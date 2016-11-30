@@ -2,7 +2,7 @@
 title: "Serving Geospatial Features with Mapnik and TileStache"
 author: "Chris Hansen"
 date: "2016-11-28"
-categories: ["geospatial"]
+categories: ["geospatial", "mapping"]
 draft: false
 output: 
    html_document:

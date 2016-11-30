@@ -2,6 +2,7 @@
 title: "Web Services with Node.js"
 author: "Chris Hansen"
 date: "2016-05-28"
+categories: ["REST", "webservices", "node", "javascript"]
 output: 
    html_document:
      css: rmd.css
