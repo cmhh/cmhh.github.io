@@ -1,0 +1,471 @@
+---
+title: "Using R Packages to Disseminate Data"
+author: "Chris Hansen"
+date: "2016-07-20"
+categories: ["R", "shiny", "R packages"]
+output:
+   html_document:
+     css: rmd.css
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(comment = NA, echo = TRUE, cache = FALSE,
+                      fig.align = "center",
+                      warning = FALSE, message = FALSE)
+```
+```{r imports, include = FALSE, echo = FALSE}
+library(data.table)
+library(NZCensus)
+library(NZCensusDemos)
+```
+
+
+# Anatomy of an R Package
+
+An R package is essentially an eponymously named folder which exists somewhere
+in your 'library path', and whose contents conform to certain conventions.  The
+package source itself also resides in an eponymously named folder, but not
+in your library path, and with slight differences in layout.
+
+For example, a relatively minimal source package might contain the following:
+
+| path        | type   | purpose                                                              |
+|-------------|--------|----------------------------------------------------------------------|
+| data        | folder | Contains datasets in R's native format (.rda).                       |
+| man         | folder | Contains help files in R's native documentation markup format (.Rd). |
+| R           | folder | Contains R source files.                                             |
+| DESCRIPTION | file   | Package metadata including name, title, version, author, etc.        |
+| NAMESPACE   | file   | Controls exports, dependencies, etc.                                 |
+
+Traditionally, a loadable version of a package would be built from this source 
+repository by running a command at a shell such as:
+
+```
+R CMD INSTALL --build pkgname
+```
+
+to both install the package and make a zip file for distribution for Windows 
+platforms, or:
+
+```
+R CMD build pkgname 
+R CMD install pkgname.tar.gz
+```
+
+for every other platform.  After installing, there will be a folder containing
+the package added to one of the folders in the library path, with some subtle 
+difference in layout compared to the original source.  For example, help files 
+will be processed to produce formatted HTML output.  
+
+
+## Building packages in RStudio
+
+RStudio has a number of productivity features which greatly assist the authoring
+of packages.  RStudio allows users to work with projects, and packages can be
+authored by creating a project with type 'R Package':
+
+![Project->New Project...](/img/datapackages/package01.png)
+
+![Create Project](/img/datapackages/package02.png)
+
+![Project Type](/img/datapackages/package03.png)
+
+![Create R Package](/img/datapackages/package04.png)
+
+When working on a package, RStudio provides automation via a 'Build' menu.
+From there you can build the package and create source or binary packages for
+dissemination.
+
+![Build menu](/img/datapackages/package05.png)
+
+In addition to this, help files can be built automatically from source code 
+comments using the `roxygen2` package.  The traditional method is to make a
+markup file for each function that requires documentation, but using `roxygen2`
+is far more convenient.  We'll see examples below, but for a reasonable overview
+see:
+
+[Object documentation](http://r-pkgs.had.co.nz/man.html)
+
+Finally, a package source code can be managed via either of git or subversion,
+which brings obvious advantage.
+
+![Version control](/img/datapackages/versioning.png)
+
+
+# Using R Packages to Distribute Data
+
+As noted above, R pacakges can include datasets, and it is very common to do so.
+This shouldn't really come as a surprise--R is a statistical language in the 
+end, and it is normal to include working examples with pacakges; and including
+datasets against which to run unit tests and other examples is clearly a 
+useful thing to do.
+
+But datasets themselves aren't central to most packages--statistical 
+methodologies often are, and the data is there for testing or illustrative
+purposes.  But this doesn't have to be the case.
+
+In this document, we look at a couple of datasets available from the
+[Statistics New Zealand](http://www.stats.govt.nz)
+website and consider the ways in which value might be added by disseminating
+this data via an R package (or set of packages).
+
+
+# Single-function Shiny Applications
+
+It is possible to make 1-page web applications in R via the `shiny` package.
+There are a number of ways a `shiny` application can be created, and RStudio
+tries to help out here as well.  
+
+For example, selecting File &rarr; New File &rarr; Shiny Web App... in RStudio 
+will cause RStudio to create a small working app which you can use as a starting
+point:
+
+![Shiny web app](/img/datapackages/shiny01.png)
+
+![New Shiny Web Application](/img/datapackages/shiny02.png)
+
+![Shiny application running within RStudio IDE](/img/datapackages/shiny03.png)
+
+A `shiny` application is essentially made of a `ui` component which contains the
+UI definition and a `server` component which contains all the server-side logic
+for the application.  Given these components, there are then a number of ways of
+creating and running an application.  For example, one could create files
+`foo/ui.R` and `foo/server.R` which contain the `ui` and `server` components,
+respectively, and then run the application by calling: 
+
+```r
+shiny::runApp("foo")
+```
+
+Alternatively, if `ui` and `server` are actual R objects, one could run an
+application via
+
+```r
+shiny::runApp(list(ui=ui, server=server))
+```
+
+or even 
+
+```r
+shiny::shinyApp(ui=ui, server=server)
+```
+
+But, of course, we can then write a function which returns one of these
+application objects.  For example
+
+```r
+foo <- function(){
+   shinyApp(ui=ui, server=server)
+}
+```
+
+so that an application can be started, then, simply by calling:
+
+```
+foo()
+```
+
+In fact, this is what we will do here.  We will include functions in the
+packages we create which do nothing but cause a `shiny` application to
+run.  Thus, we can provide users with data, but also interactive applications
+that make use of that data.
+
+
+# Example--Census Meshblock Dataset
+
+For our first example, let us consider the Census Meshblock Dataset.  From the
+[Statistics New Zealand website](http://www.stats.govt.nz/Census/2013-census/data-tables/meshblock-dataset.aspx): 
+
+> 2013 Census meshblock dataset contains counts at meshblock and other
+geographic levels for selected variables from the 2013, 2006, and 2001 Censuses.
+The geographies correspond to 2013 Census boundaries. The counts are at the
+highest level of each variable’s classification.
+
+> The meshblock dataset is in Excel (.xlxs) and CSV format and can be integrated 
+with analytical or mapping systems (using geographic boundary files), enabling 
+further analysis of census data.
+
+We'll look specifically at the
+[downloadable CSV file](http://www3.stats.govt.nz/meshblock/2013/csv/2013_mb_dataset_Total_New_Zealand_CSV.zip),
+primarily because the CSV file would be of the most universal use to any kind of
+data analyst (casual users might use the Excel version, but even those users 
+might find it more useful to use the R version we'll create here).
+
+## Repairing / reorganising the data
+
+This data has a number of organisational issues that impedes its use, so I spent
+a bit of time tidying things up and put the results in a package called
+[NZCensus](https://github.com/cmhh/NZCensus).
+
+## Making a package
+
+Here we make a simple package which does nothing but provide the following five
+datasets:
+
+* `datadictionary`
+* `dwelling`
+* `household`
+* `family`
+* `individual`
+
+That is, once installed, users can refer to any of these datasets by name if
+the package is loaded, or else load any of the datasets into memory by calling:
+
+```r
+data(dataset, package="NZCensus")
+```
+
+Note that if all 5 datasets were loaded into memory, the total footprint would
+be 318MB.  However, the package itself weighs in at 40.3MB--this compares
+favourably with the original CSV source (a zip file), which weighs in at 37.6MB.
+
+We use RStudio's integrated support for packages to make this as easy as
+possible.  We create a project called `NZCensus`, which will also become
+the name of the package.  The basic layout is as follows:
+
+```asis
+NZCensus/data/datadictionary.rda
+NZCensus/data/dwelling.rda
+NZCensus/data/family.rda
+NZCensus/data/household.rda
+NZCensus/data/individual.rda
+NZCensus/inst/doc/datadictionary.xlsx
+NZCensus/inst/doc/datadictionary.ods
+NZCensus/inst/doc/datadictionary.csv
+NZCensus/man/datadictionary.Rd
+NZCensus/man/dwelling.Rd
+NZCensus/man/family.Rd
+NZCensus/man/housheold.Rd
+NZCensus/man/individual.Rd
+NZCensus/R/data.R
+NZCensus/DESCRIPTION
+NZCensus/NAMESPACE
+```
+
+The `*.rda` files are datasets in R's native format, and are compressed.  For
+example, the individual dataset is 209.8MB uncompressed in-memory.  But this can
+be compressed and saved to disk by running:
+
+```r
+save(individual, file = "individual", compress = TRUE)
+```
+
+with the resulting file in this case being just 28.7MB.
+
+R packages are usually very well documented.  Here, we take advantage of
+`doxygen2` to build help files automatically from the package R scripts.
+In this case, we don't actually have any R code, but we fake it anyway.  We
+create entries for each dataset in a file called `./NZCensus/R/data.R`.  For
+example, for the `dwelling` dataset we include the following:
+
+```r
+#' New Zealand Census of Population and Dwellings dwelling data
+#'
+#' A dataset containing dwelling counts at various geographic levels.
+#'
+#' @format A data table with columns:
+#' \describe{
+#'   \item{geography}{Geographic level.  One of MB (meshblock), AU (area unit),
+#'   Ward, TA (Territorial Authority), or RC (Regional Council).}
+#'   \item{code}{Geography code.}
+#'   \item{description}{Geography description.}
+#'   \item{year}{Census year.  One of 2001, 2006, or 2013.}
+#'   Other variables are documented in \code{\link{datadictionary}}.
+#' }
+#' @source
+#' \url{http://www.stats.govt.nz/Census/2013-census/data-tables/meshblock-dataset.aspx}
+"dwelling"
+```
+
+Processing this file yields, among other things, `NZCensus/man/dwelling.Rd`,
+which is in R's own documentation format.  And after actually building and
+installing this package, an HTML version of this file is created which can
+be queried from R via something like:
+
+```r
+?NZCensus::dwelling
+```
+
+![Help for `dwelling` dataset.](/img/datapackages/dwellinghelp.png)
+
+Besides this, RStudio also automates the creation of other files, but several
+files were also created manually.  For example, files were added to the folder
+`NZCensus/inst/doc/`, and once the package has been installed, these are
+available from the main help page via the
+`User guides, package vignettes and other documentation.` link.
+
+![`help(package="NZCensus")`.](/img/datapackages/NZCensushelp.png)
+
+![`NZCensus` docs.](/img/datapackages/NZCensusdoc.png)
+
+In this case, these files are just versions of the `datadictionary`
+dataset that can be opened in Excel or LibreOffice (what used to be known as
+OpenOffice).
+
+
+## Extending the package
+
+Above, we wrapped five datasets up as a package which we called `NZCensus`.  We
+can add value to packages by bundling other interesting functions along with the
+data.  For example, we could write a function that takes a particular variable
+name as input, and plots that variable for each Census year.
+
+In this case, we'll create two functions that provide `shiny` applications
+in the way described above:
+
+* `mapdemo` - an interactive map which displays a choropleth based on user
+  input
+* `distributiondemo` - an barplot showing the distribution of a 
+  categorical variable selected by the user.
+
+We place these functions in a new package called
+[`NZCensusDemos`](https://github.com/cmhh/NZCensusDemos) which has an explicit
+dependency on the `NZCensus` package, among others.  The main reason for this is
+that we will bundle some additional spatial feature classes required to draw
+geographical features such as regional council areas on a map.  The feature
+classes aren't terribly terribly large (we haven't included, amusingly, the
+meshblock feature class, which is pretty large), but at least this way users who
+only want the Census datasets aren't burdened with the extra bulk implied by the
+demo package if they don't want it.  Similarly, the demos have dependencies
+which would need to be installed along with them, and loaded any time the demo
+package is.  So, again, if users have no need for the demos, then they wouldn't
+be forced to install these additional dependencies if they didn't want them.
+
+Either way, the `mapdemo` function, heavily edited, looks as follows:
+
+```r
+mapdemo <- function(){
+   shinyApp(
+      ui = fluidPage(
+         titlePanel("Mapping Census..."),
+         sidebarLayout(
+            sidebarPanel(width=3,
+               ...
+            ),
+            mainPanel(width=9,
+               ...
+            )
+         )
+      ),
+      server = function(input, output){
+         ...
+      }
+   )
+}
+```
+
+It can then be called via:
+
+```r
+library(NZCensusDemos)
+mapdemo()
+```
+
+and looks as follows:
+
+![`NZCensusDemos::mapdemo()`](/img/datapackages/NZCensusMapDemo.png)
+
+Similarly, the `distributiondemo` can be called via:
+
+```r
+distributiondemo()
+```
+
+and looks as follows:
+
+![```NZCensusDemos::distributiondemo()```](/img/datapackages/NZCensusDistributionDemo.png)
+
+
+# Example--HLFS Time Series Data
+
+Since looking at the Census meshblock dataset had convinced myself that putting
+data in R pacakges was a useful thing to do, I started thinking about other
+datasets for which this sort of treatment might also be useful.
+
+[Statistics New Zealand](http://www.stats.govt.nz) puts bulk CSV files on their
+website containing a number of time series, and that seemed a reasonable choice.
+We can use this data to produce a `shiny` application which lets users explore a
+range time series and make selections to plot.
+
+
+## Preparing the data sets
+
+The data I decided to use is labour market data found via the
+[CSV files for download](http://www.stats.govt.nz/tools_and_services/releases_csv_files.aspx)
+page here:
+
+[Income and work](http://www.stats.govt.nz/~/media/Statistics/Browse%20for%20stats/LabourMarketStatistics/HOTPMar16qtr/lms-mar16-zipped-csv-tables.zip)
+
+The data consists of 14 columns, and 605535 rows.
+There isn't any major problems with this data--it's perfectly usable as it is.
+However there is a fair bit of duplication:
+
+![lots of duplication!](/img/datapackages/rawlabmkt.png)
+
+Specifically, the `subject`, `group`, and title columns are unique by
+`series_reference`.  So, we split the table into two tables which have
+`series_reference` as a common key, and remove as much duplication as possible.
+In addtion, we take the opportunity to cast the variable `Period` to a genuine
+date-type variable.    
+
+![metadata](/img/datapackages/metadata.png)
+
+![metadata](/img/datapackages/labmkt.png)
+
+
+## Making a package
+
+In this case, the data is relatively small, and for convenience we bundle the
+data and demos together.  We create a package called
+[`SNZlabmkt`](https://github.com/cmhh/SNZlabmkt) which contains the two data
+sets, `metadata` and `labmkt`, as well as a single function, `timeseriesdemo`,
+which provides a `shiny` application which plots time series based on user
+input.  Since it has been discussed above, we skip the details of package
+creation here.  But the demo is triggered by calling:
+
+```r
+library(SNZlabmkt)
+timeseriesdemo()
+```
+
+and it looks as follows:
+
+![```timeseriesdemo()```](/img/datapackages/SNZlabmktTSDemo.png)
+
+
+# Try it out...
+
+The packages discussed here have all been uploaded to GitHub.  RStudio has
+excellent integration with Git, as noted earlier, and allows users to use GitHub
+to set a remote repository.
+
+![Git](/img/datapackages/git01.png)
+
+![Git](/img/datapackages/git02.png)
+
+![Git diff](/img/datapackages/git03.png)
+
+To install the packages:
+
+```r
+if (!require(devtools)) install.packages("devtools")
+devtools::install_github("cmhh/NZCensus")
+devtools::install_github("cmhh/NZCensusDemos")
+devtools::install_github("cmhh/SNZlabmkt")
+```
+
+If for some reason this fails, download each file manually through from:
+
+* [NZCensus](https://github.com/cmhh/NZCensus/archive/master.zip)
+* [NZCensusDemos](https://github.com/cmhh/NZCensusDemos/archive/master.zip)
+* [SNZlabmkt](https://github.com/cmhh/SNZlabmkt/archive/master.zip)
+
+Then install each zip file in turn as follows:
+
+```r
+devtools::install_local("path-to-zip/NZCensus-master.zip")
+devtools::install_local("path-to-zip/NZCensusDemos-master.zip")
+devtools::install_local("path-to-zip/SNZlabmkt-master.zip")
+```
+
+

@@ -22,6 +22,11 @@
   </url>
   
   <url>
+    <loc>/post/datapackages/</loc>
+    <lastmod>2016-07-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/post/webservice/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url>
