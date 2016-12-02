@@ -21,7 +21,7 @@ library(NZCensusDemos)
 
 # Introduction
 
-R pacakges can include datasets, and it is very common to do so.  This shouldn't
+R packages can include datasets, and it is very common to do so.  This shouldn't
 really come as a surprise--R is a statistical language in the end, and it is
 normal to include working examples with pacakges; and including datasets against
 which to run unit tests and other examples is clearly a useful thing to do.
