@@ -60,7 +60,7 @@ But datasets themselves aren’t central to most packages–statistical methodol
 
 
 <meta itemprop="dateModified" content="2016-07-20T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="2001">
+<meta itemprop="wordCount" content="2004">
 
 
 
@@ -537,7 +537,7 @@ NZCensus/NAMESPACE</code></pre>
 <li><code>mapdemo</code> - an interactive map which displays a choropleth based on user input</li>
 <li><code>distributiondemo</code> - an barplot showing the distribution of a categorical variable selected by the user.</li>
 </ul>
-<p>We place these functions in a new package called <a href="https://github.com/cmhh/NZCensusDemos"><code>NZCensusDemos</code></a> which has an explicit dependency on the <code>NZCensus</code> package, among others. The main reason for this is that we will bundle some additional spatial feature classes required to draw geographical features such as regional council areas on a map. The feature classes aren’t terribly terribly large (we haven’t included, amusingly, the meshblock feature class, which is pretty large), but at least this way users who only want the Census datasets aren’t burdened with the extra bulk implied by the demo package if they don’t want it. Similarly, the demos have dependencies which would need to be installed along with them, and loaded any time the demo package is. So, again, if users have no need for the demos, then they wouldn’t be forced to install these additional dependencies if they didn’t want them.</p>
+<p>We place these functions in a new package called <a href="https://github.com/cmhh/NZCensusDemos"><code>NZCensusDemos</code></a> which has an explicit dependency on the <code>NZCensus</code> package, among others. The main reason for this is that we will bundle some additional spatial feature classes required to draw geographical features such as regional council areas on a map. The feature classes aren’t terribly large (we haven’t included, amusingly, given the product name, the meshblock feature class, which is pretty large), but at least this way users who only want the Census datasets aren’t burdened with the extra bulk implied by the demo package if they don’t want it. Similarly, the demos have dependencies which would need to be installed along with them, and loaded any time the demo package is. So, again, if users have no need for the demos, then they wouldn’t be forced to install these additional dependencies if they didn’t want them.</p>
 <p>Either way, the <code>mapdemo</code> function, heavily edited, looks as follows:</p>
 <pre class="r"><code>mapdemo &lt;- function(){
    shinyApp(

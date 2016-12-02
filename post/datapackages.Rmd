@@ -316,13 +316,14 @@ We place these functions in a new package called
 dependency on the `NZCensus` package, among others.  The main reason for this is
 that we will bundle some additional spatial feature classes required to draw
 geographical features such as regional council areas on a map.  The feature
-classes aren't terribly terribly large (we haven't included, amusingly, the
-meshblock feature class, which is pretty large), but at least this way users who
-only want the Census datasets aren't burdened with the extra bulk implied by the
-demo package if they don't want it.  Similarly, the demos have dependencies
-which would need to be installed along with them, and loaded any time the demo
-package is.  So, again, if users have no need for the demos, then they wouldn't
-be forced to install these additional dependencies if they didn't want them.
+classes aren't terribly large (we haven't included, amusingly, given the product
+name, the meshblock feature class, which is pretty large), but at least this way
+users who only want the Census datasets aren't burdened with the extra bulk
+implied by the demo package if they don't want it.  Similarly, the demos have
+dependencies which would need to be installed along with them, and loaded any
+time the demo package is.  So, again, if users have no need for the demos, then
+they wouldn't be forced to install these additional dependencies if they didn't
+want them.
 
 Either way, the `mapdemo` function, heavily edited, looks as follows:
 
