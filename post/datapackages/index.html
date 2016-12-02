@@ -30,16 +30,14 @@
 
 
 <meta name="twitter:title" content="Using R Packages to Disseminate Data"/>
-<meta name="twitter:description" content="Anatomy of an R Package An R package is essentially an eponymously named folder which exists somewhere in your ‘library path’, and whose contents conform to certain conventions. The package source itself also resides in an eponymously named folder, but not in your library path, and with slight differences in layout.
-For example, a relatively minimal source package might contain the following:
-    path type purpose    data folder Contains datasets in R’s native format (."/>
+<meta name="twitter:description" content="Introduction R pacakges can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
+But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes."/>
 
 
 
         <meta property="og:title" content="Using R Packages to Disseminate Data" />
-<meta property="og:description" content="Anatomy of an R Package An R package is essentially an eponymously named folder which exists somewhere in your ‘library path’, and whose contents conform to certain conventions. The package source itself also resides in an eponymously named folder, but not in your library path, and with slight differences in layout.
-For example, a relatively minimal source package might contain the following:
-    path type purpose    data folder Contains datasets in R’s native format (." />
+<meta property="og:description" content="Introduction R pacakges can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
+But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/post/datapackages/" />
 
@@ -57,13 +55,12 @@ For example, a relatively minimal source package might contain the following:
 
         
 <meta itemprop="name" content="Using R Packages to Disseminate Data">
-<meta itemprop="description" content="Anatomy of an R Package An R package is essentially an eponymously named folder which exists somewhere in your ‘library path’, and whose contents conform to certain conventions. The package source itself also resides in an eponymously named folder, but not in your library path, and with slight differences in layout.
-For example, a relatively minimal source package might contain the following:
-    path type purpose    data folder Contains datasets in R’s native format (.">
+<meta itemprop="description" content="Introduction R pacakges can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
+But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes.">
 
 
 <meta itemprop="dateModified" content="2016-07-20T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="2032">
+<meta itemprop="wordCount" content="2001">
 
 
 
@@ -372,57 +369,22 @@ For example, a relatively minimal source package might contain the following:
     <div id="content">
 
 
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>R pacakges can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.</p>
+<p>But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes. But this doesn’t have to be the case. For analysts familiar with R, consuming packages to obtain data might be quite convenient. But we can also bundle functionality specific to the included datasets, possibly increasing its overall utility. For example, one could include pre-canned statistical analyses in the form of simple helper functions or interactive <code>shiny</code> applications.</p>
+<p>In this document, we look at a couple of datasets available from the <a href="http://www.stats.govt.nz">Statistics New Zealand</a> website and consider the ways in which value might be added by disseminating this data via an R package (or set of packages) along with bundled demo apps.</p>
+</div>
 <div id="anatomy-of-an-r-package" class="section level1">
 <h1>Anatomy of an R Package</h1>
-<p>An R package is essentially an eponymously named folder which exists somewhere in your ‘library path’, and whose contents conform to certain conventions. The package source itself also resides in an eponymously named folder, but not in your library path, and with slight differences in layout.</p>
-<p>For example, a relatively minimal source package might contain the following:</p>
-<table>
-<colgroup>
-<col width="14%" />
-<col width="9%" />
-<col width="75%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>path</th>
-<th>type</th>
-<th>purpose</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>data</td>
-<td>folder</td>
-<td>Contains datasets in R’s native format (.rda).</td>
-</tr>
-<tr class="even">
-<td>man</td>
-<td>folder</td>
-<td>Contains help files in R’s native documentation markup format (.Rd).</td>
-</tr>
-<tr class="odd">
-<td>R</td>
-<td>folder</td>
-<td>Contains R source files.</td>
-</tr>
-<tr class="even">
-<td>DESCRIPTION</td>
-<td>file</td>
-<td>Package metadata including name, title, version, author, etc.</td>
-</tr>
-<tr class="odd">
-<td>NAMESPACE</td>
-<td>file</td>
-<td>Controls exports, dependencies, etc.</td>
-</tr>
-</tbody>
-</table>
-<p>Traditionally, a loadable version of a package would be built from this source repository by running a command at a shell such as:</p>
+<p>An R package is essentially an eponymously named folder which bundles additional functionality in a standardised way, and which can be loaded on demand. A package contains, among other things, function and type definitions, documentation, and datasets.</p>
+<p>Traditionally, a loadable version of a package would be built from a source repository by running shell commands such as:</p>
 <pre><code>R CMD INSTALL --build pkgname</code></pre>
-<p>to both install the package and make a zip file for distribution for Windows platforms, or:</p>
+<p>or</p>
 <pre><code>R CMD build pkgname 
 R CMD install pkgname.tar.gz</code></pre>
-<p>for every other platform. After installing, there will be a folder containing the package added to one of the folders in the library path, with some subtle difference in layout compared to the original source. For example, help files will be processed to produce formatted HTML output.</p>
+<p>depending on the target platform. It is not all that difficult to build a modest package, but it can be tedious to construct packages from scratch. Large packages, on the other hand, can be difficult to build and manage. Those interested in the detail should refer to:</p>
+<p><a href="https://cran.r-project.org/">Writing R Extensions</a></p>
 <div id="building-packages-in-rstudio" class="section level2">
 <h2>Building packages in RStudio</h2>
 <p>RStudio has a number of productivity features which greatly assist the authoring of packages. RStudio allows users to work with projects, and packages can be authored by creating a project with type ‘R Package’:</p>
@@ -442,7 +404,7 @@ R CMD install pkgname.tar.gz</code></pre>
 <img src="../../img/datapackages/package04.png" alt="Create R Package" />
 <p class="caption">Create R Package</p>
 </div>
-<p>When working on a package, RStudio provides automation via a ‘Build’ menu. From there you can build the package and create source or binary packages for dissemination.</p>
+<p>When working on a package, RStudio provides a number of useful tools via a ‘Build’ menu. From there you can build the package and create source or binary packages for dissemination.</p>
 <div class="figure">
 <img src="../../img/datapackages/package05.png" alt="Build menu" />
 <p class="caption">Build menu</p>
@@ -455,12 +417,6 @@ R CMD install pkgname.tar.gz</code></pre>
 <p class="caption">Version control</p>
 </div>
 </div>
-</div>
-<div id="using-r-packages-to-distribute-data" class="section level1">
-<h1>Using R Packages to Distribute Data</h1>
-<p>As noted above, R pacakges can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.</p>
-<p>But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes. But this doesn’t have to be the case.</p>
-<p>In this document, we look at a couple of datasets available from the <a href="http://www.stats.govt.nz">Statistics New Zealand</a> website and consider the ways in which value might be added by disseminating this data via an R package (or set of packages).</p>
 </div>
 <div id="single-function-shiny-applications" class="section level1">
 <h1>Single-function Shiny Applications</h1>
