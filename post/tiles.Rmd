@@ -5,8 +5,7 @@ date: "2016-11-28"
 categories: ["geospatial", "mapping"]
 draft: false
 output: 
-   html_document:
-     css: rmd.css
+   html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -14,6 +13,8 @@ knitr::opts_chunk$set(comment = NA, echo = TRUE, cache = TRUE,
                       fig.align = "center",
                       warning = FALSE, message = FALSE)
 ```
+
+<link rel="stylesheet" type="text/css" href="/css/custom.css">
 
 # Overview
 
@@ -104,7 +105,7 @@ we create one as follows:
 To start TileStache, run:
 
 ```bash
-tilestache-server -c ~/wms/cfg/tilestache.cfg
+tilestache-server -c <path to config>/tilestache.cfg
 ```
 
 which will then make the server available at

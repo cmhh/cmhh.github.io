@@ -4,8 +4,7 @@ author: "Chris Hansen"
 date: "2016-11-27"
 categories: ["R", "geospatial"]
 output: 
-   html_document:
-     css: rmd.css
+   html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +12,8 @@ knitr::opts_chunk$set(comment = NA, echo = TRUE, cache = FALSE,
                       fig.align = "center",
                       warning = FALSE, message = FALSE)
 ```
+
+<link rel="stylesheet" type="text/css" href="/css/custom.css">
 
 # Overview
 

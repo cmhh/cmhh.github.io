@@ -4,8 +4,7 @@ author: "Chris Hansen"
 date: "2016-05-28"
 categories: ["REST", "webservices", "node", "javascript"]
 output: 
-   html_document:
-     css: rmd.css
+   html_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,6 +12,8 @@ knitr::opts_chunk$set(comment = NA, echo = TRUE, cache = FALSE,
                       fig.align = "center",
                       warning = FALSE, message = FALSE)
 ```
+
+<link rel="stylesheet" type="text/css" href="/css/custom.css">
 
 # What is node.js?
 
@@ -318,9 +319,9 @@ app.use(express.static(__dirname + '/public')).listen(3000);
 The service will serve any file found in the `public` folder, and will return an
 error for any file that does not exist.
 
-![](/img/webservice/0301.png)
+![found](/img/webservice/0301.png)
 
-![](/img/webservice/0302.png)
+![not found](/img/webservice/0302.png)
 
 `express.static` is an example of _middleware_.  You simply pass the middleware
 to the `use` method, and you can chain lots of different middleware together.
@@ -396,7 +397,7 @@ The full set of datasets is:
 
 * `dwelling`
 * `household`
-* `family```
+* `family`
 * `individual`
 * `datadictionary` - metadata describing columns in the above datasets
 
@@ -666,9 +667,9 @@ app.get('/:dataset/:geography/:code', function(request, response){
 });
 ```
 
-![](/img/webservice/metadata02.png)
+![`/metadata/`](/img/webservice/metadata02.png)
 
-![](/img/webservice/dwelling01.png)
+![`/dwelling/RC/01`](/img/webservice/dwelling01.png)
 
 
 
@@ -842,13 +843,13 @@ app.get('/:series/:output', function(request, response){
 app.listen(3000);
 ```
 
-![](/img/webservice/x13post.png)
+![`/adjust`](/img/webservice/x13post.png)
 
-![](/img/webservice/x13get01.png)
+![`/<output>/d11`](/img/webservice/x13get01.png)
 
-![](/img/webservice/x13get02.png)
+![`/<output>/out`](/img/webservice/x13get02.png)
 
-![](/img/webservice/x13delete.png)
+![`/<output>](/img/webservice/x13delete.png)
 
 And we might as well visualise the results:
 

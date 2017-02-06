@@ -6,8 +6,279 @@
     <description>Recent content on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 28 Nov 2016 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 26 Jan 2017 00:00:00 +0000</lastBuildDate>
     <atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Web Maps and Tiles with QGIS</title>
+      <link>/post/qgis/</link>
+      <pubDate>Thu, 26 Jan 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/post/qgis/</guid>
+      <description>&lt;!-- BLOGDOWN-BODY-BEFORE
+
+/BLOGDOWN-BODY-BEFORE --&gt;
+
+&lt;p&gt;&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;./css/custom.css&#34;&gt;&lt;/p&gt;
+&lt;div id=&#34;overview&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Overview&lt;/h1&gt;
+&lt;p&gt;In an &lt;a href=&#34;../tiles/index.html&#34;&gt;earlier post&lt;/a&gt;, we looked at how to style a map using &lt;a href=&#34;https://tilemill-project.github.io/tilemill/&#34;&gt;TileMill&lt;/a&gt; (actually, using a fork called &lt;a href=&#34;https://github.com/florianf/tileoven&#34;&gt;TileOven&lt;/a&gt;), render tiles with &lt;a href=&#34;http://mapnik.org/&#34;&gt;Mapnik&lt;/a&gt;, and finally serve tiles using &lt;a href=&#34;http://tilestache.org/&#34;&gt;TileStache&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Serving tiles in this way is useful, avoiding the need to bundle potentially large features with an online map or web app. At the same time, the outlined process is a little involved.&lt;/p&gt;
+&lt;p&gt;In this post we look at the open source &lt;a href=&#34;http://www.qgis.org/en/site/&#34;&gt;Quantum GIS&lt;/a&gt;. QGIS provides functionality to publish maps as WMS / WFS / WCS services, and so we look at how this is done.&lt;/p&gt;
+&lt;p&gt;QGIS is made extensible via plugins, and this is a strong feature of the product. We also look at a plugin called &lt;a href=&#34;https://bitbucket.org/we-do-it/qgis-latlongo-stage-1&#34;&gt;QMetaTiles&lt;/a&gt; which can make a set of static tiles which can be combined with a web server to be used as a standard tile service.&lt;/p&gt;
+&lt;!--
+Finally, we consider
+[QGIS Web Client](http://www.qgis.org/en/site/about/features.html#qgis-web-client),
+a means of publishing QGIS projects on the web.  While not producing a service
+in the same way as the other features considered, this is still a useful
+feature worth looking at.
+--&gt;
+&lt;/div&gt;
+&lt;div id=&#34;prerequisites&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Prerequisites&lt;/h1&gt;
+&lt;p&gt;In this post we outline the steps required on a Debian-based Linux distribution (Ubuntu or Debian). However, for the most part, things should be able to be adapted for use on a Windows platform.&lt;/p&gt;
+&lt;div id=&#34;qgis-qgis-server&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;QGIS + QGIS Server&lt;/h2&gt;
+&lt;p&gt;To install, simply run:&lt;/p&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo apt-get install qgis qgis-server&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The version of QGIS available will likely be an older, LTS version. If a newer version is desired, simply follow the instructions provided on the QGIS website. In the case of Ubuntu / Debian Linux:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;http://www.qgis.org/en/site/forusers/alldownloads.html#debian-ubuntu&#34;&gt;QGIS Installers&lt;/a&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;fastcgi-nginx&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;fastcgi + NGINX&lt;/h2&gt;
+&lt;p&gt;To deploy QGIS maps as a service, a CGI-enabled web server is required. For illustration here we use &lt;a href=&#34;https://www.nginx.com/&#34;&gt;NGINX&lt;/a&gt; and FastCGI. But &lt;a href=&#34;https://httpd.apache.org/&#34;&gt;Apache&lt;/a&gt; is relatively easy to use on both Linux and Windows users. Windows users might find it easy to use IIS and &lt;a href=&#34;https://www.iis.net/downloads/microsoft/fastcgi-for-iis&#34;&gt;FastCGI for IIS&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Regardless, to install both NGINX and fastcgi:&lt;/p&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo apt-get install nginx fcgiwrap&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To enable CGI, modify the NGINX default config (probably something like &lt;code&gt;/etc/nginx/sites-available/default&lt;/code&gt;) so it looks as follows:&lt;/p&gt;
+&lt;pre class=&#34;asis&#34;&gt;&lt;code&gt;...
+
+server {
+
+  ...
+
+  location /cgi-bin/ {
+    gzip off;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME /usr/lib$fastcgi_script_name;
+    fastcgi_pass unix:/var/run/fcgiwrap.socket;
+  }
+   
+  ...
+
+}
+
+...&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;When done, test the config and restart NGINX if all is well:&lt;/p&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo /etc/init.d/nginx configtest &amp;amp;&amp;amp; sudo /etc/init.d/nginx reload&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;To conduct a quick test, we can make a little CGI script. On my machine, I created a file called &lt;code&gt;/usr/lib/cgi-bin/hello.cgi&lt;/code&gt; with the following content:&lt;/p&gt;
+&lt;pre class=&#34;python&#34;&gt;&lt;code&gt;#!/usr/bin/python
+print &amp;quot;Content-type: text/html\n\n&amp;quot;
+print &amp;quot;&amp;lt;html&amp;gt;&amp;lt;head&amp;gt;&amp;lt;title&amp;gt;Hello, World!&amp;lt;/title&amp;gt;&amp;lt;/head&amp;gt;\n&amp;quot;
+print &amp;quot;&amp;lt;body&amp;gt;&amp;lt;h1&amp;gt;Hello, World!&amp;lt;/h1&amp;gt;&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;\n&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The file needs to be made readable and executable, so:&lt;/p&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo chmod go+rx /usr/lib/cgi-bin/hello.cgi&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then, browsing to &lt;code&gt;http://localhost/test/hello.cgi&lt;/code&gt; will yield something like:&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/hello.png&#34; alt=&#34;hello.cgi&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;hello.cgi&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;publish-qgis-maps-via-wms&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Publish QGIS Maps via WMS&lt;/h1&gt;
+&lt;p&gt;Here we’ll consider just two simple examples:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;several polygon feature classes from SQLite&lt;/li&gt;
+&lt;li&gt;several rasters from geoTIFF files.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;(It had been my intention to use shapefiles for the polygon features, but QGIS kept crashing when adding labels to the Area Unit layer, and when setting the rendering option ‘only draw labels which fit completely within feature’–the exact same feature class exported to SQLite does not seem to have this issue.)&lt;/p&gt;
+&lt;p&gt;In each case we will use R to demonstrate consumption of the service using the &lt;code&gt;leaflet&lt;/code&gt; package, and the &lt;code&gt;addWMSTiles&lt;/code&gt; function.&lt;/p&gt;
+&lt;p&gt;As a shortcut, the two projects have been archived and uploaded to GitHub at:&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://github.com/cmhh/spatialdata/raw/master/qgs/2013.zip&#34;&gt;2013.zip&lt;/a&gt; &lt;a href=&#34;https://github.com/cmhh/spatialdata/raw/master/qgs/2013.zip&#34;&gt;2013.zip&lt;/a&gt;&lt;/p&gt;
+&lt;div id=&#34;polygons&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Polygons&lt;/h2&gt;
+&lt;p&gt;We start QGIS, and we load 4 polygon feature classes:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;MB2013&lt;/li&gt;
+&lt;li&gt;AU2013&lt;/li&gt;
+&lt;li&gt;TA2013&lt;/li&gt;
+&lt;li&gt;REGC2013&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The project is saved as &lt;code&gt;~/Maps/2013/2013.qgs&lt;/code&gt;, and each of the included feature classes is saved in the same directory as the project. In addition we also place a copy of &lt;code&gt;/usr/lib/cgi-bin/qgis-mapserve.fcgi&lt;/code&gt; in the directory.&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.2013.01.png&#34; alt=&#34;2013.qgs&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;2013.qgs&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Only basic styling is applied–simple black outlines for each feature class, and labels only visible at certain scales.&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.2013.02.png&#34; alt=&#34;Style&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;Style&lt;/p&gt;
+&lt;/div&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.2013.03.png&#34; alt=&#34;Labels&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;Labels&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Next, to enable the map as a web service, open the the project properties (CTRL + SHIFT + P), and select ‘OWS Server’. There, check the ‘Service capabilites’ box, and also the ‘Use layer ids as names’ box. To enable WFS, also check each box in the ‘Published’ column in the table under the section labelled ‘WFS capabilities (also influences DXF export)’. Click the ‘Launch’ button in the ‘Test configuration’ section to confirm everything is okay, the click ‘OK’, and save the project.&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.2013.04.png&#34; alt=&#34;OWS server&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;OWS server&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;At this point, the service isn’t yet published. To do this, first ensure that the ‘Save paths’ option in the project properties is set to ‘relative’:&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.2013.05.png&#34; alt=&#34;General settings&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;General settings&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Then, copy the project to &lt;code&gt;/usr/lib/cgi-bin/&lt;/code&gt;, which is where the webserver is configured to run CGI scripts from (of course, modify this as you see fit if you have decided, for safety reasons or otherwise, to serve CGI content from a different location):&lt;/p&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo cp -R ~/Maps/2013 /usr/lib/cgi-bin/
+sudo chmod -R go+rx /usr/lib/cgi-bin/2013&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If all is well, you should get a response at the following URI:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;http://localhost/cgi-bin/2013/qgis_mapserv.fcgi?service=wms&amp;amp;request=getcapabilities&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;The result should be an XML file describing the service. It is, of course, possible to get images directly from the service given the right set of parameters. For example:&lt;/p&gt;
+&lt;pre class=&#34;asis&#34;&gt;&lt;code&gt;https://localhost/cgi-bin/2013/qgis_mapserv.fcgi?&amp;amp;SERVICE=WMS&amp;amp;REQUEST=GetMap&amp;amp;VERSION=1.1.1&amp;amp;LAYERS=REGC2013&amp;amp;STYLES=&amp;amp;FORMAT=image%2Fpng&amp;amp;TRANSPARENT=true&amp;amp;HEIGHT=256&amp;amp;WIDTH=256&amp;amp;SRS=EPSG%3A2193&amp;amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;yields the following thumbnail:&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis_mapserv.01.png&#34; alt=&#34;GetMap&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;GetMap&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;As a further example, we use R to create a leaflet map containing each layer:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(leaflet)
+
+uri &amp;lt;- &amp;quot;https://localhost/cgi-bin/2013/qgis_mapserv.fcgi?&amp;quot;
+
+leaflet() %&amp;gt;%
+  addTiles() %&amp;gt;%
+  fitBounds(167, -48, 179, -34) %&amp;gt;%
+  addWMSTiles(baseUrl=uri, 
+              layers=&amp;quot;REGC2013&amp;quot;,
+              options = WMSTileOptions(format = &amp;quot;image/png&amp;quot;, transparent = TRUE),
+              group = &amp;quot;Regional Council&amp;quot;) %&amp;gt;%
+  addWMSTiles(baseUrl=uri,
+              layers=&amp;quot;TA2013&amp;quot;,
+              options = WMSTileOptions(format = &amp;quot;image/png&amp;quot;, transparent = TRUE),
+              group = &amp;quot;Territorial Authority&amp;quot;) %&amp;gt;%
+  addWMSTiles(baseUrl=uri,
+              layers=&amp;quot;AU2013&amp;quot;,
+              options = WMSTileOptions(format = &amp;quot;image/png&amp;quot;, transparent = TRUE),
+              group = &amp;quot;Area Unit&amp;quot;) %&amp;gt;%
+  addWMSTiles(baseUrl=uri,
+              layers=&amp;quot;MB2013&amp;quot;,
+              options = WMSTileOptions(format = &amp;quot;image/png&amp;quot;, transparent = TRUE),
+              group = &amp;quot;Meshblock&amp;quot;) %&amp;gt;%
+  addLayersControl(baseGroups = c(&amp;quot;Regional Council&amp;quot;, &amp;quot;Territorial Authority&amp;quot;,
+                                  &amp;quot;Area Unit&amp;quot;, &amp;quot;Meshblock&amp;quot;),
+                   options = layersControlOptions(collapsed = FALSE))&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/leaflet.01.png&#34; alt=&#34;leaflet&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;leaflet&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;rasters&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Rasters&lt;/h2&gt;
+&lt;p&gt;We start QGIS and load the raster &lt;code&gt;Nitrogen_Leaching_20150903.tif&lt;/code&gt;. The project is saved as &lt;code&gt;~/Maps/nitrogen.qgs&lt;/code&gt;, and both the raster and a copy of &lt;code&gt;/usr/lib/cgi-bin/qgis-mapserve.fcgi&lt;/code&gt; is placed in the same directory.&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.nitrogen.01.png&#34; alt=&#34;nitrogen.qgs&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;nitrogen.qgs&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Some basic styling is applied. Specifically, the colouring is changed from greyscale to psuedo-colour (yellow to red).&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.nitrogen.02.png&#34; alt=&#34;Style&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;Style&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Making the map available as a web service is similar to before, except we check features under the ‘WCS’ heading rather than ‘WFS’.&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis.nitrogen.03.png&#34; alt=&#34;OWS server&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;OWS server&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;As before, we copy the project to the web server root directory, and alter permissions to make it readable (and executable):&lt;/p&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo cp -R ~/Maps/nitrogen /usr/lib/cgi-bin/
+sudo chmod -R go+rx /usr/lib/cgi-bin/nitrogen&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Again, if the service is functioning correctly, there should be at the following URL:&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;http://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?service=wms&amp;amp;request=getcapabilities&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;And, again, it should bepossible to get images directly from the service given the right set of parameters. For example:&lt;/p&gt;
+&lt;pre class=&#34;asis&#34;&gt;&lt;code&gt;https://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?&amp;amp;SERVICE=WMS&amp;amp;REQUEST=GetMap&amp;amp;VERSION=1.1.1&amp;amp;LAYERS=nitrogen&amp;amp;STYLES=&amp;amp;FORMAT=image%2Fpng&amp;amp;HEIGHT=256&amp;amp;WIDTH=256&amp;amp;SRS=EPSG%3A2193&amp;amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;yields the following thumbnail:&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qgis_mapserv.02.png&#34; alt=&#34;GetMap&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;GetMap&lt;/code&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;As a further example, we use R to create a leaflet map containing each layer:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(leaflet)
+
+uri &amp;lt;- &amp;quot;https://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?&amp;quot;
+
+leaflet() %&amp;gt;%
+  addTiles() %&amp;gt;%
+  fitBounds(167, -48, 179, -34) %&amp;gt;%
+  addWMSTiles(baseUrl=uri, 
+              layers=&amp;quot;nitrogen&amp;quot;,
+              options = WMSTileOptions(format = &amp;quot;image/png&amp;quot;, transparent = TRUE),
+              group = &amp;quot;nitrogen&amp;quot;)%&amp;gt;%
+  addLayersControl(overlayGroups = c(&amp;quot;nitrogen&amp;quot;),
+                   options = layersControlOptions(collapsed = FALSE))&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/leaflet.02.png&#34; alt=&#34;leaflet&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;leaflet&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;make-a-tilecache-and-publish-via-a-webserver&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Make a Tilecache and Publish via a Webserver&lt;/h1&gt;
+&lt;p&gt;Plugins are easy to install in QGIS–simply click the ‘Plugins’ menu item, and then select ‘Managa and Install Plugins…’. Search for QMetaTiles, and click install. Once installed, we simply open the previous &lt;code&gt;nitrogen.qgs&lt;/code&gt; project, and run the QMetaTiles plugin. We simply chose a target directory, and the zoom levels required, and then run the plugin.&lt;/p&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/qmetatiles.01.png&#34; alt=&#34;QMetaTiles&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;QMetaTiles&lt;/p&gt;
+&lt;/div&gt;
+&lt;p&gt;Of course, the problem with a tile cache is size. A tileset covering just New Zealand down to a low zoom can easily total several gigabytes in size. On the other hand, a tile server which creates images on-the-fly only requires the raw inputs be saved–in this case totalling only 40 or so megabytes.&lt;/p&gt;
+&lt;p&gt;Regardless, we can copy the tiles somewhere on the webserver path, and then treat them as a tile service. In this case, I moved the tiles to &lt;code&gt;/var/www/html/tilecache/nitrogen&lt;/code&gt; as follows:&lt;/p&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo mkdir -p /var/www/html/tilecache
+sudo mv ~/Maps/tilecache/nitrogen /var/www/html/tilecache/
+sudo chmod -R go+rx /var/www/html/tilecache&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The ‘service’ should then be reachable at:&lt;/p&gt;
+&lt;pre class=&#34;asis&#34;&gt;&lt;code&gt;http://localhost/tilecache/nitrogen/{z}/{x}/{y}.png&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;For example, we can make a leaflet chart in R as follows:&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(leaflet)
+
+leaflet() %&amp;gt;%
+  fitBounds(167, -48, 179, -34) %&amp;gt;%
+  addTiles() %&amp;gt;%
+  addTiles(urlTemplate=&amp;quot;https://localhost/tilecache/nitrogen/{z}/{x}/{y}.png&amp;quot;,
+           group = &amp;quot;nitrogen&amp;quot;) %&amp;gt;%
+  addLayersControl(overlayGroups = c(&amp;quot;nitrogen&amp;quot;),
+                   options = layersControlOptions(collapsed = FALSE))&lt;/code&gt;&lt;/pre&gt;
+&lt;div class=&#34;figure&#34;&gt;
+&lt;img src=&#34;./img/qgis/leaflet.03.png&#34; alt=&#34;leaflet&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;leaflet&lt;/p&gt;
+&lt;/div&gt;
+&lt;!--
+# Show Features in a Web Client
+
+First, download the client:
+
+```bash
+cd Downloads
+git clone https://github.com/qgis/qgis-web-client.git
+```
+
+The resulting directory was 172MB when I did it, so this could take a minute or
+tow.  Then, install somewhere your webserver can see:
+
+```bash
+cd qgis-web-client
+sudo mkdir -p /var/www/html/qgis-web-client/projects
+sudo ./install.sh /var/www/html/qgis-web-client/projects
+```
+--&gt;
+&lt;/div&gt;
+
+
+&lt;!-- BLOGDOWN-HEAD
+
+
+
+
+/BLOGDOWN-HEAD --&gt;
+</description>
+    </item>
     
     <item>
       <title>About this blog</title>
@@ -18,9 +289,11 @@
       <description>&lt;p&gt;I work for a National Statistics Office as a methodologist, which invariably
 involves a fair bit of computer programming and the like.  It&amp;rsquo;s interesting
 work, and so I find myself tinkering with similar things in my free time.
+&lt;!--
 However, my work environment is pretty tightly controlled, with access to a
 relatively small set of mostly proprietary products.  But away from work I have
-complete freedom, and (by choice) access only to open source products.&lt;/p&gt;
+complete freedom, and (by choice) access only to open source products.
+--&gt;&lt;/p&gt;
 
 &lt;p&gt;This blog mostly contains posts describing things I&amp;rsquo;ve tried that I find
 interesting.  But this also means that more often than not I am describing tools
@@ -41,6 +314,7 @@ colleagues, but maybe others will find something here useful&amp;hellip;&lt;/p&g
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
+&lt;p&gt;&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;./css/custom.css&#34;&gt;&lt;/p&gt;
 &lt;div id=&#34;overview&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Overview&lt;/h1&gt;
 &lt;p&gt;When making maps for display on the web, the size of the various objects being rendered can quickly become overwhelming. For example, a polygon feature class containing &lt;a href=&#34;http://www.stats.govt.nz/methods/classifications-and-standards/classification-related-stats-standards/meshblock/definition.aspx#&#34;&gt;New Zealand Meshblocks&lt;/a&gt;, a set of roughly 40,000 mutually exclusive and exhaustive polygons, is more than 100MB when stored as a shapefile, but much larger uncompressed and rendered in a browser window.&lt;/p&gt;
@@ -77,7 +351,7 @@ colleagues, but maybe others will find something here useful&amp;hellip;&lt;/p&g
   }
 }&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;To start TileStache, run:&lt;/p&gt;
-&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;tilestache-server -c ~/wms/cfg/tilestache.cfg&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;tilestache-server -c &amp;lt;path to config&amp;gt;/tilestache.cfg&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;which will then make the server available at &lt;a href=&#34;http://localhost:8080&#34; class=&#34;uri&#34;&gt;http://localhost:8080&lt;/a&gt;:&lt;/p&gt;
 &lt;div class=&#34;figure&#34;&gt;
 &lt;img src=&#34;./img/tiles/tiles.png&#34; alt=&#34;http://localhost:8080&#34; /&gt;
@@ -627,10 +901,7 @@ leaflet() %&amp;gt;% addTiles() %&amp;gt;%
 &lt;/div&gt;
 
 
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
@@ -649,6 +920,7 @@ leaflet() %&amp;gt;% addTiles() %&amp;gt;%
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
+&lt;p&gt;&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;./css/custom.css&#34;&gt;&lt;/p&gt;
 &lt;div id=&#34;overview&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Overview&lt;/h1&gt;
 &lt;p&gt;I often find myself needing to establish the travel time or distance between arrays of addresses. In the past I have used ArcMap’s Network Analyst tool, but have found the syntax to be clunky at best, and the performance to be very mediocre. And, besides, I am often working in R and sometimes it’s nice to be able to do everything in the one environment, rather than doing the routing in Python, say, and then using the results in R.&lt;/p&gt;
@@ -707,14 +979,14 @@ d &amp;lt;- destination$results[[1]]$geometry$location
    route &amp;lt;- fromJSON(file=url)
 })&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;   user  system elapsed 
-  0.000   0.004   1.240 &lt;/code&gt;&lt;/pre&gt;
+  0.000   0.000   0.784 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Again, assuming a route was successfully found, &lt;code&gt;route&lt;/code&gt; will now contain a list including, among other things, time in seconds to traverse the route, distance in metres, and the route geomertry stored in &lt;a href=&#34;https://developers.google.com/maps/documentation/utilities/polylinealgorithm&#34;&gt;encoded polyline algorithm format&lt;/a&gt;.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;route$routes[[1]]$duration&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;[1] 1755.3&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[1] 1738.8&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;route$routes[[1]]$distance&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;[1] 34283.6&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[1] 34267&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;route$routes[[1]]$geometry&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;[1] &amp;quot;hf_zFufsk`@M?O@QEqAKA\\GVKTKTORQTqB|BKNIRINK`@CXCV@\\@x@p@hEL`@NZPVXLVJl@DdB\\^PVLRRRZFRH`@BZC`@GZIX}@|AY^]TWJm@Li@DeBgFUSYCi@F_Dh@MB]RKJWc@MUmAmB{C_Fm@v@OFaHlAaNxA[eG_BLw@JYNUFBf@NdCFhCFhAP~EJ~CLnCDt@DjAHrBJtBBfAB~@@hA@bBAxACvAIbFAfA?`AD`A@t@HdEHjCNvCFhBD`BDzCBnA?XBlA@z@?hA@zAC|BOrGCxGAjD?|E?pAAdLB~DDfDN~CPvCPtBRlBZbC\\~BBRlBfI\\hAV~@L^l@hBt@lBjAhCr@vAn@jA`AdBdAbB`BfC|BlDpCdEdBnCz@nA^t@Rp@Hb@Hh@Dj@Bt@?r@I~@IbAIlAErABjAJrANt@d@jAVh@Zj@`AbBjAdChAbDz@|Cv@jCtD|NZ`ANd@\\dA~@~B`@`An@vAhAlB`AbB|A|BxDdG~CbFfCxD~BfDdBjCjBxCdAfBdArB~@hB~@`CZv@p@jBb@vA\\hAz@tC|@tCr@pBh@zAx@xBv@jBfAdCpAnCdAvBv@|Ap@rAbB|Cr@vAp@|Ad@hAhAzCt@tBfA`Dj@zAd@dAr@dB|@nBhA|Bp@hA~@zAfBlC`ClDhB~Bt@fAl@|@f@`Ad@x@Zv@Vl@b@pAXdAX`Af@fBb@~Al@|Bj@lCt@jDb@hB`A~Cx@hChBfF^jAb@fAh@nAp@rAt@pA^n@~@lAhAvAhCbDtAnApFzDjDdC~BbC~A|BtCjFbD~FpEhIx@~AzAlCrApCv@bBbAdC|B~HfD`KhBnDb@|@rCjEbE`FjCdCbDtCzCtDnDtFzBxDfD~E~B~ChExF|EnGbCpDpCpF~BrEtBrDdDhEvCfDrClDfCzDvC~FrB~DtBfDxEdGfBlBnBhB`C~BdC|B~ClDtBfCfCfE|ArCtBdEbBtCv@|ApBnE|AnDlDfIxDvIrA~C`ApBfB`DnBtDt@pAtA|Bf@z@FLFNb@z@lA~Bj@rAv@fBx@|ApAdCp@rAzBfEvBpEvB|EpCxFhBdEdAfCnC`HxBhFz@lBhAzBlAhCjAnBh@pAf@rAzAvD~@xBbAxBbBjDnCzFnDnHn@tATj@nArC|@dCn@dBN^Z|@n@hBnAfDnDjJpAjD`@bA^t@vBnDp@rAt@zA|AdDbA~Bz@xBr@dBfAbCd@pAlCjHvBzFv@~Bj@pAr@nAfAlBr@fA`ApAjAnB~BnDv@vAbCpDxA~Bn@dAdAxBp@rARf@^|@j@~Aj@vAf@zAZfATv@ZfA\\|@f@xA^z@\\`A`A`Cn@fB^dAX|@ZfAz@xChApEjB|Gt@pCx@lCfCjHt@nBb@fAl@~AfA`Dl@hBbA`DxBvIvApG|ApHfAnFTpBJnBFfC?bB?`@Ch@El@OhAEf@ARA^?\\B\\Hd@Jd@pBtHxAzGvAjG~AxHbA`EvAbDz@nCvA`IvBxMtAlI\\dBV~@^fAl@tAp@fAt@~@|@x@nCbCf@f@`@h@r@pAb@fAd@~A~@lE\\~A\\fAf@hAh@`A~@rA`GvGlCrDlCtExG~M~IfR|ExHbElIfFxKrBjElBjE`AnBpArCx@bBjAtBjAnBlBhCfBdC~@rAr@bAp@fAj@~@x@zAn@hAn@fAbAnB`AfB`BfDtA~C~BhF|CrGt@`Bn@fAf@t@`@h@j@p@f@j@x@`Aj@l@tAbBfBbCvB~ExA`Er@jCdAzFfAbG~@jDlChI\\lAj@hBp@|Ax@hBlAbCpArBvAnBhAnAx@x@lAdAbA|@jAfAp@n@`@b@b@n@`@p@^r@b@hAb@lAr@jB`@dAd@dAl@hAx@dA~@~@lG|FpAnAhI`Jt@x@~CbDxJvIlAxA`@p@dGhJh@p@TPZLVFV@ZCp@Ox@ULGhAm@j@YvAs@nAo@BCj@YXMRKTMjAm@HcGAKL@&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;[1] &amp;quot;hf_zFufsk`@M?O?QCoAKC\\GVKTKTORQTqB|BKNIRINK`@CXCV@\\@x@p@hEL`@NZPVXLXJj@DdB\\^PVLRRRZFRH`@BZC`@GZIX}@|AY^]TWJk@Jk@FeBgFUSYCi@D_Dj@MB]RKJWc@MUmAmB{C_FcB{CyA{CCBE@C?EACCCCEDw@v@g@d@{@x@_@XWJSJa@HuEf@}CZ}ALy@JYNUFBf@NdCFhCFhAP~EJ~CLnCDt@DjAHrBJtBBfAB~@@hA@bBAxACvAIbFAfA?`AD`A@t@HdEHjCNvCFhBD`BDxCBpA@X@lA@z@?hA@zAC|BOrGCxGAjD?|E?pAAdLB~DDfDN~CPvCPtBRlBZbC\\~BDPjBhI\\hAV~@L^l@hBt@lBjAhCr@vAn@jA`AdBdAbB`BfC|BlDpCdEdBnCz@nA^t@Rp@Hb@Hh@Dj@Dt@Ar@I~@IbAIlAErABjAJpANv@d@jAVh@Zj@`A`BjAfChAbDz@zCv@lCtD|NZ`ANd@\\dA~@~B`@`An@vAhAlB`AbB|A|BxDdG~CbFfCxD~BfDdBjCjBvCdAhBdApB~@jB~@~BZx@p@jBb@vA\\hAz@tC|@tCr@pBh@zAx@xBv@jBfAdCpAnCdAvBv@|Ap@rAbBzCr@xAp@|Ad@hAhAxCv@vBdA`Dj@zAd@dAr@dB|@nBhA|Bp@hA~@zAfBlC`ClDhB~Bt@fAl@|@f@`Ad@x@\\v@Tl@b@pAXdAX`Af@fBb@~Al@|Bj@lCv@jD`@hB`A~Cx@fChBhF^jAb@fAh@nAp@rAt@pA^n@~@lAhAvAhCbDtAnApFzDjDdC~BbC`B|BrCjFbD~FpEhIx@~AzAlCrAnCv@dBbAdC|B~HfD`KhBnDb@|@rCjEbE`FjCdCbDtCzCtDnDtFzBxDfD~E~B~ChExF|EnGbCpDpCpF~BrEtBrDdDhEvCfDrClDfCzDvC~FrB~DtBfDxEdGfBlBnBhB`C~BdC|B~ClDtBfCfCfE|ArCtBdEbBtCv@|ApBnE|AnDlDfIxDvIrA~C`ApBfB`DnBtDt@pAtA|Bf@z@FLFNb@z@lA~Bj@rAv@dBx@~ApAdCp@rAzBfEvBpEvB|EpCxFhBdEdAfCnC`HxBhFz@lBhAzBlAhCjAnBh@pAf@rAzAvD~@xBbAxBbBjDnCzFnDnHn@tATj@nArC|@dCn@dBN^Z|@n@hBnAfDnDjJpAjD`@bA^t@vBnDp@rAt@xA|AfDbA~Bz@xBr@dBfAbCd@pAlCjHvBzFv@~Bj@pAr@nAfAlBt@fA~@nAjApB~BnDv@vAbCpDxA~Bn@dAdAxBp@rARf@^|@j@~Aj@vAf@zAZfATv@ZdA\\~@f@xA^z@\\`A`A`Cn@fB^dAX|@ZfAz@xChApEjB|Gt@pCx@jCfCjHt@pBb@fAl@~AfA`Dl@hBbA`DxBvIvApG|ApHfAnFTpBJnBHfCAbB?`@Ch@El@OhAEf@ARA^?\\B\\Hd@Jd@pBtHxAzGvAjG~AvHbAbEvAbDz@nCvA`IvBxMtAlI\\dBV~@^fAl@tAp@fAt@~@|@x@nCbCf@d@`@j@r@pAb@fAd@~A~@lE\\~A\\fAf@hAh@`A~@rA`GvGlCrDlCtExG~M~IfR~ExH`ElIfFxKrBjElBjE`AnBpArCx@bBjAtBjAnBlBhCfBdC~@rAr@bAp@fAj@~@x@zAp@hAl@fAbAnB`AfB`BfDtA~C~BhF|CrGt@`Bn@fAf@t@`@h@j@p@f@j@x@`Aj@l@tAbBfBbCvB~ExA`Er@jCdAzFfAbG~@jDlChI\\lAl@hBn@|Ax@hBlAbCpArBvAnBhAnAx@x@lAdAbA|@lAfAn@n@`@b@b@n@`@p@^r@b@hAb@lAr@jB`@dAd@dAl@hAx@dA~@~@lG|FpAnAhI`Jt@x@~CbDxJvIlAxA`@n@dGhJh@p@TRZLVFV?ZAp@Ox@ULGhAm@l@YtAs@nAo@BCj@YXORITMjAo@HaGAKN@&amp;quot;&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;We write a function to convert the encoded route to a &lt;code&gt;SpatialLines&lt;/code&gt; object:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;decode &amp;lt;- function(str, multiplier=1e5){
    
@@ -753,7 +1025,7 @@ d &amp;lt;- destination$results[[1]]$geometry$location
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;par(mar=par()$mar-c(1,0,2.5,0), cex=0.8)
 path &amp;lt;- decode(route$routes[[1]]$geometry, multiplier=1e5)
 plot(path); axis(1); axis(2); box()&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;#####../content/post/routing_files/figure-html/plot-1.png&#34; width=&#34;810&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/routing/figures/plot-1.png&#34; width=&#34;810&#34; style=&#34;display: block; margin: auto;&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;using-leaflet-to-make-a-nicer-map&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Using &lt;code&gt;leaflet&lt;/code&gt; to make a nicer map&lt;/h1&gt;
@@ -771,8 +1043,8 @@ m &amp;lt;- leaflet(width=&amp;quot;100%&amp;quot;) %&amp;gt;%
   addMarkers(lng=o$lng, lat=o$lat, popup=origin$results[[1]]$formatted_address) %&amp;gt;%
   addMarkers(lng=d$lng, lat=d$lat, popup=destination$results[[1]]$formatted_address)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;m&lt;/code&gt;&lt;/pre&gt;
-&lt;div id=&#34;htmlwidget-68989a44cffaf687f09c&#34; style=&#34;width:100%;height:480px;&#34; class=&#34;leaflet html-widget&#34;&gt;&lt;/div&gt;
-&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-68989a44cffaf687f09c&#34;&gt;{&#34;x&#34;:{&#34;calls&#34;:[{&#34;method&#34;:&#34;addTiles&#34;,&#34;args&#34;:[&#34;http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png&#34;,null,null,{&#34;minZoom&#34;:0,&#34;maxZoom&#34;:18,&#34;maxNativeZoom&#34;:null,&#34;tileSize&#34;:256,&#34;subdomains&#34;:&#34;abc&#34;,&#34;errorTileUrl&#34;:&#34;&#34;,&#34;tms&#34;:false,&#34;continuousWorld&#34;:false,&#34;noWrap&#34;:false,&#34;zoomOffset&#34;:0,&#34;zoomReverse&#34;:false,&#34;opacity&#34;:1,&#34;zIndex&#34;:null,&#34;unloadInvisibleTiles&#34;:null,&#34;updateWhenIdle&#34;:null,&#34;detectRetina&#34;:false,&#34;reuseTiles&#34;:false,&#34;attribution&#34;:&#34;&amp;copy; &lt;a href=\&#34;http://openstreetmap.org\&#34;&gt;OpenStreetMap\u003c/a&gt; contributors, &lt;a href=\&#34;http://creativecommons.org/licenses/by-sa/2.0/\&#34;&gt;CC-BY-SA\u003c/a&gt;&#34;}]},{&#34;method&#34;:&#34;addPolylines&#34;,&#34;args&#34;:[[[{&#34;lng&#34;:[175.08475,175.08475,175.08474,175.08477,175.08483,175.08468,175.08456,175.08445,175.08434,175.08424,175.08413,175.0835,175.08342,175.08332,175.08324,175.08307,175.08294,175.08282,175.08267,175.08238,175.08137,175.0812,175.08106,175.08094,175.08087,175.08081,175.08078,175.08063,175.08054,175.08047,175.08037,175.08023,175.08013,175.07996,175.07982,175.07965,175.07951,175.07938,175.07891,175.07875,175.07864,175.07858,175.07851,175.07848,175.07964,175.07974,175.07976,175.07972,175.07951,175.07949,175.07939,175.07933,175.07951,175.07962,175.08017,175.08129,175.08101,175.08097,175.08058,175.08013,175.08144,175.08137,175.08131,175.08123,175.08119,175.08099,175.08032,175.07963,175.07926,175.07814,175.07734,175.07662,175.07635,175.07597,175.07539,175.0748,175.07444,175.07412,175.07375,175.07325,175.0728,175.07236,175.07122,175.07086,175.07053,175.0702,175.06993,175.06894,175.06824,175.06748,175.06695,175.06646,175.06568,175.06528,175.06515,175.06476,175.06446,175.06409,175.06363,175.063,175.06162,175.06021,175.05935,175.05824,175.05783,175.05572,175.05476,175.05392,175.05312,175.05236,175.05177,175.05122,175.05056,175.04992,175.04982,175.04818,175.04781,175.04749,175.04733,175.0468,175.04625,175.04556,175.04512,175.04474,175.04423,175.04373,175.04305,175.04218,175.04119,175.04047,175.04007,175.0398,175.03955,175.03937,175.03916,175.03894,175.03867,175.03841,175.03809,175.03775,175.03736,175.03694,175.03656,175.03614,175.03587,175.03549,175.03528,175.03506,175.03456,175.03389,175.03307,175.03228,175.03158,175.02903,175.0287,175.02851,175.02816,175.02752,175.02719,175.02675,175.0262,175.0257,175.02507,175.02376,175.02262,175.02169,175.02085,175.02015,175.01938,175.01886,175.01828,175.01775,175.0171,175.01682,175.01628,175.01584,175.01547,175.01472,175.01397,175.0134,175.01294,175.01233,175.01179,175.01112,175.0104,175.0098,175.00933,175.00891,175.00812,175.00768,175.00721,175.00684,175.00606,175.00547,175.00466,175.0042,175.00385,175.00334,175.00278,175.00215,175.00178,175.00132,175.00061,174.99974,174.9991,174.99874,174.99843,174.9981,174.99781,174.99753,174.9973,174.99689,174.99654,174.99621,174.99569,174.99521,174.99458,174.99387,174.99301,174.99248,174.99168,174.99099,174.98983,174.98945,174.98909,174.98869,174.98827,174.98786,174.98762,174.98723,174.98679,174.98597,174.98557,174.98463,174.98396,174.9833,174.98267,174.98149,174.98021,174.97856,174.97808,174.97737,174.97664,174.97614,174.97547,174.97387,174.97194,174.97106,174.97075,174.96973,174.9686,174.96793,174.96718,174.96627,174.96504,174.96411,174.96299,174.96219,174.96094,174.95958,174.95869,174.95748,174.95642,174.95552,174.95451,174.95367,174.9528,174.95186,174.95058,174.94962,174.94878,174.94747,174.94692,174.94639,174.94575,174.94512,174.94425,174.94357,174.94257,174.94183,174.94084,174.94009,174.93962,174.93858,174.9377,174.93606,174.93434,174.93354,174.93297,174.93216,174.93125,174.93084,174.93021,174.92991,174.92984,174.92976,174.92946,174.92882,174.9284,174.92788,174.92741,174.92674,174.92632,174.92532,174.92427,174.92316,174.92191,174.92092,174.92024,174.91879,174.91762,174.91707,174.91645,174.91576,174.9152,174.91479,174.91437,174.91345,174.91284,174.91223,174.91137,174.91011,174.90859,174.90816,174.90794,174.9072,174.90653,174.90602,174.90586,174.90555,174.90502,174.90418,174.90236,174.9015,174.90116,174.90089,174.90001,174.89959,174.89913,174.8983,174.89766,174.89705,174.89654,174.89588,174.89547,174.89397,174.89271,174.89207,174.89166,174.89126,174.89071,174.89035,174.88994,174.88938,174.8885,174.88806,174.88717,174.88653,174.88618,174.88557,174.88515,174.88495,174.88464,174.88416,174.88372,174.88326,174.8829,174.88262,174.88226,174.88195,174.8815,174.8812,174.88087,174.88022,174.8797,174.87935,174.87904,174.87868,174.87791,174.87686,174.87543,174.8747,174.87399,174.87249,174.87193,174.87157,174.87109,174.87028,174.86975,174.86894,174.86722,174.86585,174.86432,174.86312,174.86255,174.86199,174.86131,174.86081,174.86064,174.86043,174.8602,174.85983,174.85963,174.85953,174.85937,174.85922,174.85907,174.85888,174.85869,174.85714,174.85572,174.85438,174.85281,174.85184,174.85102,174.8503,174.84869,174.84632,174.84465,174.84414,174.84382,174.84346,174.84303,174.84267,174.84235,174.84206,174.8414,174.8412,174.84099,174.84058,174.84022,174.83974,174.83871,174.83823,174.83787,174.8375,174.83717,174.83675,174.83535,174.83445,174.83338,174.83098,174.8279,174.82633,174.82466,174.82261,174.82159,174.82057,174.82001,174.81927,174.81877,174.81818,174.81762,174.81693,174.81626,174.81584,174.8155,174.81514,174.81482,174.81436,174.81399,174.81363,174.81307,174.81255,174.81171,174.81091,174.80974,174.80836,174.80787,174.80751,174.80724,174.80703,174.80678,174.80656,174.80623,174.806,174.8055,174.80484,174.80372,174.80275,174.80205,174.80079,174.79949,174.79863,174.79698,174.79659,174.79606,174.79559,174.79506,174.7944,174.79382,174.79326,174.79286,174.79257,174.79222,174.79191,174.79155,174.79131,174.79113,174.79089,174.79064,174.79038,174.79001,174.78962,174.78908,174.78873,174.78838,174.78801,174.78766,174.78734,174.78607,174.78567,174.7839,174.78361,174.78279,174.78107,174.78062,174.78037,174.77856,174.77831,174.77822,174.77815,174.77811,174.7781,174.77812,174.7782,174.77831,174.77835,174.77858,174.77871,174.77897,174.77921,174.77923,174.77936,174.77943,174.77949,174.77956,174.77979,174.78109,174.78115,174.78114],&#34;lat&#34;:[-41.12501,-41.12494,-41.12486,-41.12477,-41.12436,-41.12435,-41.12431,-41.12425,-41.12419,-41.12411,-41.12402,-41.12345,-41.12339,-41.12334,-41.12329,-41.12323,-41.12321,-41.12319,-41.1232,-41.12321,-41.12346,-41.12353,-41.12361,-41.1237,-41.12383,-41.12395,-41.12418,-41.12469,-41.12485,-41.12497,-41.12507,-41.12517,-41.12521,-41.12526,-41.12528,-41.12526,-41.12522,-41.12517,-41.12486,-41.12473,-41.12458,-41.12446,-41.12423,-41.12402,-41.12351,-41.1234,-41.12327,-41.12306,-41.12226,-41.12219,-41.12204,-41.12198,-41.12186,-41.12179,-41.1214,-41.12062,-41.12039,-41.12031,-41.11886,-41.11645,-41.11631,-41.11583,-41.11555,-41.11542,-41.11531,-41.11533,-41.11541,-41.11545,-41.11549,-41.11558,-41.11564,-41.11571,-41.11574,-41.11577,-41.11582,-41.11588,-41.1159,-41.11592,-41.11593,-41.11594,-41.11593,-41.11591,-41.11586,-41.11585,-41.11585,-41.11588,-41.11589,-41.11594,-41.11599,-41.11607,-41.11611,-41.11614,-41.11617,-41.11619,-41.11619,-41.11621,-41.11622,-41.11622,-41.11623,-41.11621,-41.11613,-41.11611,-41.1161,-41.1161,-41.1161,-41.11609,-41.11611,-41.11614,-41.11622,-41.11631,-41.1164,-41.1165,-41.11664,-41.11679,-41.11681,-41.11736,-41.11751,-41.11763,-41.1177,-41.11793,-41.1182,-41.11858,-41.11884,-41.11908,-41.11941,-41.11976,-41.12025,-41.12088,-41.12161,-41.12212,-41.12242,-41.12258,-41.12268,-41.12273,-41.12278,-41.12281,-41.12283,-41.12283,-41.12278,-41.12273,-41.12268,-41.12265,-41.12267,-41.12273,-41.12281,-41.123,-41.12312,-41.12326,-41.12359,-41.12397,-41.12434,-41.12464,-41.12492,-41.12583,-41.12597,-41.12605,-41.1262,-41.12652,-41.12669,-41.12693,-41.1273,-41.12763,-41.1281,-41.12903,-41.12983,-41.13051,-41.13115,-41.13166,-41.1322,-41.13255,-41.1329,-41.13322,-41.13354,-41.13368,-41.13393,-41.13411,-41.13426,-41.13456,-41.13487,-41.13513,-41.13534,-41.13563,-41.13591,-41.13627,-41.13668,-41.13703,-41.13731,-41.13756,-41.13806,-41.13832,-41.13857,-41.13876,-41.13913,-41.1394,-41.13976,-41.13998,-41.14017,-41.14043,-41.14074,-41.14111,-41.14136,-41.14168,-41.1422,-41.14285,-41.14338,-41.14365,-41.14388,-41.14408,-41.14427,-41.14441,-41.14453,-41.14471,-41.14484,-41.14497,-41.14517,-41.14535,-41.14558,-41.1458,-41.14607,-41.14625,-41.14658,-41.14687,-41.1474,-41.14756,-41.14774,-41.14795,-41.1482,-41.14847,-41.14863,-41.14895,-41.14932,-41.15001,-41.15044,-41.15165,-41.15251,-41.15315,-41.15363,-41.15438,-41.1552,-41.15625,-41.15654,-41.157,-41.15742,-41.1577,-41.15804,-41.15867,-41.15951,-41.16004,-41.16022,-41.16096,-41.16194,-41.16264,-41.16346,-41.16424,-41.16512,-41.16574,-41.16658,-41.16722,-41.16823,-41.16934,-41.17,-41.17073,-41.17137,-41.17196,-41.17279,-41.17355,-41.17429,-41.17497,-41.17573,-41.17631,-41.1769,-41.17799,-41.17851,-41.17907,-41.17972,-41.18039,-41.18119,-41.18178,-41.18246,-41.18293,-41.18352,-41.18402,-41.1843,-41.18487,-41.18534,-41.18621,-41.18714,-41.18756,-41.18789,-41.18841,-41.18897,-41.18924,-41.18967,-41.18987,-41.18991,-41.18995,-41.19013,-41.19052,-41.19074,-41.19102,-41.19131,-41.19172,-41.19197,-41.19259,-41.19319,-41.19379,-41.19452,-41.19505,-41.1954,-41.19612,-41.19673,-41.19703,-41.1974,-41.19779,-41.19817,-41.19838,-41.19858,-41.19904,-41.19936,-41.1997,-41.2002,-41.20092,-41.2018,-41.20204,-41.20215,-41.20255,-41.20286,-41.2031,-41.20318,-41.20332,-41.20356,-41.20396,-41.20484,-41.20525,-41.20542,-41.20558,-41.20618,-41.20643,-41.2067,-41.20717,-41.20751,-41.20781,-41.20807,-41.20843,-41.20862,-41.20933,-41.20993,-41.21021,-41.21043,-41.21069,-41.21105,-41.21131,-41.21164,-41.21202,-41.21266,-41.21294,-41.2136,-41.21405,-41.21429,-41.21464,-41.21489,-41.21499,-41.21515,-41.21537,-41.21559,-41.21579,-41.21593,-41.21604,-41.21618,-41.21633,-41.21653,-41.21669,-41.21684,-41.21717,-41.21741,-41.21757,-41.2177,-41.21784,-41.21814,-41.21851,-41.21905,-41.21932,-41.21961,-41.22029,-41.22056,-41.22074,-41.22097,-41.22133,-41.22156,-41.2219,-41.22251,-41.22295,-41.22342,-41.22378,-41.22389,-41.22395,-41.22399,-41.22399,-41.22399,-41.22397,-41.22394,-41.22386,-41.22383,-41.22382,-41.22381,-41.22381,-41.22383,-41.22388,-41.22394,-41.22451,-41.22496,-41.2254,-41.22588,-41.22622,-41.22666,-41.22696,-41.2274,-41.228,-41.22843,-41.22858,-41.2287,-41.22886,-41.22909,-41.22934,-41.22961,-41.22992,-41.23064,-41.23084,-41.23101,-41.23127,-41.23145,-41.23164,-41.23196,-41.23211,-41.23226,-41.23246,-41.23267,-41.23299,-41.23428,-41.23499,-41.2357,-41.23711,-41.23887,-41.23998,-41.24096,-41.24212,-41.2427,-41.24325,-41.24358,-41.24399,-41.24428,-41.24466,-41.24504,-41.24559,-41.24611,-41.24643,-41.24669,-41.24694,-41.24716,-41.24745,-41.24769,-41.24793,-41.24827,-41.2486,-41.24909,-41.24952,-41.25016,-41.25095,-41.25122,-41.25146,-41.25166,-41.25183,-41.25205,-41.25225,-41.25254,-41.25276,-41.25319,-41.25371,-41.25431,-41.25476,-41.25502,-41.25537,-41.25573,-41.25605,-41.25676,-41.25691,-41.25713,-41.25738,-41.25767,-41.25806,-41.25847,-41.25891,-41.25928,-41.25957,-41.25996,-41.2603,-41.26068,-41.26093,-41.2611,-41.26128,-41.26145,-41.26161,-41.26179,-41.26197,-41.26223,-41.2624,-41.26259,-41.26282,-41.26311,-41.26343,-41.26478,-41.26519,-41.26684,-41.26711,-41.26791,-41.2698,-41.27019,-41.27036,-41.27167,-41.27188,-41.27199,-41.27213,-41.27225,-41.27237,-41.27251,-41.27276,-41.27305,-41.27312,-41.27349,-41.27371,-41.27415,-41.27455,-41.27457,-41.27479,-41.27492,-41.27502,-41.27513,-41.27551,-41.27556,-41.27555,-41.27562]}]],null,null,{&#34;lineCap&#34;:null,&#34;lineJoin&#34;:null,&#34;clickable&#34;:true,&#34;pointerEvents&#34;:null,&#34;className&#34;:&#34;&#34;,&#34;stroke&#34;:true,&#34;color&#34;:&#34;#000000&#34;,&#34;weight&#34;:3,&#34;opacity&#34;:1,&#34;fill&#34;:false,&#34;fillColor&#34;:&#34;#000000&#34;,&#34;fillOpacity&#34;:0.2,&#34;dashArray&#34;:null,&#34;smoothFactor&#34;:1,&#34;noClip&#34;:false},&#34;29m 15.3s , 34.3kms&#34;,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.1250097,175.0845498,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;10 Aragon Grove, Kingsley Heights, Upper Hutt 5018, New Zealand&#34;,null,null,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.2756572,174.7811653,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;1 Pipitea St, Pipitea, Wellington 6011, New Zealand&#34;,null,null,null,null]}],&#34;limits&#34;:{&#34;lat&#34;:[-41.2756572,-41.11531],&#34;lng&#34;:[174.7781,175.08483]}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;div id=&#34;htmlwidget-a637f0464010cda5fa7b&#34; style=&#34;width:100%;height:480px;&#34; class=&#34;leaflet html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-a637f0464010cda5fa7b&#34;&gt;{&#34;x&#34;:{&#34;options&#34;:{&#34;crs&#34;:{&#34;crsClass&#34;:&#34;L.CRS.EPSG3857&#34;,&#34;code&#34;:null,&#34;proj4def&#34;:null,&#34;projectedBounds&#34;:null,&#34;options&#34;:{}}},&#34;calls&#34;:[{&#34;method&#34;:&#34;addTiles&#34;,&#34;args&#34;:[&#34;//{s}.tile.openstreetmap.org/{z}/{x}/{y}.png&#34;,null,null,{&#34;minZoom&#34;:0,&#34;maxZoom&#34;:18,&#34;maxNativeZoom&#34;:null,&#34;tileSize&#34;:256,&#34;subdomains&#34;:&#34;abc&#34;,&#34;errorTileUrl&#34;:&#34;&#34;,&#34;tms&#34;:false,&#34;continuousWorld&#34;:false,&#34;noWrap&#34;:false,&#34;zoomOffset&#34;:0,&#34;zoomReverse&#34;:false,&#34;opacity&#34;:1,&#34;zIndex&#34;:null,&#34;unloadInvisibleTiles&#34;:null,&#34;updateWhenIdle&#34;:null,&#34;detectRetina&#34;:false,&#34;reuseTiles&#34;:false,&#34;attribution&#34;:&#34;&amp;copy; &lt;a href=\&#34;http://openstreetmap.org\&#34;&gt;OpenStreetMap\u003c/a&gt; contributors, &lt;a href=\&#34;http://creativecommons.org/licenses/by-sa/2.0/\&#34;&gt;CC-BY-SA\u003c/a&gt;&#34;}]},{&#34;method&#34;:&#34;addPolylines&#34;,&#34;args&#34;:[[[{&#34;lng&#34;:[175.08475,175.08475,175.08475,175.08477,175.08483,175.08468,175.08456,175.08445,175.08434,175.08424,175.08413,175.0835,175.08342,175.08332,175.08324,175.08307,175.08294,175.08282,175.08267,175.08238,175.08137,175.0812,175.08106,175.08094,175.08087,175.08081,175.08078,175.08063,175.08054,175.08047,175.08037,175.08023,175.08013,175.07996,175.07982,175.07965,175.07951,175.07938,175.07891,175.07875,175.07864,175.07858,175.07852,175.07848,175.07964,175.07974,175.07976,175.07973,175.07951,175.07949,175.07939,175.07933,175.07951,175.07962,175.08017,175.08129,175.08207,175.08285,175.08283,175.08282,175.08282,175.08283,175.08285,175.08287,175.08284,175.08256,175.08237,175.08208,175.08195,175.08189,175.08183,175.08178,175.08158,175.08144,175.08137,175.08131,175.08123,175.08119,175.08099,175.08032,175.07963,175.07926,175.07814,175.07734,175.07662,175.07635,175.07597,175.07539,175.0748,175.07444,175.07412,175.07375,175.07325,175.0728,175.07236,175.07122,175.07086,175.07053,175.0702,175.06993,175.06894,175.06824,175.06748,175.06695,175.06646,175.06569,175.06528,175.06515,175.06476,175.06446,175.06409,175.06363,175.063,175.06162,175.06021,175.05935,175.05824,175.05783,175.05572,175.05476,175.05392,175.05312,175.05236,175.05177,175.05122,175.05056,175.04992,175.04983,175.04818,175.04781,175.04749,175.04733,175.0468,175.04625,175.04556,175.04512,175.04474,175.04423,175.04373,175.04305,175.04218,175.04119,175.04047,175.04007,175.0398,175.03955,175.03937,175.03916,175.03894,175.03867,175.03841,175.03809,175.03775,175.03736,175.03694,175.03656,175.03615,175.03587,175.03549,175.03528,175.03506,175.03457,175.03389,175.03307,175.03229,175.03158,175.02903,175.0287,175.02851,175.02816,175.02752,175.02719,175.02675,175.0262,175.0257,175.02507,175.02376,175.02262,175.02169,175.02085,175.02015,175.01939,175.01886,175.01829,175.01775,175.01711,175.01682,175.01628,175.01584,175.01547,175.01472,175.01397,175.0134,175.01294,175.01233,175.01179,175.01112,175.0104,175.0098,175.00933,175.00891,175.00813,175.00768,175.00721,175.00684,175.00607,175.00547,175.00466,175.0042,175.00385,175.00334,175.00278,175.00215,175.00178,175.00132,175.00061,174.99974,174.9991,174.99874,174.99843,174.9981,174.99781,174.99753,174.9973,174.99689,174.99654,174.99621,174.99569,174.99521,174.99458,174.99387,174.99301,174.99248,174.99168,174.991,174.98983,174.98945,174.98909,174.98869,174.98827,174.98786,174.98762,174.98723,174.98679,174.98597,174.98557,174.98463,174.98396,174.9833,174.98267,174.98149,174.98021,174.97856,174.97808,174.97737,174.97665,174.97614,174.97547,174.97387,174.97194,174.97106,174.97075,174.96973,174.9686,174.96793,174.96718,174.96627,174.96504,174.96411,174.96299,174.96219,174.96094,174.95958,174.95869,174.95748,174.95642,174.95552,174.95451,174.95367,174.9528,174.95186,174.95058,174.94962,174.94878,174.94747,174.94692,174.94639,174.94575,174.94512,174.94425,174.94357,174.94257,174.94183,174.94084,174.94009,174.93962,174.93858,174.9377,174.93606,174.93434,174.93354,174.93297,174.93216,174.93125,174.93084,174.93021,174.92991,174.92984,174.92976,174.92946,174.92882,174.9284,174.92789,174.92741,174.92674,174.92632,174.92532,174.92427,174.92316,174.92191,174.92092,174.92024,174.91879,174.91762,174.91707,174.91645,174.91576,174.9152,174.91479,174.91437,174.91345,174.91284,174.91223,174.91137,174.91011,174.90859,174.90816,174.90794,174.9072,174.90653,174.90602,174.90586,174.90555,174.90502,174.90418,174.90236,174.9015,174.90116,174.90089,174.90001,174.89959,174.89914,174.8983,174.89766,174.89705,174.89654,174.89588,174.89547,174.89397,174.89271,174.89207,174.89166,174.89126,174.89071,174.89035,174.88995,174.88938,174.8885,174.88806,174.88717,174.88653,174.88618,174.88557,174.88515,174.88495,174.88464,174.88416,174.88372,174.88326,174.8829,174.88262,174.88227,174.88195,174.8815,174.8812,174.88087,174.88022,174.8797,174.87935,174.87904,174.87868,174.87791,174.87686,174.87543,174.8747,174.874,174.8725,174.87193,174.87157,174.87109,174.87028,174.86975,174.86894,174.86722,174.86585,174.86432,174.86312,174.86255,174.86199,174.86131,174.86081,174.86064,174.86043,174.8602,174.85983,174.85963,174.85953,174.85937,174.85922,174.85907,174.85888,174.85869,174.85714,174.85572,174.85438,174.85282,174.85184,174.85102,174.8503,174.84869,174.84632,174.84465,174.84414,174.84382,174.84346,174.84303,174.84267,174.84235,174.84206,174.8414,174.84121,174.84099,174.84058,174.84022,174.83974,174.83871,174.83823,174.83787,174.8375,174.83717,174.83675,174.83535,174.83445,174.83338,174.83098,174.8279,174.82633,174.82466,174.82261,174.82159,174.82057,174.82001,174.81927,174.81877,174.81818,174.81762,174.81693,174.81626,174.81584,174.8155,174.81514,174.81482,174.81436,174.81399,174.81363,174.81307,174.81255,174.81171,174.81091,174.80974,174.80836,174.80787,174.80751,174.80724,174.80703,174.80678,174.80656,174.80623,174.806,174.8055,174.80484,174.80372,174.80275,174.80205,174.80079,174.79949,174.79863,174.79698,174.79659,174.79606,174.79559,174.79506,174.7944,174.79382,174.79326,174.79286,174.79257,174.79222,174.79191,174.79155,174.79131,174.79113,174.79089,174.79064,174.79038,174.79001,174.78962,174.78908,174.78873,174.78838,174.78801,174.78766,174.78734,174.78607,174.78567,174.7839,174.78361,174.78279,174.78107,174.78062,174.78038,174.77857,174.77832,174.77822,174.77815,174.77811,174.77811,174.77812,174.7782,174.77831,174.77835,174.77858,174.77871,174.77897,174.77921,174.77923,174.77936,174.77944,174.77949,174.77956,174.7798,174.78109,174.78115,174.78114],&#34;lat&#34;:[-41.12501,-41.12494,-41.12486,-41.12477,-41.12437,-41.12435,-41.12431,-41.12425,-41.12419,-41.12411,-41.12402,-41.12345,-41.12339,-41.12334,-41.12329,-41.12323,-41.12321,-41.12319,-41.1232,-41.12321,-41.12346,-41.12353,-41.12361,-41.1237,-41.12383,-41.12396,-41.12418,-41.12469,-41.12485,-41.12497,-41.12507,-41.12517,-41.12521,-41.12526,-41.12528,-41.12526,-41.12522,-41.12517,-41.12486,-41.12473,-41.12458,-41.12446,-41.12424,-41.12402,-41.12351,-41.1234,-41.12327,-41.12306,-41.12226,-41.12219,-41.12204,-41.12198,-41.12186,-41.12179,-41.1214,-41.12062,-41.12012,-41.11967,-41.11965,-41.11962,-41.1196,-41.11957,-41.11955,-41.11953,-41.1195,-41.11922,-41.11902,-41.11872,-41.11856,-41.11844,-41.11834,-41.11817,-41.1171,-41.11631,-41.11584,-41.11555,-41.11542,-41.11531,-41.11533,-41.11541,-41.11545,-41.11549,-41.11558,-41.11564,-41.11571,-41.11574,-41.11577,-41.11582,-41.11588,-41.1159,-41.11592,-41.11593,-41.11594,-41.11593,-41.11591,-41.11586,-41.11585,-41.11585,-41.11588,-41.11589,-41.11594,-41.11599,-41.11607,-41.11611,-41.11614,-41.11617,-41.11619,-41.1162,-41.11621,-41.11622,-41.11622,-41.11623,-41.11621,-41.11613,-41.11611,-41.1161,-41.1161,-41.1161,-41.11609,-41.11611,-41.11614,-41.11622,-41.11631,-41.1164,-41.1165,-41.11664,-41.11679,-41.11682,-41.11736,-41.11751,-41.11763,-41.1177,-41.11793,-41.1182,-41.11858,-41.11884,-41.11908,-41.11941,-41.11976,-41.12025,-41.12088,-41.12161,-41.12212,-41.12242,-41.12258,-41.12268,-41.12273,-41.12278,-41.12281,-41.12284,-41.12283,-41.12278,-41.12273,-41.12268,-41.12265,-41.12267,-41.12273,-41.12281,-41.123,-41.12312,-41.12326,-41.12359,-41.12397,-41.12434,-41.12464,-41.12492,-41.12583,-41.12597,-41.12605,-41.1262,-41.12652,-41.12669,-41.12693,-41.1273,-41.12763,-41.1281,-41.12903,-41.12983,-41.13051,-41.13115,-41.13166,-41.1322,-41.13255,-41.1329,-41.13322,-41.13354,-41.13368,-41.13393,-41.13411,-41.13426,-41.13456,-41.13487,-41.13513,-41.13534,-41.13563,-41.13591,-41.13627,-41.13668,-41.13703,-41.13731,-41.13756,-41.13806,-41.13832,-41.13857,-41.13876,-41.13913,-41.13941,-41.13976,-41.13998,-41.14017,-41.14043,-41.14074,-41.14111,-41.14136,-41.14168,-41.1422,-41.14285,-41.14338,-41.14365,-41.14388,-41.14408,-41.14427,-41.14442,-41.14453,-41.14471,-41.14484,-41.14497,-41.14517,-41.14535,-41.14558,-41.1458,-41.14608,-41.14625,-41.14658,-41.14687,-41.1474,-41.14756,-41.14774,-41.14795,-41.1482,-41.14847,-41.14863,-41.14895,-41.14932,-41.15001,-41.15044,-41.15165,-41.15251,-41.15315,-41.15364,-41.15438,-41.1552,-41.15625,-41.15654,-41.157,-41.15742,-41.1577,-41.15804,-41.15867,-41.15951,-41.16004,-41.16022,-41.16096,-41.16194,-41.16264,-41.16346,-41.16424,-41.16512,-41.16574,-41.16658,-41.16722,-41.16823,-41.16934,-41.17,-41.17073,-41.17137,-41.17196,-41.17279,-41.17355,-41.17429,-41.17497,-41.17573,-41.17631,-41.1769,-41.17799,-41.17851,-41.17907,-41.17972,-41.18039,-41.18119,-41.18178,-41.18246,-41.18293,-41.18352,-41.18402,-41.1843,-41.18487,-41.18534,-41.18621,-41.18714,-41.18756,-41.18789,-41.18841,-41.18897,-41.18924,-41.18967,-41.18987,-41.18991,-41.18995,-41.19013,-41.19052,-41.19074,-41.19102,-41.19131,-41.19172,-41.19197,-41.19259,-41.19319,-41.19379,-41.19452,-41.19505,-41.1954,-41.19612,-41.19673,-41.19703,-41.1974,-41.19779,-41.19817,-41.19838,-41.19858,-41.19904,-41.19936,-41.1997,-41.2002,-41.20092,-41.2018,-41.20204,-41.20215,-41.20255,-41.20286,-41.2031,-41.20318,-41.20332,-41.20356,-41.20396,-41.20484,-41.20525,-41.20542,-41.20558,-41.20618,-41.20643,-41.2067,-41.20717,-41.20751,-41.20781,-41.20807,-41.20843,-41.20862,-41.20933,-41.20993,-41.21021,-41.21043,-41.21069,-41.21105,-41.21132,-41.21164,-41.21202,-41.21266,-41.21294,-41.2136,-41.21405,-41.21429,-41.21464,-41.21489,-41.21499,-41.21515,-41.21537,-41.21559,-41.21579,-41.21593,-41.21604,-41.21618,-41.21633,-41.21653,-41.21669,-41.21684,-41.21717,-41.21741,-41.21757,-41.2177,-41.21784,-41.21814,-41.21851,-41.21905,-41.21932,-41.21961,-41.22029,-41.22056,-41.22074,-41.22097,-41.22133,-41.22156,-41.2219,-41.22251,-41.22295,-41.22342,-41.22378,-41.22389,-41.22395,-41.224,-41.22399,-41.22399,-41.22397,-41.22394,-41.22386,-41.22383,-41.22382,-41.22381,-41.22381,-41.22383,-41.22388,-41.22394,-41.22451,-41.22496,-41.2254,-41.22588,-41.22622,-41.22666,-41.22696,-41.2274,-41.228,-41.22843,-41.22858,-41.2287,-41.22886,-41.22909,-41.22934,-41.22961,-41.22992,-41.23064,-41.23084,-41.23101,-41.23127,-41.23145,-41.23164,-41.23196,-41.23211,-41.23226,-41.23246,-41.23267,-41.23299,-41.23428,-41.23499,-41.2357,-41.23711,-41.23887,-41.23999,-41.24096,-41.24212,-41.2427,-41.24325,-41.24358,-41.24399,-41.24428,-41.24466,-41.24504,-41.24559,-41.24611,-41.24643,-41.24669,-41.24694,-41.24716,-41.24745,-41.2477,-41.24793,-41.24827,-41.2486,-41.24909,-41.24952,-41.25016,-41.25095,-41.25122,-41.25146,-41.25166,-41.25183,-41.25205,-41.25225,-41.25254,-41.25276,-41.25319,-41.25371,-41.25431,-41.25476,-41.25502,-41.25537,-41.25573,-41.25605,-41.25676,-41.25691,-41.25714,-41.25738,-41.25767,-41.25806,-41.25847,-41.25891,-41.25928,-41.25957,-41.25996,-41.2603,-41.26069,-41.26093,-41.2611,-41.26128,-41.26145,-41.26161,-41.26179,-41.26197,-41.26223,-41.2624,-41.26259,-41.26282,-41.26311,-41.26343,-41.26478,-41.26519,-41.26684,-41.26711,-41.26791,-41.2698,-41.27019,-41.27036,-41.27167,-41.27188,-41.27199,-41.27213,-41.27225,-41.27237,-41.27251,-41.27276,-41.27305,-41.27312,-41.27349,-41.27372,-41.27415,-41.27455,-41.27457,-41.27479,-41.27492,-41.27502,-41.27513,-41.27551,-41.27556,-41.27555,-41.27563]}]],null,null,{&#34;lineCap&#34;:null,&#34;lineJoin&#34;:null,&#34;clickable&#34;:true,&#34;pointerEvents&#34;:null,&#34;className&#34;:&#34;&#34;,&#34;stroke&#34;:true,&#34;color&#34;:&#34;#000000&#34;,&#34;weight&#34;:3,&#34;opacity&#34;:1,&#34;fill&#34;:false,&#34;fillColor&#34;:&#34;#000000&#34;,&#34;fillOpacity&#34;:0.2,&#34;dashArray&#34;:null,&#34;smoothFactor&#34;:1,&#34;noClip&#34;:false},&#34;28m 58.8s , 34.3kms&#34;,null,null,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.1250097,175.0845498,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;10 Aragon Grove, Kingsley Heights, Upper Hutt 5018, New Zealand&#34;,null,null,null,null,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.2756572,174.7811653,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;1 Pipitea St, Pipitea, Wellington 6011, New Zealand&#34;,null,null,null,null,null,null]}],&#34;limits&#34;:{&#34;lat&#34;:[-41.2756572,-41.11531],&#34;lng&#34;:[174.77811,175.08483]}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
 &lt;p&gt;It’s also relatively straight forward to use different base maps, and a nice demo of some other providers can be found &lt;a href=&#34;http://leaflet-extras.github.io/leaflet-providers/preview/&#34;&gt;here&lt;/a&gt;. For example:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;require(leaflet)
 leaflet(width=&amp;quot;100%&amp;quot;, height=600) %&amp;gt;% 
@@ -781,24 +1053,23 @@ leaflet(width=&amp;quot;100%&amp;quot;, height=600) %&amp;gt;%
   addPolylines(data=path, popup=routelabel, color = &amp;quot;#000000&amp;quot;, opacity=1, weight = 3) %&amp;gt;%
   addMarkers(lng=o$lng, lat=o$lat, popup=origin$results[[1]]$formatted_address) %&amp;gt;%
   addMarkers(lng=d$lng, lat=d$lat, popup=destination$results[[1]]$formatted_address)&lt;/code&gt;&lt;/pre&gt;
-&lt;div id=&#34;htmlwidget-4cf2432c4149c99c6041&#34; style=&#34;width:100%;height:600px;&#34; class=&#34;leaflet html-widget&#34;&gt;&lt;/div&gt;
-&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-4cf2432c4149c99c6041&#34;&gt;{&#34;x&#34;:{&#34;calls&#34;:[{&#34;method&#34;:&#34;addTiles&#34;,&#34;args&#34;:[&#34;http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png&#34;,null,null,{&#34;minZoom&#34;:0,&#34;maxZoom&#34;:18,&#34;maxNativeZoom&#34;:null,&#34;tileSize&#34;:256,&#34;subdomains&#34;:&#34;abc&#34;,&#34;errorTileUrl&#34;:&#34;&#34;,&#34;tms&#34;:false,&#34;continuousWorld&#34;:false,&#34;noWrap&#34;:false,&#34;zoomOffset&#34;:0,&#34;zoomReverse&#34;:false,&#34;opacity&#34;:1,&#34;zIndex&#34;:null,&#34;unloadInvisibleTiles&#34;:null,&#34;updateWhenIdle&#34;:null,&#34;detectRetina&#34;:false,&#34;reuseTiles&#34;:false}]},{&#34;method&#34;:&#34;addTiles&#34;,&#34;args&#34;:[&#34;http://{s}.tile.openstreetmap.se/hydda/roads_and_labels/{z}/{x}/{y}.png&#34;,null,null,{&#34;minZoom&#34;:0,&#34;maxZoom&#34;:18,&#34;maxNativeZoom&#34;:null,&#34;tileSize&#34;:256,&#34;subdomains&#34;:&#34;abc&#34;,&#34;errorTileUrl&#34;:&#34;&#34;,&#34;tms&#34;:false,&#34;continuousWorld&#34;:false,&#34;noWrap&#34;:false,&#34;zoomOffset&#34;:0,&#34;zoomReverse&#34;:false,&#34;opacity&#34;:1,&#34;zIndex&#34;:null,&#34;unloadInvisibleTiles&#34;:null,&#34;updateWhenIdle&#34;:null,&#34;detectRetina&#34;:false,&#34;reuseTiles&#34;:false}]},{&#34;method&#34;:&#34;addPolylines&#34;,&#34;args&#34;:[[[{&#34;lng&#34;:[175.08475,175.08475,175.08474,175.08477,175.08483,175.08468,175.08456,175.08445,175.08434,175.08424,175.08413,175.0835,175.08342,175.08332,175.08324,175.08307,175.08294,175.08282,175.08267,175.08238,175.08137,175.0812,175.08106,175.08094,175.08087,175.08081,175.08078,175.08063,175.08054,175.08047,175.08037,175.08023,175.08013,175.07996,175.07982,175.07965,175.07951,175.07938,175.07891,175.07875,175.07864,175.07858,175.07851,175.07848,175.07964,175.07974,175.07976,175.07972,175.07951,175.07949,175.07939,175.07933,175.07951,175.07962,175.08017,175.08129,175.08101,175.08097,175.08058,175.08013,175.08144,175.08137,175.08131,175.08123,175.08119,175.08099,175.08032,175.07963,175.07926,175.07814,175.07734,175.07662,175.07635,175.07597,175.07539,175.0748,175.07444,175.07412,175.07375,175.07325,175.0728,175.07236,175.07122,175.07086,175.07053,175.0702,175.06993,175.06894,175.06824,175.06748,175.06695,175.06646,175.06568,175.06528,175.06515,175.06476,175.06446,175.06409,175.06363,175.063,175.06162,175.06021,175.05935,175.05824,175.05783,175.05572,175.05476,175.05392,175.05312,175.05236,175.05177,175.05122,175.05056,175.04992,175.04982,175.04818,175.04781,175.04749,175.04733,175.0468,175.04625,175.04556,175.04512,175.04474,175.04423,175.04373,175.04305,175.04218,175.04119,175.04047,175.04007,175.0398,175.03955,175.03937,175.03916,175.03894,175.03867,175.03841,175.03809,175.03775,175.03736,175.03694,175.03656,175.03614,175.03587,175.03549,175.03528,175.03506,175.03456,175.03389,175.03307,175.03228,175.03158,175.02903,175.0287,175.02851,175.02816,175.02752,175.02719,175.02675,175.0262,175.0257,175.02507,175.02376,175.02262,175.02169,175.02085,175.02015,175.01938,175.01886,175.01828,175.01775,175.0171,175.01682,175.01628,175.01584,175.01547,175.01472,175.01397,175.0134,175.01294,175.01233,175.01179,175.01112,175.0104,175.0098,175.00933,175.00891,175.00812,175.00768,175.00721,175.00684,175.00606,175.00547,175.00466,175.0042,175.00385,175.00334,175.00278,175.00215,175.00178,175.00132,175.00061,174.99974,174.9991,174.99874,174.99843,174.9981,174.99781,174.99753,174.9973,174.99689,174.99654,174.99621,174.99569,174.99521,174.99458,174.99387,174.99301,174.99248,174.99168,174.99099,174.98983,174.98945,174.98909,174.98869,174.98827,174.98786,174.98762,174.98723,174.98679,174.98597,174.98557,174.98463,174.98396,174.9833,174.98267,174.98149,174.98021,174.97856,174.97808,174.97737,174.97664,174.97614,174.97547,174.97387,174.97194,174.97106,174.97075,174.96973,174.9686,174.96793,174.96718,174.96627,174.96504,174.96411,174.96299,174.96219,174.96094,174.95958,174.95869,174.95748,174.95642,174.95552,174.95451,174.95367,174.9528,174.95186,174.95058,174.94962,174.94878,174.94747,174.94692,174.94639,174.94575,174.94512,174.94425,174.94357,174.94257,174.94183,174.94084,174.94009,174.93962,174.93858,174.9377,174.93606,174.93434,174.93354,174.93297,174.93216,174.93125,174.93084,174.93021,174.92991,174.92984,174.92976,174.92946,174.92882,174.9284,174.92788,174.92741,174.92674,174.92632,174.92532,174.92427,174.92316,174.92191,174.92092,174.92024,174.91879,174.91762,174.91707,174.91645,174.91576,174.9152,174.91479,174.91437,174.91345,174.91284,174.91223,174.91137,174.91011,174.90859,174.90816,174.90794,174.9072,174.90653,174.90602,174.90586,174.90555,174.90502,174.90418,174.90236,174.9015,174.90116,174.90089,174.90001,174.89959,174.89913,174.8983,174.89766,174.89705,174.89654,174.89588,174.89547,174.89397,174.89271,174.89207,174.89166,174.89126,174.89071,174.89035,174.88994,174.88938,174.8885,174.88806,174.88717,174.88653,174.88618,174.88557,174.88515,174.88495,174.88464,174.88416,174.88372,174.88326,174.8829,174.88262,174.88226,174.88195,174.8815,174.8812,174.88087,174.88022,174.8797,174.87935,174.87904,174.87868,174.87791,174.87686,174.87543,174.8747,174.87399,174.87249,174.87193,174.87157,174.87109,174.87028,174.86975,174.86894,174.86722,174.86585,174.86432,174.86312,174.86255,174.86199,174.86131,174.86081,174.86064,174.86043,174.8602,174.85983,174.85963,174.85953,174.85937,174.85922,174.85907,174.85888,174.85869,174.85714,174.85572,174.85438,174.85281,174.85184,174.85102,174.8503,174.84869,174.84632,174.84465,174.84414,174.84382,174.84346,174.84303,174.84267,174.84235,174.84206,174.8414,174.8412,174.84099,174.84058,174.84022,174.83974,174.83871,174.83823,174.83787,174.8375,174.83717,174.83675,174.83535,174.83445,174.83338,174.83098,174.8279,174.82633,174.82466,174.82261,174.82159,174.82057,174.82001,174.81927,174.81877,174.81818,174.81762,174.81693,174.81626,174.81584,174.8155,174.81514,174.81482,174.81436,174.81399,174.81363,174.81307,174.81255,174.81171,174.81091,174.80974,174.80836,174.80787,174.80751,174.80724,174.80703,174.80678,174.80656,174.80623,174.806,174.8055,174.80484,174.80372,174.80275,174.80205,174.80079,174.79949,174.79863,174.79698,174.79659,174.79606,174.79559,174.79506,174.7944,174.79382,174.79326,174.79286,174.79257,174.79222,174.79191,174.79155,174.79131,174.79113,174.79089,174.79064,174.79038,174.79001,174.78962,174.78908,174.78873,174.78838,174.78801,174.78766,174.78734,174.78607,174.78567,174.7839,174.78361,174.78279,174.78107,174.78062,174.78037,174.77856,174.77831,174.77822,174.77815,174.77811,174.7781,174.77812,174.7782,174.77831,174.77835,174.77858,174.77871,174.77897,174.77921,174.77923,174.77936,174.77943,174.77949,174.77956,174.77979,174.78109,174.78115,174.78114],&#34;lat&#34;:[-41.12501,-41.12494,-41.12486,-41.12477,-41.12436,-41.12435,-41.12431,-41.12425,-41.12419,-41.12411,-41.12402,-41.12345,-41.12339,-41.12334,-41.12329,-41.12323,-41.12321,-41.12319,-41.1232,-41.12321,-41.12346,-41.12353,-41.12361,-41.1237,-41.12383,-41.12395,-41.12418,-41.12469,-41.12485,-41.12497,-41.12507,-41.12517,-41.12521,-41.12526,-41.12528,-41.12526,-41.12522,-41.12517,-41.12486,-41.12473,-41.12458,-41.12446,-41.12423,-41.12402,-41.12351,-41.1234,-41.12327,-41.12306,-41.12226,-41.12219,-41.12204,-41.12198,-41.12186,-41.12179,-41.1214,-41.12062,-41.12039,-41.12031,-41.11886,-41.11645,-41.11631,-41.11583,-41.11555,-41.11542,-41.11531,-41.11533,-41.11541,-41.11545,-41.11549,-41.11558,-41.11564,-41.11571,-41.11574,-41.11577,-41.11582,-41.11588,-41.1159,-41.11592,-41.11593,-41.11594,-41.11593,-41.11591,-41.11586,-41.11585,-41.11585,-41.11588,-41.11589,-41.11594,-41.11599,-41.11607,-41.11611,-41.11614,-41.11617,-41.11619,-41.11619,-41.11621,-41.11622,-41.11622,-41.11623,-41.11621,-41.11613,-41.11611,-41.1161,-41.1161,-41.1161,-41.11609,-41.11611,-41.11614,-41.11622,-41.11631,-41.1164,-41.1165,-41.11664,-41.11679,-41.11681,-41.11736,-41.11751,-41.11763,-41.1177,-41.11793,-41.1182,-41.11858,-41.11884,-41.11908,-41.11941,-41.11976,-41.12025,-41.12088,-41.12161,-41.12212,-41.12242,-41.12258,-41.12268,-41.12273,-41.12278,-41.12281,-41.12283,-41.12283,-41.12278,-41.12273,-41.12268,-41.12265,-41.12267,-41.12273,-41.12281,-41.123,-41.12312,-41.12326,-41.12359,-41.12397,-41.12434,-41.12464,-41.12492,-41.12583,-41.12597,-41.12605,-41.1262,-41.12652,-41.12669,-41.12693,-41.1273,-41.12763,-41.1281,-41.12903,-41.12983,-41.13051,-41.13115,-41.13166,-41.1322,-41.13255,-41.1329,-41.13322,-41.13354,-41.13368,-41.13393,-41.13411,-41.13426,-41.13456,-41.13487,-41.13513,-41.13534,-41.13563,-41.13591,-41.13627,-41.13668,-41.13703,-41.13731,-41.13756,-41.13806,-41.13832,-41.13857,-41.13876,-41.13913,-41.1394,-41.13976,-41.13998,-41.14017,-41.14043,-41.14074,-41.14111,-41.14136,-41.14168,-41.1422,-41.14285,-41.14338,-41.14365,-41.14388,-41.14408,-41.14427,-41.14441,-41.14453,-41.14471,-41.14484,-41.14497,-41.14517,-41.14535,-41.14558,-41.1458,-41.14607,-41.14625,-41.14658,-41.14687,-41.1474,-41.14756,-41.14774,-41.14795,-41.1482,-41.14847,-41.14863,-41.14895,-41.14932,-41.15001,-41.15044,-41.15165,-41.15251,-41.15315,-41.15363,-41.15438,-41.1552,-41.15625,-41.15654,-41.157,-41.15742,-41.1577,-41.15804,-41.15867,-41.15951,-41.16004,-41.16022,-41.16096,-41.16194,-41.16264,-41.16346,-41.16424,-41.16512,-41.16574,-41.16658,-41.16722,-41.16823,-41.16934,-41.17,-41.17073,-41.17137,-41.17196,-41.17279,-41.17355,-41.17429,-41.17497,-41.17573,-41.17631,-41.1769,-41.17799,-41.17851,-41.17907,-41.17972,-41.18039,-41.18119,-41.18178,-41.18246,-41.18293,-41.18352,-41.18402,-41.1843,-41.18487,-41.18534,-41.18621,-41.18714,-41.18756,-41.18789,-41.18841,-41.18897,-41.18924,-41.18967,-41.18987,-41.18991,-41.18995,-41.19013,-41.19052,-41.19074,-41.19102,-41.19131,-41.19172,-41.19197,-41.19259,-41.19319,-41.19379,-41.19452,-41.19505,-41.1954,-41.19612,-41.19673,-41.19703,-41.1974,-41.19779,-41.19817,-41.19838,-41.19858,-41.19904,-41.19936,-41.1997,-41.2002,-41.20092,-41.2018,-41.20204,-41.20215,-41.20255,-41.20286,-41.2031,-41.20318,-41.20332,-41.20356,-41.20396,-41.20484,-41.20525,-41.20542,-41.20558,-41.20618,-41.20643,-41.2067,-41.20717,-41.20751,-41.20781,-41.20807,-41.20843,-41.20862,-41.20933,-41.20993,-41.21021,-41.21043,-41.21069,-41.21105,-41.21131,-41.21164,-41.21202,-41.21266,-41.21294,-41.2136,-41.21405,-41.21429,-41.21464,-41.21489,-41.21499,-41.21515,-41.21537,-41.21559,-41.21579,-41.21593,-41.21604,-41.21618,-41.21633,-41.21653,-41.21669,-41.21684,-41.21717,-41.21741,-41.21757,-41.2177,-41.21784,-41.21814,-41.21851,-41.21905,-41.21932,-41.21961,-41.22029,-41.22056,-41.22074,-41.22097,-41.22133,-41.22156,-41.2219,-41.22251,-41.22295,-41.22342,-41.22378,-41.22389,-41.22395,-41.22399,-41.22399,-41.22399,-41.22397,-41.22394,-41.22386,-41.22383,-41.22382,-41.22381,-41.22381,-41.22383,-41.22388,-41.22394,-41.22451,-41.22496,-41.2254,-41.22588,-41.22622,-41.22666,-41.22696,-41.2274,-41.228,-41.22843,-41.22858,-41.2287,-41.22886,-41.22909,-41.22934,-41.22961,-41.22992,-41.23064,-41.23084,-41.23101,-41.23127,-41.23145,-41.23164,-41.23196,-41.23211,-41.23226,-41.23246,-41.23267,-41.23299,-41.23428,-41.23499,-41.2357,-41.23711,-41.23887,-41.23998,-41.24096,-41.24212,-41.2427,-41.24325,-41.24358,-41.24399,-41.24428,-41.24466,-41.24504,-41.24559,-41.24611,-41.24643,-41.24669,-41.24694,-41.24716,-41.24745,-41.24769,-41.24793,-41.24827,-41.2486,-41.24909,-41.24952,-41.25016,-41.25095,-41.25122,-41.25146,-41.25166,-41.25183,-41.25205,-41.25225,-41.25254,-41.25276,-41.25319,-41.25371,-41.25431,-41.25476,-41.25502,-41.25537,-41.25573,-41.25605,-41.25676,-41.25691,-41.25713,-41.25738,-41.25767,-41.25806,-41.25847,-41.25891,-41.25928,-41.25957,-41.25996,-41.2603,-41.26068,-41.26093,-41.2611,-41.26128,-41.26145,-41.26161,-41.26179,-41.26197,-41.26223,-41.2624,-41.26259,-41.26282,-41.26311,-41.26343,-41.26478,-41.26519,-41.26684,-41.26711,-41.26791,-41.2698,-41.27019,-41.27036,-41.27167,-41.27188,-41.27199,-41.27213,-41.27225,-41.27237,-41.27251,-41.27276,-41.27305,-41.27312,-41.27349,-41.27371,-41.27415,-41.27455,-41.27457,-41.27479,-41.27492,-41.27502,-41.27513,-41.27551,-41.27556,-41.27555,-41.27562]}]],null,null,{&#34;lineCap&#34;:null,&#34;lineJoin&#34;:null,&#34;clickable&#34;:true,&#34;pointerEvents&#34;:null,&#34;className&#34;:&#34;&#34;,&#34;stroke&#34;:true,&#34;color&#34;:&#34;#000000&#34;,&#34;weight&#34;:3,&#34;opacity&#34;:1,&#34;fill&#34;:false,&#34;fillColor&#34;:&#34;#000000&#34;,&#34;fillOpacity&#34;:0.2,&#34;dashArray&#34;:null,&#34;smoothFactor&#34;:1,&#34;noClip&#34;:false},&#34;29m 15.3s , 34.3kms&#34;,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.1250097,175.0845498,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;10 Aragon Grove, Kingsley Heights, Upper Hutt 5018, New Zealand&#34;,null,null,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.2756572,174.7811653,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;1 Pipitea St, Pipitea, Wellington 6011, New Zealand&#34;,null,null,null,null]}],&#34;limits&#34;:{&#34;lat&#34;:[-41.2756572,-41.11531],&#34;lng&#34;:[174.7781,175.08483]}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;div id=&#34;htmlwidget-6e6207ca98ba5d22f4c9&#34; style=&#34;width:100%;height:600px;&#34; class=&#34;leaflet html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-6e6207ca98ba5d22f4c9&#34;&gt;{&#34;x&#34;:{&#34;options&#34;:{&#34;crs&#34;:{&#34;crsClass&#34;:&#34;L.CRS.EPSG3857&#34;,&#34;code&#34;:null,&#34;proj4def&#34;:null,&#34;projectedBounds&#34;:null,&#34;options&#34;:{}}},&#34;calls&#34;:[{&#34;method&#34;:&#34;addTiles&#34;,&#34;args&#34;:[&#34;http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png&#34;,null,null,{&#34;minZoom&#34;:0,&#34;maxZoom&#34;:18,&#34;maxNativeZoom&#34;:null,&#34;tileSize&#34;:256,&#34;subdomains&#34;:&#34;abc&#34;,&#34;errorTileUrl&#34;:&#34;&#34;,&#34;tms&#34;:false,&#34;continuousWorld&#34;:false,&#34;noWrap&#34;:false,&#34;zoomOffset&#34;:0,&#34;zoomReverse&#34;:false,&#34;opacity&#34;:1,&#34;zIndex&#34;:null,&#34;unloadInvisibleTiles&#34;:null,&#34;updateWhenIdle&#34;:null,&#34;detectRetina&#34;:false,&#34;reuseTiles&#34;:false}]},{&#34;method&#34;:&#34;addTiles&#34;,&#34;args&#34;:[&#34;http://{s}.tile.openstreetmap.se/hydda/roads_and_labels/{z}/{x}/{y}.png&#34;,null,null,{&#34;minZoom&#34;:0,&#34;maxZoom&#34;:18,&#34;maxNativeZoom&#34;:null,&#34;tileSize&#34;:256,&#34;subdomains&#34;:&#34;abc&#34;,&#34;errorTileUrl&#34;:&#34;&#34;,&#34;tms&#34;:false,&#34;continuousWorld&#34;:false,&#34;noWrap&#34;:false,&#34;zoomOffset&#34;:0,&#34;zoomReverse&#34;:false,&#34;opacity&#34;:1,&#34;zIndex&#34;:null,&#34;unloadInvisibleTiles&#34;:null,&#34;updateWhenIdle&#34;:null,&#34;detectRetina&#34;:false,&#34;reuseTiles&#34;:false}]},{&#34;method&#34;:&#34;addPolylines&#34;,&#34;args&#34;:[[[{&#34;lng&#34;:[175.08475,175.08475,175.08475,175.08477,175.08483,175.08468,175.08456,175.08445,175.08434,175.08424,175.08413,175.0835,175.08342,175.08332,175.08324,175.08307,175.08294,175.08282,175.08267,175.08238,175.08137,175.0812,175.08106,175.08094,175.08087,175.08081,175.08078,175.08063,175.08054,175.08047,175.08037,175.08023,175.08013,175.07996,175.07982,175.07965,175.07951,175.07938,175.07891,175.07875,175.07864,175.07858,175.07852,175.07848,175.07964,175.07974,175.07976,175.07973,175.07951,175.07949,175.07939,175.07933,175.07951,175.07962,175.08017,175.08129,175.08207,175.08285,175.08283,175.08282,175.08282,175.08283,175.08285,175.08287,175.08284,175.08256,175.08237,175.08208,175.08195,175.08189,175.08183,175.08178,175.08158,175.08144,175.08137,175.08131,175.08123,175.08119,175.08099,175.08032,175.07963,175.07926,175.07814,175.07734,175.07662,175.07635,175.07597,175.07539,175.0748,175.07444,175.07412,175.07375,175.07325,175.0728,175.07236,175.07122,175.07086,175.07053,175.0702,175.06993,175.06894,175.06824,175.06748,175.06695,175.06646,175.06569,175.06528,175.06515,175.06476,175.06446,175.06409,175.06363,175.063,175.06162,175.06021,175.05935,175.05824,175.05783,175.05572,175.05476,175.05392,175.05312,175.05236,175.05177,175.05122,175.05056,175.04992,175.04983,175.04818,175.04781,175.04749,175.04733,175.0468,175.04625,175.04556,175.04512,175.04474,175.04423,175.04373,175.04305,175.04218,175.04119,175.04047,175.04007,175.0398,175.03955,175.03937,175.03916,175.03894,175.03867,175.03841,175.03809,175.03775,175.03736,175.03694,175.03656,175.03615,175.03587,175.03549,175.03528,175.03506,175.03457,175.03389,175.03307,175.03229,175.03158,175.02903,175.0287,175.02851,175.02816,175.02752,175.02719,175.02675,175.0262,175.0257,175.02507,175.02376,175.02262,175.02169,175.02085,175.02015,175.01939,175.01886,175.01829,175.01775,175.01711,175.01682,175.01628,175.01584,175.01547,175.01472,175.01397,175.0134,175.01294,175.01233,175.01179,175.01112,175.0104,175.0098,175.00933,175.00891,175.00813,175.00768,175.00721,175.00684,175.00607,175.00547,175.00466,175.0042,175.00385,175.00334,175.00278,175.00215,175.00178,175.00132,175.00061,174.99974,174.9991,174.99874,174.99843,174.9981,174.99781,174.99753,174.9973,174.99689,174.99654,174.99621,174.99569,174.99521,174.99458,174.99387,174.99301,174.99248,174.99168,174.991,174.98983,174.98945,174.98909,174.98869,174.98827,174.98786,174.98762,174.98723,174.98679,174.98597,174.98557,174.98463,174.98396,174.9833,174.98267,174.98149,174.98021,174.97856,174.97808,174.97737,174.97665,174.97614,174.97547,174.97387,174.97194,174.97106,174.97075,174.96973,174.9686,174.96793,174.96718,174.96627,174.96504,174.96411,174.96299,174.96219,174.96094,174.95958,174.95869,174.95748,174.95642,174.95552,174.95451,174.95367,174.9528,174.95186,174.95058,174.94962,174.94878,174.94747,174.94692,174.94639,174.94575,174.94512,174.94425,174.94357,174.94257,174.94183,174.94084,174.94009,174.93962,174.93858,174.9377,174.93606,174.93434,174.93354,174.93297,174.93216,174.93125,174.93084,174.93021,174.92991,174.92984,174.92976,174.92946,174.92882,174.9284,174.92789,174.92741,174.92674,174.92632,174.92532,174.92427,174.92316,174.92191,174.92092,174.92024,174.91879,174.91762,174.91707,174.91645,174.91576,174.9152,174.91479,174.91437,174.91345,174.91284,174.91223,174.91137,174.91011,174.90859,174.90816,174.90794,174.9072,174.90653,174.90602,174.90586,174.90555,174.90502,174.90418,174.90236,174.9015,174.90116,174.90089,174.90001,174.89959,174.89914,174.8983,174.89766,174.89705,174.89654,174.89588,174.89547,174.89397,174.89271,174.89207,174.89166,174.89126,174.89071,174.89035,174.88995,174.88938,174.8885,174.88806,174.88717,174.88653,174.88618,174.88557,174.88515,174.88495,174.88464,174.88416,174.88372,174.88326,174.8829,174.88262,174.88227,174.88195,174.8815,174.8812,174.88087,174.88022,174.8797,174.87935,174.87904,174.87868,174.87791,174.87686,174.87543,174.8747,174.874,174.8725,174.87193,174.87157,174.87109,174.87028,174.86975,174.86894,174.86722,174.86585,174.86432,174.86312,174.86255,174.86199,174.86131,174.86081,174.86064,174.86043,174.8602,174.85983,174.85963,174.85953,174.85937,174.85922,174.85907,174.85888,174.85869,174.85714,174.85572,174.85438,174.85282,174.85184,174.85102,174.8503,174.84869,174.84632,174.84465,174.84414,174.84382,174.84346,174.84303,174.84267,174.84235,174.84206,174.8414,174.84121,174.84099,174.84058,174.84022,174.83974,174.83871,174.83823,174.83787,174.8375,174.83717,174.83675,174.83535,174.83445,174.83338,174.83098,174.8279,174.82633,174.82466,174.82261,174.82159,174.82057,174.82001,174.81927,174.81877,174.81818,174.81762,174.81693,174.81626,174.81584,174.8155,174.81514,174.81482,174.81436,174.81399,174.81363,174.81307,174.81255,174.81171,174.81091,174.80974,174.80836,174.80787,174.80751,174.80724,174.80703,174.80678,174.80656,174.80623,174.806,174.8055,174.80484,174.80372,174.80275,174.80205,174.80079,174.79949,174.79863,174.79698,174.79659,174.79606,174.79559,174.79506,174.7944,174.79382,174.79326,174.79286,174.79257,174.79222,174.79191,174.79155,174.79131,174.79113,174.79089,174.79064,174.79038,174.79001,174.78962,174.78908,174.78873,174.78838,174.78801,174.78766,174.78734,174.78607,174.78567,174.7839,174.78361,174.78279,174.78107,174.78062,174.78038,174.77857,174.77832,174.77822,174.77815,174.77811,174.77811,174.77812,174.7782,174.77831,174.77835,174.77858,174.77871,174.77897,174.77921,174.77923,174.77936,174.77944,174.77949,174.77956,174.7798,174.78109,174.78115,174.78114],&#34;lat&#34;:[-41.12501,-41.12494,-41.12486,-41.12477,-41.12437,-41.12435,-41.12431,-41.12425,-41.12419,-41.12411,-41.12402,-41.12345,-41.12339,-41.12334,-41.12329,-41.12323,-41.12321,-41.12319,-41.1232,-41.12321,-41.12346,-41.12353,-41.12361,-41.1237,-41.12383,-41.12396,-41.12418,-41.12469,-41.12485,-41.12497,-41.12507,-41.12517,-41.12521,-41.12526,-41.12528,-41.12526,-41.12522,-41.12517,-41.12486,-41.12473,-41.12458,-41.12446,-41.12424,-41.12402,-41.12351,-41.1234,-41.12327,-41.12306,-41.12226,-41.12219,-41.12204,-41.12198,-41.12186,-41.12179,-41.1214,-41.12062,-41.12012,-41.11967,-41.11965,-41.11962,-41.1196,-41.11957,-41.11955,-41.11953,-41.1195,-41.11922,-41.11902,-41.11872,-41.11856,-41.11844,-41.11834,-41.11817,-41.1171,-41.11631,-41.11584,-41.11555,-41.11542,-41.11531,-41.11533,-41.11541,-41.11545,-41.11549,-41.11558,-41.11564,-41.11571,-41.11574,-41.11577,-41.11582,-41.11588,-41.1159,-41.11592,-41.11593,-41.11594,-41.11593,-41.11591,-41.11586,-41.11585,-41.11585,-41.11588,-41.11589,-41.11594,-41.11599,-41.11607,-41.11611,-41.11614,-41.11617,-41.11619,-41.1162,-41.11621,-41.11622,-41.11622,-41.11623,-41.11621,-41.11613,-41.11611,-41.1161,-41.1161,-41.1161,-41.11609,-41.11611,-41.11614,-41.11622,-41.11631,-41.1164,-41.1165,-41.11664,-41.11679,-41.11682,-41.11736,-41.11751,-41.11763,-41.1177,-41.11793,-41.1182,-41.11858,-41.11884,-41.11908,-41.11941,-41.11976,-41.12025,-41.12088,-41.12161,-41.12212,-41.12242,-41.12258,-41.12268,-41.12273,-41.12278,-41.12281,-41.12284,-41.12283,-41.12278,-41.12273,-41.12268,-41.12265,-41.12267,-41.12273,-41.12281,-41.123,-41.12312,-41.12326,-41.12359,-41.12397,-41.12434,-41.12464,-41.12492,-41.12583,-41.12597,-41.12605,-41.1262,-41.12652,-41.12669,-41.12693,-41.1273,-41.12763,-41.1281,-41.12903,-41.12983,-41.13051,-41.13115,-41.13166,-41.1322,-41.13255,-41.1329,-41.13322,-41.13354,-41.13368,-41.13393,-41.13411,-41.13426,-41.13456,-41.13487,-41.13513,-41.13534,-41.13563,-41.13591,-41.13627,-41.13668,-41.13703,-41.13731,-41.13756,-41.13806,-41.13832,-41.13857,-41.13876,-41.13913,-41.13941,-41.13976,-41.13998,-41.14017,-41.14043,-41.14074,-41.14111,-41.14136,-41.14168,-41.1422,-41.14285,-41.14338,-41.14365,-41.14388,-41.14408,-41.14427,-41.14442,-41.14453,-41.14471,-41.14484,-41.14497,-41.14517,-41.14535,-41.14558,-41.1458,-41.14608,-41.14625,-41.14658,-41.14687,-41.1474,-41.14756,-41.14774,-41.14795,-41.1482,-41.14847,-41.14863,-41.14895,-41.14932,-41.15001,-41.15044,-41.15165,-41.15251,-41.15315,-41.15364,-41.15438,-41.1552,-41.15625,-41.15654,-41.157,-41.15742,-41.1577,-41.15804,-41.15867,-41.15951,-41.16004,-41.16022,-41.16096,-41.16194,-41.16264,-41.16346,-41.16424,-41.16512,-41.16574,-41.16658,-41.16722,-41.16823,-41.16934,-41.17,-41.17073,-41.17137,-41.17196,-41.17279,-41.17355,-41.17429,-41.17497,-41.17573,-41.17631,-41.1769,-41.17799,-41.17851,-41.17907,-41.17972,-41.18039,-41.18119,-41.18178,-41.18246,-41.18293,-41.18352,-41.18402,-41.1843,-41.18487,-41.18534,-41.18621,-41.18714,-41.18756,-41.18789,-41.18841,-41.18897,-41.18924,-41.18967,-41.18987,-41.18991,-41.18995,-41.19013,-41.19052,-41.19074,-41.19102,-41.19131,-41.19172,-41.19197,-41.19259,-41.19319,-41.19379,-41.19452,-41.19505,-41.1954,-41.19612,-41.19673,-41.19703,-41.1974,-41.19779,-41.19817,-41.19838,-41.19858,-41.19904,-41.19936,-41.1997,-41.2002,-41.20092,-41.2018,-41.20204,-41.20215,-41.20255,-41.20286,-41.2031,-41.20318,-41.20332,-41.20356,-41.20396,-41.20484,-41.20525,-41.20542,-41.20558,-41.20618,-41.20643,-41.2067,-41.20717,-41.20751,-41.20781,-41.20807,-41.20843,-41.20862,-41.20933,-41.20993,-41.21021,-41.21043,-41.21069,-41.21105,-41.21132,-41.21164,-41.21202,-41.21266,-41.21294,-41.2136,-41.21405,-41.21429,-41.21464,-41.21489,-41.21499,-41.21515,-41.21537,-41.21559,-41.21579,-41.21593,-41.21604,-41.21618,-41.21633,-41.21653,-41.21669,-41.21684,-41.21717,-41.21741,-41.21757,-41.2177,-41.21784,-41.21814,-41.21851,-41.21905,-41.21932,-41.21961,-41.22029,-41.22056,-41.22074,-41.22097,-41.22133,-41.22156,-41.2219,-41.22251,-41.22295,-41.22342,-41.22378,-41.22389,-41.22395,-41.224,-41.22399,-41.22399,-41.22397,-41.22394,-41.22386,-41.22383,-41.22382,-41.22381,-41.22381,-41.22383,-41.22388,-41.22394,-41.22451,-41.22496,-41.2254,-41.22588,-41.22622,-41.22666,-41.22696,-41.2274,-41.228,-41.22843,-41.22858,-41.2287,-41.22886,-41.22909,-41.22934,-41.22961,-41.22992,-41.23064,-41.23084,-41.23101,-41.23127,-41.23145,-41.23164,-41.23196,-41.23211,-41.23226,-41.23246,-41.23267,-41.23299,-41.23428,-41.23499,-41.2357,-41.23711,-41.23887,-41.23999,-41.24096,-41.24212,-41.2427,-41.24325,-41.24358,-41.24399,-41.24428,-41.24466,-41.24504,-41.24559,-41.24611,-41.24643,-41.24669,-41.24694,-41.24716,-41.24745,-41.2477,-41.24793,-41.24827,-41.2486,-41.24909,-41.24952,-41.25016,-41.25095,-41.25122,-41.25146,-41.25166,-41.25183,-41.25205,-41.25225,-41.25254,-41.25276,-41.25319,-41.25371,-41.25431,-41.25476,-41.25502,-41.25537,-41.25573,-41.25605,-41.25676,-41.25691,-41.25714,-41.25738,-41.25767,-41.25806,-41.25847,-41.25891,-41.25928,-41.25957,-41.25996,-41.2603,-41.26069,-41.26093,-41.2611,-41.26128,-41.26145,-41.26161,-41.26179,-41.26197,-41.26223,-41.2624,-41.26259,-41.26282,-41.26311,-41.26343,-41.26478,-41.26519,-41.26684,-41.26711,-41.26791,-41.2698,-41.27019,-41.27036,-41.27167,-41.27188,-41.27199,-41.27213,-41.27225,-41.27237,-41.27251,-41.27276,-41.27305,-41.27312,-41.27349,-41.27372,-41.27415,-41.27455,-41.27457,-41.27479,-41.27492,-41.27502,-41.27513,-41.27551,-41.27556,-41.27555,-41.27563]}]],null,null,{&#34;lineCap&#34;:null,&#34;lineJoin&#34;:null,&#34;clickable&#34;:true,&#34;pointerEvents&#34;:null,&#34;className&#34;:&#34;&#34;,&#34;stroke&#34;:true,&#34;color&#34;:&#34;#000000&#34;,&#34;weight&#34;:3,&#34;opacity&#34;:1,&#34;fill&#34;:false,&#34;fillColor&#34;:&#34;#000000&#34;,&#34;fillOpacity&#34;:0.2,&#34;dashArray&#34;:null,&#34;smoothFactor&#34;:1,&#34;noClip&#34;:false},&#34;28m 58.8s , 34.3kms&#34;,null,null,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.1250097,175.0845498,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;10 Aragon Grove, Kingsley Heights, Upper Hutt 5018, New Zealand&#34;,null,null,null,null,null,null]},{&#34;method&#34;:&#34;addMarkers&#34;,&#34;args&#34;:[-41.2756572,174.7811653,null,null,null,{&#34;clickable&#34;:true,&#34;draggable&#34;:false,&#34;keyboard&#34;:true,&#34;title&#34;:&#34;&#34;,&#34;alt&#34;:&#34;&#34;,&#34;zIndexOffset&#34;:0,&#34;opacity&#34;:1,&#34;riseOnHover&#34;:false,&#34;riseOffset&#34;:250},&#34;1 Pipitea St, Pipitea, Wellington 6011, New Zealand&#34;,null,null,null,null,null,null]}],&#34;limits&#34;:{&#34;lat&#34;:[-41.2756572,-41.11531],&#34;lng&#34;:[174.77811,175.08483]}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
 &lt;/div&gt;
-
 
 
 &lt;!-- BLOGDOWN-HEAD
 
-&lt;script src=&#34;#####../content/post/routing_files/htmlwidgets-0.8/htmlwidgets.js&#34;&gt;&lt;/script&gt;
-&lt;script src=&#34;#####../content/post/routing_files/jquery-1.11.1/jquery.min.js&#34;&gt;&lt;/script&gt;
-&lt;link href=&#34;#####../content/post/routing_files/leaflet-0.7.3/leaflet.css&#34; rel=&#34;stylesheet&#34; /&gt;
-&lt;script src=&#34;#####../content/post/routing_files/leaflet-0.7.3/leaflet.js&#34;&gt;&lt;/script&gt;
-&lt;link href=&#34;#####../content/post/routing_files/leafletfix-1.0.0/leafletfix.css&#34; rel=&#34;stylesheet&#34; /&gt;
-&lt;link href=&#34;#####../content/post/routing_files/leaflet-label-0.2.2/leaflet.label.css&#34; rel=&#34;stylesheet&#34; /&gt;
-&lt;script src=&#34;#####../content/post/routing_files/leaflet-label-0.2.2/leaflet.label.js&#34;&gt;&lt;/script&gt;
-&lt;script src=&#34;#####../content/post/routing_files/leaflet-binding-1.0.1.9004/leaflet.js&#34;&gt;&lt;/script&gt;
-
-
+&lt;script src=&#34;#####content/post/routing_files/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;#####content/post/routing_files/jquery/jquery.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;#####content/post/routing_files/leaflet/leaflet.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;#####content/post/routing_files/leaflet/leaflet.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;#####content/post/routing_files/leafletfix/leafletfix.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;link href=&#34;#####content/post/routing_files/leaflet-label/leaflet.label.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;#####content/post/routing_files/leaflet-label/leaflet.label.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;#####content/post/routing_files/Proj4Leaflet/proj4-compressed.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;#####content/post/routing_files/Proj4Leaflet/proj4leaflet.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;#####content/post/routing_files/leaflet-binding/leaflet.js&#34;&gt;&lt;/script&gt;
 
 
 
@@ -816,6 +1087,7 @@ leaflet(width=&amp;quot;100%&amp;quot;, height=600) %&amp;gt;%
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
+&lt;p&gt;&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;./css/custom.css&#34;&gt;&lt;/p&gt;
 &lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.&lt;/p&gt;
@@ -1089,10 +1361,7 @@ devtools::install_local(&amp;quot;path-to-zip/SNZlabmkt-master.zip&amp;quot;)&lt
 &lt;/div&gt;
 
 
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
@@ -1111,6 +1380,7 @@ devtools::install_local(&amp;quot;path-to-zip/SNZlabmkt-master.zip&amp;quot;)&lt
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
+&lt;p&gt;&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;./css/custom.css&#34;&gt;&lt;/p&gt;
 &lt;div id=&#34;what-is-node.js&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;What is node.js?&lt;/h1&gt;
 &lt;p&gt;According to the &lt;a href=&#34;https://nodejs.org/en/&#34;&gt;Node.js website&lt;/a&gt;:&lt;/p&gt;
@@ -1337,12 +1607,12 @@ var app = express();
 app.use(express.static(__dirname + &amp;#39;/public&amp;#39;)).listen(3000);&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The service will serve any file found in the &lt;code&gt;public&lt;/code&gt; folder, and will return an error for any file that does not exist.&lt;/p&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/0301.png&#34; /&gt;
-
+&lt;img src=&#34;./img/webservice/0301.png&#34; alt=&#34;found&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;found&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/0302.png&#34; /&gt;
-
+&lt;img src=&#34;./img/webservice/0302.png&#34; alt=&#34;not found&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;not found&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;&lt;code&gt;express.static&lt;/code&gt; is an example of &lt;em&gt;middleware&lt;/em&gt;. You simply pass the middleware to the &lt;code&gt;use&lt;/code&gt; method, and you can chain lots of different middleware together. You could add more folders, compress content, cache content, and so on. In fact, let’s add compression to the above example:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;server.js&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -1388,7 +1658,7 @@ app.use(compression())
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;dwelling&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;household&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;`family```&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;family&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;individual&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;datadictionary&lt;/code&gt; - metadata describing columns in the above datasets&lt;/li&gt;
 &lt;/ul&gt;
@@ -1625,12 +1895,12 @@ app.get(&amp;#39;/:dataset/:geography/:code&amp;#39;, function(request, response
    });
 });&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/metadata02.png&#34; /&gt;
-
+&lt;img src=&#34;./img/webservice/metadata02.png&#34; alt=&#34;/metadata/&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/metadata/&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/dwelling01.png&#34; /&gt;
-
+&lt;img src=&#34;./img/webservice/dwelling01.png&#34; alt=&#34;/dwelling/RC/01&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/dwelling/RC/01&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;x13-arima-seats-service&#34; class=&#34;section level2&#34;&gt;
@@ -1776,21 +2046,20 @@ app.get(&amp;#39;/:series/:output&amp;#39;, function(request, response){
 
 app.listen(3000);&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/x13post.png&#34; /&gt;
-
+&lt;img src=&#34;./img/webservice/x13post.png&#34; alt=&#34;/adjust&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/adjust&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/x13get01.png&#34; /&gt;
-
+&lt;img src=&#34;./img/webservice/x13get01.png&#34; alt=&#34;/&amp;lt;output&amp;gt;/d11&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/&amp;lt;output&amp;gt;/d11&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/x13get02.png&#34; /&gt;
-
+&lt;img src=&#34;./img/webservice/x13get02.png&#34; alt=&#34;/&amp;lt;output&amp;gt;/out&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/&amp;lt;output&amp;gt;/out&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;./img/webservice/x13delete.png&#34; /&gt;
-
-&lt;/div&gt;
+![`/
+&lt;output&gt;
+&lt;p&gt;](/img/webservice/x13delete.png)&lt;/p&gt;
 &lt;p&gt;And we might as well visualise the results:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getandplot &amp;lt;- function(){
    if (!require(magrittr)) stop(&amp;quot;Nope.&amp;quot;)
@@ -1837,10 +2106,7 @@ app.listen(3000);&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
 
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 

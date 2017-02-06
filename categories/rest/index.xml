@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>cmhh</title>
+    <title>rest on cmhh</title>
     <link>/categories/rest/index.xml</link>
-    <description>Recent content on cmhh</description>
+    <description>Recent content in rest on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <atom:link href="/categories/rest/index.xml" rel="self" type="application/rss+xml" />
@@ -18,6 +18,7 @@
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
+&lt;p&gt;&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;../../css/custom.css&#34;&gt;&lt;/p&gt;
 &lt;div id=&#34;what-is-node.js&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;What is node.js?&lt;/h1&gt;
 &lt;p&gt;According to the &lt;a href=&#34;https://nodejs.org/en/&#34;&gt;Node.js website&lt;/a&gt;:&lt;/p&gt;
@@ -244,12 +245,12 @@ var app = express();
 app.use(express.static(__dirname + &amp;#39;/public&amp;#39;)).listen(3000);&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;The service will serve any file found in the &lt;code&gt;public&lt;/code&gt; folder, and will return an error for any file that does not exist.&lt;/p&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/0301.png&#34; /&gt;
-
+&lt;img src=&#34;../../img/webservice/0301.png&#34; alt=&#34;found&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;found&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/0302.png&#34; /&gt;
-
+&lt;img src=&#34;../../img/webservice/0302.png&#34; alt=&#34;not found&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;not found&lt;/p&gt;
 &lt;/div&gt;
 &lt;p&gt;&lt;code&gt;express.static&lt;/code&gt; is an example of &lt;em&gt;middleware&lt;/em&gt;. You simply pass the middleware to the &lt;code&gt;use&lt;/code&gt; method, and you can chain lots of different middleware together. You could add more folders, compress content, cache content, and so on. In fact, let’s add compression to the above example:&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;&lt;code&gt;server.js&lt;/code&gt;&lt;/strong&gt;&lt;/p&gt;
@@ -295,7 +296,7 @@ app.use(compression())
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;dwelling&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;household&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;`family```&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;family&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;individual&lt;/code&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;datadictionary&lt;/code&gt; - metadata describing columns in the above datasets&lt;/li&gt;
 &lt;/ul&gt;
@@ -532,12 +533,12 @@ app.get(&amp;#39;/:dataset/:geography/:code&amp;#39;, function(request, response
    });
 });&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/metadata02.png&#34; /&gt;
-
+&lt;img src=&#34;../../img/webservice/metadata02.png&#34; alt=&#34;/metadata/&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/metadata/&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/dwelling01.png&#34; /&gt;
-
+&lt;img src=&#34;../../img/webservice/dwelling01.png&#34; alt=&#34;/dwelling/RC/01&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/dwelling/RC/01&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;x13-arima-seats-service&#34; class=&#34;section level2&#34;&gt;
@@ -683,21 +684,20 @@ app.get(&amp;#39;/:series/:output&amp;#39;, function(request, response){
 
 app.listen(3000);&lt;/code&gt;&lt;/pre&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/x13post.png&#34; /&gt;
-
+&lt;img src=&#34;../../img/webservice/x13post.png&#34; alt=&#34;/adjust&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/adjust&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/x13get01.png&#34; /&gt;
-
+&lt;img src=&#34;../../img/webservice/x13get01.png&#34; alt=&#34;/&amp;lt;output&amp;gt;/d11&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/&amp;lt;output&amp;gt;/d11&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/x13get02.png&#34; /&gt;
-
+&lt;img src=&#34;../../img/webservice/x13get02.png&#34; alt=&#34;/&amp;lt;output&amp;gt;/out&#34; /&gt;
+&lt;p class=&#34;caption&#34;&gt;&lt;code&gt;/&amp;lt;output&amp;gt;/out&lt;/code&gt;&lt;/p&gt;
 &lt;/div&gt;
-&lt;div class=&#34;figure&#34;&gt;
-&lt;img src=&#34;../../img/webservice/x13delete.png&#34; /&gt;
-
-&lt;/div&gt;
+![`/
+&lt;output&gt;
+&lt;p&gt;](/img/webservice/x13delete.png)&lt;/p&gt;
 &lt;p&gt;And we might as well visualise the results:&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;getandplot &amp;lt;- function(){
    if (!require(magrittr)) stop(&amp;quot;Nope.&amp;quot;)
@@ -744,10 +744,7 @@ app.listen(3000);&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 
 
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 

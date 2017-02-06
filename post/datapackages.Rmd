@@ -4,8 +4,7 @@ author: "Chris Hansen"
 date: "2016-07-20"
 categories: ["R", "shiny", "R packages"]
 output:
-   html_document:
-     css: rmd.css
+   html_document
 ---
 
 ```{r setup, include = FALSE}
@@ -18,6 +17,8 @@ library(data.table)
 library(NZCensus)
 library(NZCensusDemos)
 ```
+
+<link rel="stylesheet" type="text/css" href="/css/custom.css">
 
 # Introduction
 

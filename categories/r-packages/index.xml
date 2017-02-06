@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>cmhh</title>
+    <title>r-packages on cmhh</title>
     <link>/categories/r-packages/index.xml</link>
-    <description>Recent content on cmhh</description>
+    <description>Recent content in r-packages on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <atom:link href="/categories/r-packages/index.xml" rel="self" type="application/rss+xml" />
@@ -18,6 +18,7 @@
 
 /BLOGDOWN-BODY-BEFORE --&gt;
 
+&lt;p&gt;&lt;link rel=&#34;stylesheet&#34; type=&#34;text/css&#34; href=&#34;../../css/custom.css&#34;&gt;&lt;/p&gt;
 &lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.&lt;/p&gt;
@@ -291,10 +292,7 @@ devtools::install_local(&amp;quot;path-to-zip/SNZlabmkt-master.zip&amp;quot;)&lt
 &lt;/div&gt;
 
 
-
 &lt;!-- BLOGDOWN-HEAD
-
-
 
 
 
