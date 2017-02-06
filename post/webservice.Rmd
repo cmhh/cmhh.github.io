@@ -849,7 +849,7 @@ app.listen(3000);
 
 ![`/<output>/out`](/img/webservice/x13get02.png)
 
-![`/<output>](/img/webservice/x13delete.png)
+![`/<output>` - `DELETE`](/img/webservice/x13delete.png)
 
 And we might as well visualise the results:
 
