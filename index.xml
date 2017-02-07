@@ -557,7 +557,7 @@ source ~/.bashrc&lt;/code&gt;&lt;/pre&gt;
 &lt;h3&gt;Install PostgreSQL and PostGIS&lt;/h3&gt;
 &lt;p&gt;To install PostgreSQL and PostGIS, simply run:&lt;/p&gt;
 &lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo apt-get install postgresql postgis odbc-postgresql&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The last package, &lt;code&gt;odbc-postgresql&lt;/code&gt;, is not strictly necessary, but it will often be useful to access Posgres via ODBC, and this package provides the necessary driver. If you would also like a JDBC driver, you can do:&lt;/p&gt;
+&lt;p&gt;The last package, &lt;code&gt;odbc-postgresql&lt;/code&gt;, is not strictly necessary, but it will often be useful to access Postgres via ODBC, and this package provides the necessary driver. If you would also like a JDBC driver, you can do:&lt;/p&gt;
 &lt;pre class=&#34;bash&#34;&gt;&lt;code&gt;sudo apt-get install libpostgresql-jdbc-java&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;create-a-spatially-enabled-database&#34; class=&#34;section level3&#34;&gt;

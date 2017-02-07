@@ -446,7 +446,7 @@ sudo apt-get install postgresql postgis odbc-postgresql
 ```
 
 The last package, `odbc-postgresql`, is not strictly necessary, but it will
-often be useful to access Posgres via ODBC, and this package provides the
+often be useful to access Postgres via ODBC, and this package provides the
 necessary driver.  If you would also like a JDBC driver, you can do:
 
 ```bash
