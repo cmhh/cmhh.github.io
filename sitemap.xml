@@ -37,18 +37,6 @@
   </url>
   
   <url>
-    <loc>/post/</loc>
-    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>/categories/geospatial/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -69,6 +57,12 @@
   <url>
     <loc>/categories/node/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -109,8 +103,19 @@
   </url>
   
   <url>
+    <loc>/tags/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/categories/webservices/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
