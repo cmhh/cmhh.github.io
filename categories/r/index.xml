@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>R on cmhh</title>
+    <link>/categories/r/</link>
+    <description>Recent content in R on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 27 Nov 2016 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/r/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Routing in R Using the Open Source Routing Machine (OSRM)</title>
+      <link>/post/routing/</link>
+      <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/post/routing/</guid>
+      <description>Overview I often find myself needing to establish the travel time or distance between arrays of addresses. In the past I have used ArcMap’s Network Analyst tool, but have found the syntax to be clunky at best, and the performance to be very mediocre. And, besides, I am often working in R and sometimes it’s nice to be able to do everything in the one environment, rather than doing the routing in Python, say, and then using the results in R.</description>
+    </item>
+    
+    <item>
+      <title>Using R Packages to Disseminate Data</title>
+      <link>/post/datapackages/</link>
+      <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/post/datapackages/</guid>
+      <description>Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
+But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes.</description>
+    </item>
+    
+  </channel>
+</rss>

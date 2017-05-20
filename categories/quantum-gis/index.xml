@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Quantum GIS on cmhh</title>
+    <link>/categories/quantum-gis/</link>
+    <description>Recent content in Quantum GIS on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 26 Jan 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/quantum-gis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Web Maps and Tiles with QGIS</title>
+      <link>/post/qgis/</link>
+      <pubDate>Thu, 26 Jan 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/post/qgis/</guid>
+      <description>Overview In an earlier post, we looked at how to style a map using TileMill (actually, using a fork called TileOven), render tiles with Mapnik, and finally serve tiles using TileStache.
+Serving tiles in this way is useful, avoiding the need to bundle potentially large features with an online map or web app. At the same time, the outlined process is a little involved.
+In this post we look at the open source Quantum GIS.</description>
+    </item>
+    
+  </channel>
+</rss>

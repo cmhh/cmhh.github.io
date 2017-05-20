@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on cmhh</title>
+    <link>/post/</link>
+    <description>Recent content in Posts on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 26 Jan 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Web Maps and Tiles with QGIS</title>
+      <link>/post/qgis/</link>
+      <pubDate>Thu, 26 Jan 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/post/qgis/</guid>
+      <description>Overview In an earlier post, we looked at how to style a map using TileMill (actually, using a fork called TileOven), render tiles with Mapnik, and finally serve tiles using TileStache.
+Serving tiles in this way is useful, avoiding the need to bundle potentially large features with an online map or web app. At the same time, the outlined process is a little involved.
+In this post we look at the open source Quantum GIS.</description>
+    </item>
+    
+    <item>
+      <title>Serving Geospatial Features with Mapnik and TileStache</title>
+      <link>/post/tiles/</link>
+      <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/post/tiles/</guid>
+      <description>Overview When making maps for display on the web, the size of the various objects being rendered can quickly become overwhelming. For example, a polygon feature class containing New Zealand Meshblocks, a set of roughly 40,000 mutually exclusive and exhaustive polygons, is more than 100MB when stored as a shapefile, but much larger uncompressed and rendered in a browser window.
+There are various approaches one can take to attempt to deal with this issue, though useful solutions tend to depend on server-side processing.</description>
+    </item>
+    
+    <item>
+      <title>Routing in R Using the Open Source Routing Machine (OSRM)</title>
+      <link>/post/routing/</link>
+      <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/post/routing/</guid>
+      <description>Overview I often find myself needing to establish the travel time or distance between arrays of addresses. In the past I have used ArcMap’s Network Analyst tool, but have found the syntax to be clunky at best, and the performance to be very mediocre. And, besides, I am often working in R and sometimes it’s nice to be able to do everything in the one environment, rather than doing the routing in Python, say, and then using the results in R.</description>
+    </item>
+    
+    <item>
+      <title>Using R Packages to Disseminate Data</title>
+      <link>/post/datapackages/</link>
+      <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/post/datapackages/</guid>
+      <description>Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
+But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes.</description>
+    </item>
+    
+    <item>
+      <title>Web Services with Node.js</title>
+      <link>/post/webservice/</link>
+      <pubDate>Sat, 28 May 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/post/webservice/</guid>
+      <description>What is node.js? According to the Node.js website:
+ Node.js is a JavaScript runtime built on Chrome’s V8 JavaScript engine. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient.
+  Node.js’ package ecosystem, npm, is the largest ecosystem of open source libraries in the world.
+ Event-driven, non-blocking I/O model Node.js program execution consists of a single-threaded event loop. But all I/O methods in the Node.</description>
+    </item>
+    
+  </channel>
+</rss>
