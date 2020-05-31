@@ -5,6 +5,9 @@ date: "2016-11-27"
 categories: ["R", "geospatial"]
 output: 
    html_document
+params:
+   app_id: "QKVVOf49NWwt2vGhe0It"
+   app_code: "iHDViQ2uA1X04cUopmQuYg"
 ---
 
 ```{r setup, include=FALSE}
@@ -63,27 +66,31 @@ as an origin and a destination later when using a routing service.
 ```{r geocode}
 library(rjson)
 
-#use google maps API to geocode a start point...
-geoservice <- "http://maps.googleapis.com/maps/api/geocode"
-(address <- paste0(geoservice, "/json?sensor=false&",
-   "address=10+Aragon+Grove,+Kingsley+Heights,+Upper+Hutt"))
-origin <- fromJSON(file=address)
+# use HERE API to geocode a start point...
+get_location <- function(search_text, 
+                         app_id = params$app_id, app_code = params$app_code) {
+   service <- "https://geocoder.api.here.com/6.2/geocode.json"
+   query <- sprintf(
+     "%s?app_id=%s&app_code=%s&searchtext=%s",
+     service, app_id, app_code,
+     gsub(" ", "%20", search_text, fixed = TRUE)
+   )
+   
+   res1 <- jsonlite::fromJSON(query, simplifyVector = FALSE)
+   res2 <- res1$Response$View[[1]]$Result[[1]]$Location
+   
+   list(
+      lng = res2$DisplayPosition$Longitude, 
+      lat = res2$DisplayPosition$Latitude, 
+      address = res2$Address$Label
+   )
+}
 
-#...and an end point
-(address <- paste0(geoservice, "/json?sensor=false&",
-   "address=1+Pipitea+Street,+Wellington"))
-destination <- fromJSON(file=address)
-```
+# start point...
+(o <- get_location("25 Edelweiss Grove, Timberlea, Upper Hutt"))
 
-The ```fromJSON``` function turns a JSON object to an R list.  If geocoding is 
-successful (and we will just assume it was) then the origin and
-destination objects will contain a number of elements.  We're particularly 
-interested in latitude, longitude, and the formatted address.  E.g.
-
-```{r p1}
-origin$results[[1]]$geometry$location$lat
-origin$results[[1]]$geometry$location$lng
-origin$results[[1]]$formatted_address
+# ...and destination
+(d <- get_location("1 Pipitea Street, Wellington"))
 ```
 
 
@@ -104,12 +111,11 @@ The code below shows how to find a route between the origin and destination
 locations found above:
 
 ```{r route}
-o <- origin$results[[1]]$geometry$location
-d <- destination$results[[1]]$geometry$location
-(url <- paste0("http://router.project-osrm.org/route/v1/driving/", 
+(url <- paste0("http://cmhh.hopto.org/osrm/route/v1/driving/", 
    o$lng,",",o$lat,";",d$lng,",",d$lat,"?overview=full"))
+
 system.time({
-   route <- fromJSON(file=url)
+  route <- jsonlite::fromJSON(url, simplifyVector = FALSE)
 })
 ```
 
@@ -186,8 +192,8 @@ library(leaflet)
 m <- leaflet(width="100%") %>% 
   addTiles()  %>% 
   addPolylines(data=path, popup=routelabel, color = "#000000", opacity=1, weight = 3) %>%
-  addMarkers(lng=o$lng, lat=o$lat, popup=origin$results[[1]]$formatted_address) %>%
-  addMarkers(lng=d$lng, lat=d$lat, popup=destination$results[[1]]$formatted_address)
+  addMarkers(lng=o$lng, lat=o$lat, popup=o$address) %>%
+  addMarkers(lng=d$lng, lat=d$lat, popup=d$address)
 ```
 ```{r plotmap, cache=FALSE}
 m
@@ -204,6 +210,6 @@ leaflet(width="100%", height=600) %>%
   addTiles(urlTemplate='http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png') %>%
   addTiles(urlTemplate='http://{s}.tile.openstreetmap.se/hydda/roads_and_labels/{z}/{x}/{y}.png') %>%
   addPolylines(data=path, popup=routelabel, color = "#000000", opacity=1, weight = 3) %>%
-  addMarkers(lng=o$lng, lat=o$lat, popup=origin$results[[1]]$formatted_address) %>%
-  addMarkers(lng=d$lng, lat=d$lat, popup=destination$results[[1]]$formatted_address)
+  addMarkers(lng = o$lng, lat = o$lat, popup = o$address) %>%
+  addMarkers(lng = d$lng, lat = d$lat, popup = d$address)
 ```

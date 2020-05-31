@@ -1,5 +1,51 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  
+  <url>
+    <loc>/post/geoserver/</loc>
+    <lastmod>2019-09-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/</loc>
+    <lastmod>2019-09-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/</loc>
+    <lastmod>2019-09-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/geoserver/</loc>
+    <lastmod>2019-09-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2019-09-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/r/</loc>
+    <lastmod>2019-09-17T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/geospatial/</loc>
+    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/qgis/</loc>
+    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/quantum-gis/</loc>
+    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
+  </url>
   
   <url>
     <loc>/post/qgis/</loc>
@@ -8,6 +54,11 @@
   
   <url>
     <loc>/about/</loc>
+    <lastmod>2016-11-28T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/mapping/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url>
   
@@ -22,8 +73,33 @@
   </url>
   
   <url>
+    <loc>/categories/r-packages/</loc>
+    <lastmod>2016-07-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/shiny/</loc>
+    <lastmod>2016-07-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/post/datapackages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/javascript/</loc>
+    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/node/</loc>
+    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/rest/</loc>
+    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -32,91 +108,12 @@
   </url>
   
   <url>
-    <loc>/categories/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/geospatial/</loc>
-    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/javascript/</loc>
+    <loc>/categories/webservices/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/mapping/</loc>
-    <lastmod>2016-11-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/node/</loc>
-    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/qgis/</loc>
-    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/quantum-gis/</loc>
-    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/r-packages/</loc>
-    <lastmod>2016-07-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/rest/</loc>
-    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/shiny/</loc>
-    <lastmod>2016-07-20T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/categories/webservices/</loc>
-    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/</loc>
-    <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-    <priority>0</priority>
   </url>
   
 </urlset>

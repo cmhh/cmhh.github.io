@@ -10,7 +10,7 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.20.7" />
+        <meta name="generator" content="Hugo 0.58.1" />
         
 
 
@@ -23,51 +23,31 @@
             
         
 
-        
-
-  <meta name="twitter:card" content="summary"/>
-
-
-
-<meta name="twitter:text:title" content="Using R Packages to Disseminate Data"/>
+        <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content="Using R Packages to Disseminate Data"/>
 <meta name="twitter:description" content="Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
 But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes."/>
-
 
         <meta property="og:title" content="Using R Packages to Disseminate Data" />
 <meta property="og:description" content="Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
 But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="/post/datapackages/" />
+<meta property="article:published_time" content="2016-07-20T00:00:00+00:00" />
+<meta property="article:modified_time" content="2016-07-20T00:00:00+00:00" />
 
-
-
-<meta property="article:published_time" content="2016-07-20T00:00:00&#43;00:00"/>
-<meta property="article:modified_time" content="2016-07-20T00:00:00&#43;00:00"/>
-
-
-
-
-
-
-
-
-
-
-
-        
-<meta itemprop="name" content="Using R Packages to Disseminate Data">
+        <meta itemprop="name" content="Using R Packages to Disseminate Data">
 <meta itemprop="description" content="Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
 But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes.">
 
 
+<meta itemprop="datePublished" content="2016-07-20T00:00:00&#43;00:00" />
 <meta itemprop="dateModified" content="2016-07-20T00:00:00&#43;00:00" />
 <meta itemprop="wordCount" content="2004">
 
 
 
-<meta itemprop="keywords" content="QGIS,Quantum GIS,R,R packages,REST,geospatial,javascript,mapping,node,shiny,webservices," />
+<meta itemprop="keywords" content="" />
 
         
 
@@ -109,13 +89,6 @@ But datasets themselves aren’t central to most packages–statistical methodol
 
     <nav class="links">
         <ul>
-            
-                <li>
-                    <a href="../../post">
-                        
-                            <i class="fa fa-newspaper-o">&nbsp;</i>Posts
-                    </a>
-                </li>
             
                 <li>
                     <a href="../../categories">
@@ -168,17 +141,6 @@ But datasets themselves aren’t central to most packages–statistical methodol
             <ul class="links">
                 
                     <li>
-                        <a href="../../post">
-                            <h3>
-                                
-                                    <i class="fa fa-newspaper-o">&nbsp;</i>
-                                
-                                Posts
-                            </h3>
-                        </a>
-                    </li>
-                
-                    <li>
                         <a href="../../categories">
                             <h3>
                                 
@@ -211,11 +173,11 @@ But datasets themselves aren’t central to most packages–statistical methodol
 
                 
                     <li>
-                        <a href="../../post/qgis/"><p>Web Maps and Tiles with QGIS</p></a>
+                        <a href="../../post/geoserver/"><p>Building Tile Services on-the-fly with GeoServer</p></a>
                     </li>
                 
                     <li>
-                        <a href="../../post/tiles/"><p>Serving Geospatial Features with Mapnik and TileStache</p></a>
+                        <a href="../../post/"><p>Posts</p></a>
                     </li>
                 
             </ul>
@@ -360,26 +322,50 @@ But datasets themselves aren’t central to most packages–statistical methodol
     
 
     <div id="content">
-        <p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
+        
+
+
+<p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.</p>
-<p>But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes. But this doesn’t have to be the case. For analysts familiar with R, consuming packages to obtain data might be quite convenient. But we can also bundle functionality specific to the included datasets, possibly increasing its overall utility. For example, one could include pre-canned statistical analyses in the form of simple helper functions or interactive <code>shiny</code> applications.</p>
-<p>In this document, we look at a couple of datasets available from the <a href="http://www.stats.govt.nz">Statistics New Zealand</a> website and consider the ways in which value might be added by disseminating this data via an R package (or set of packages) along with bundled demo apps.</p>
+<p>R packages can include datasets, and it is very common to do so. This shouldn’t
+really come as a surprise–R is a statistical language in the end, and it is
+normal to include working examples with pacakges; and including datasets against
+which to run unit tests and other examples is clearly a useful thing to do.</p>
+<p>But datasets themselves aren’t central to most packages–statistical
+methodologies often are, and the data is there for testing or illustrative
+purposes. But this doesn’t have to be the case. For analysts familiar with R,
+consuming packages to obtain data might be quite convenient. But we can also
+bundle functionality specific to the included datasets, possibly increasing its
+overall utility. For example, one could include pre-canned statistical analyses
+in the form of simple helper functions or interactive <code>shiny</code> applications.</p>
+<p>In this document, we look at a couple of datasets available from the
+<a href="http://www.stats.govt.nz">Statistics New Zealand</a>
+website and consider the ways in which value might be added by disseminating
+this data via an R package (or set of packages) along with bundled demo apps.</p>
 </div>
 <div id="anatomy-of-an-r-package" class="section level1">
 <h1>Anatomy of an R Package</h1>
-<p>An R package is essentially an eponymously named folder which bundles additional functionality in a standardised way, and which can be loaded on demand. A package contains, among other things, function and type definitions, documentation, and datasets.</p>
-<p>Traditionally, a loadable version of a package would be built from a source repository by running shell commands such as:</p>
+<p>An R package is essentially an eponymously named folder which
+bundles additional functionality in a standardised way, and which can be loaded
+on demand. A package contains, among other things, function and type
+definitions, documentation, and datasets.</p>
+<p>Traditionally, a loadable version of a package would be built from a source
+repository by running shell commands such as:</p>
 <pre><code>R CMD INSTALL --build pkgname</code></pre>
 <p>or</p>
 <pre><code>R CMD build pkgname 
 R CMD install pkgname.tar.gz</code></pre>
-<p>depending on the target platform. It is not all that difficult to build a modest package, but it can be tedious to construct packages from scratch. Large packages, on the other hand, can be difficult to build and manage. Those interested in the detail should refer to:</p>
+<p>depending on the target platform. It is not all that difficult to build a
+modest package, but it can be tedious to construct packages from scratch.
+Large packages, on the other hand, can be difficult to build and manage. Those
+interested in the detail should refer to:</p>
 <p><a href="https://cran.r-project.org/">Writing R Extensions</a></p>
 <div id="building-packages-in-rstudio" class="section level2">
 <h2>Building packages in RStudio</h2>
-<p>RStudio has a number of productivity features which greatly assist the authoring of packages. RStudio allows users to work with projects, and packages can be authored by creating a project with type ‘R Package’:</p>
+<p>RStudio has a number of productivity features which greatly assist the authoring
+of packages. RStudio allows users to work with projects, and packages can be
+authored by creating a project with type ‘R Package’:</p>
 <div class="figure">
 <img src="../../img/datapackages/package01.png" alt="Project-&gt;New Project…" />
 <p class="caption">Project-&gt;New Project…</p>
@@ -396,14 +382,21 @@ R CMD install pkgname.tar.gz</code></pre>
 <img src="../../img/datapackages/package04.png" alt="Create R Package" />
 <p class="caption">Create R Package</p>
 </div>
-<p>When working on a package, RStudio provides a number of useful tools via a ‘Build’ menu. From there you can build the package and create source or binary packages for dissemination.</p>
+<p>When working on a package, RStudio provides a number of useful tools via a
+‘Build’ menu. From there you can build the package and create source or binary
+packages for dissemination.</p>
 <div class="figure">
 <img src="../../img/datapackages/package05.png" alt="Build menu" />
 <p class="caption">Build menu</p>
 </div>
-<p>In addition to this, help files can be built automatically from source code comments using the <code>roxygen2</code> package. The traditional method is to make a markup file for each function that requires documentation, but using <code>roxygen2</code> is far more convenient. We’ll see examples below, but for a reasonable overview see:</p>
+<p>In addition to this, help files can be built automatically from source code
+comments using the <code>roxygen2</code> package. The traditional method is to make a
+markup file for each function that requires documentation, but using <code>roxygen2</code>
+is far more convenient. We’ll see examples below, but for a reasonable overview
+see:</p>
 <p><a href="http://r-pkgs.had.co.nz/man.html">Object documentation</a></p>
-<p>Finally, a package source code can be managed via either of git or subversion, which brings obvious advantage.</p>
+<p>Finally, a package source code can be managed via either of git or subversion,
+which brings obvious advantage.</p>
 <div class="figure">
 <img src="../../img/datapackages/versioning.png" alt="Version control" />
 <p class="caption">Version control</p>
@@ -412,8 +405,12 @@ R CMD install pkgname.tar.gz</code></pre>
 </div>
 <div id="single-function-shiny-applications" class="section level1">
 <h1>Single-function Shiny Applications</h1>
-<p>It is possible to make 1-page web applications in R via the <code>shiny</code> package. There are a number of ways a <code>shiny</code> application can be created, and RStudio tries to help out here as well.</p>
-<p>For example, selecting File → New File → Shiny Web App… in RStudio will cause RStudio to create a small working app which you can use as a starting point:</p>
+<p>It is possible to make 1-page web applications in R via the <code>shiny</code> package.
+There are a number of ways a <code>shiny</code> application can be created, and RStudio
+tries to help out here as well.</p>
+<p>For example, selecting File → New File → Shiny Web App… in RStudio
+will cause RStudio to create a small working app which you can use as a starting
+point:</p>
 <div class="figure">
 <img src="../../img/datapackages/shiny01.png" alt="Shiny web app" />
 <p class="caption">Shiny web app</p>
@@ -426,37 +423,60 @@ R CMD install pkgname.tar.gz</code></pre>
 <img src="../../img/datapackages/shiny03.png" alt="Shiny application running within RStudio IDE" />
 <p class="caption">Shiny application running within RStudio IDE</p>
 </div>
-<p>A <code>shiny</code> application is essentially made of a <code>ui</code> component which contains the UI definition and a <code>server</code> component which contains all the server-side logic for the application. Given these components, there are then a number of ways of creating and running an application. For example, one could create files <code>foo/ui.R</code> and <code>foo/server.R</code> which contain the <code>ui</code> and <code>server</code> components, respectively, and then run the application by calling:</p>
+<p>A <code>shiny</code> application is essentially made of a <code>ui</code> component which contains the
+UI definition and a <code>server</code> component which contains all the server-side logic
+for the application. Given these components, there are then a number of ways of
+creating and running an application. For example, one could create files
+<code>foo/ui.R</code> and <code>foo/server.R</code> which contain the <code>ui</code> and <code>server</code> components,
+respectively, and then run the application by calling:</p>
 <pre class="r"><code>shiny::runApp(&quot;foo&quot;)</code></pre>
-<p>Alternatively, if <code>ui</code> and <code>server</code> are actual R objects, one could run an application via</p>
+<p>Alternatively, if <code>ui</code> and <code>server</code> are actual R objects, one could run an
+application via</p>
 <pre class="r"><code>shiny::runApp(list(ui=ui, server=server))</code></pre>
 <p>or even</p>
 <pre class="r"><code>shiny::shinyApp(ui=ui, server=server)</code></pre>
-<p>But, of course, we can then write a function which returns one of these application objects. For example</p>
+<p>But, of course, we can then write a function which returns one of these
+application objects. For example</p>
 <pre class="r"><code>foo &lt;- function(){
    shinyApp(ui=ui, server=server)
 }</code></pre>
 <p>so that an application can be started, then, simply by calling:</p>
 <pre><code>foo()</code></pre>
-<p>In fact, this is what we will do here. We will include functions in the packages we create which do nothing but cause a <code>shiny</code> application to run. Thus, we can provide users with data, but also interactive applications that make use of that data.</p>
+<p>In fact, this is what we will do here. We will include functions in the
+packages we create which do nothing but cause a <code>shiny</code> application to
+run. Thus, we can provide users with data, but also interactive applications
+that make use of that data.</p>
 </div>
 <div id="examplecensus-meshblock-dataset" class="section level1">
 <h1>Example–Census Meshblock Dataset</h1>
-<p>For our first example, let us consider the Census Meshblock Dataset. From the <a href="http://www.stats.govt.nz/Census/2013-census/data-tables/meshblock-dataset.aspx">Statistics New Zealand website</a>:</p>
+<p>For our first example, let us consider the Census Meshblock Dataset. From the
+<a href="http://www.stats.govt.nz/Census/2013-census/data-tables/meshblock-dataset.aspx">Statistics New Zealand website</a>:</p>
 <blockquote>
-<p>2013 Census meshblock dataset contains counts at meshblock and other geographic levels for selected variables from the 2013, 2006, and 2001 Censuses. The geographies correspond to 2013 Census boundaries. The counts are at the highest level of each variable’s classification.</p>
+<p>2013 Census meshblock dataset contains counts at meshblock and other
+geographic levels for selected variables from the 2013, 2006, and 2001 Censuses.
+The geographies correspond to 2013 Census boundaries. The counts are at the
+highest level of each variable’s classification.</p>
 </blockquote>
 <blockquote>
-<p>The meshblock dataset is in Excel (.xlxs) and CSV format and can be integrated with analytical or mapping systems (using geographic boundary files), enabling further analysis of census data.</p>
+<p>The meshblock dataset is in Excel (.xlxs) and CSV format and can be integrated
+with analytical or mapping systems (using geographic boundary files), enabling
+further analysis of census data.</p>
 </blockquote>
-<p>We’ll look specifically at the <a href="http://www3.stats.govt.nz/meshblock/2013/csv/2013_mb_dataset_Total_New_Zealand_CSV.zip">downloadable CSV file</a>, primarily because the CSV file would be of the most universal use to any kind of data analyst (casual users might use the Excel version, but even those users might find it more useful to use the R version we’ll create here).</p>
+<p>We’ll look specifically at the
+<a href="http://www3.stats.govt.nz/meshblock/2013/csv/2013_mb_dataset_Total_New_Zealand_CSV.zip">downloadable CSV file</a>,
+primarily because the CSV file would be of the most universal use to any kind of
+data analyst (casual users might use the Excel version, but even those users
+might find it more useful to use the R version we’ll create here).</p>
 <div id="repairing-reorganising-the-data" class="section level2">
 <h2>Repairing / reorganising the data</h2>
-<p>This data has a number of organisational issues that impedes its use, so I spent a bit of time tidying things up and put the results in a package called <a href="https://github.com/cmhh/NZCensus">NZCensus</a>.</p>
+<p>This data has a number of organisational issues that impedes its use, so I spent
+a bit of time tidying things up and put the results in a package called
+<a href="https://github.com/cmhh/NZCensus">NZCensus</a>.</p>
 </div>
 <div id="making-a-package" class="section level2">
 <h2>Making a package</h2>
-<p>Here we make a simple package which does nothing but provide the following five datasets:</p>
+<p>Here we make a simple package which does nothing but provide the following five
+datasets:</p>
 <ul>
 <li><code>datadictionary</code></li>
 <li><code>dwelling</code></li>
@@ -464,10 +484,15 @@ R CMD install pkgname.tar.gz</code></pre>
 <li><code>family</code></li>
 <li><code>individual</code></li>
 </ul>
-<p>That is, once installed, users can refer to any of these datasets by name if the package is loaded, or else load any of the datasets into memory by calling:</p>
+<p>That is, once installed, users can refer to any of these datasets by name if
+the package is loaded, or else load any of the datasets into memory by calling:</p>
 <pre class="r"><code>data(dataset, package=&quot;NZCensus&quot;)</code></pre>
-<p>Note that if all 5 datasets were loaded into memory, the total footprint would be 318MB. However, the package itself weighs in at 40.3MB–this compares favourably with the original CSV source (a zip file), which weighs in at 37.6MB.</p>
-<p>We use RStudio’s integrated support for packages to make this as easy as possible. We create a project called <code>NZCensus</code>, which will also become the name of the package. The basic layout is as follows:</p>
+<p>Note that if all 5 datasets were loaded into memory, the total footprint would
+be 318MB. However, the package itself weighs in at 40.3MB–this compares
+favourably with the original CSV source (a zip file), which weighs in at 37.6MB.</p>
+<p>We use RStudio’s integrated support for packages to make this as easy as
+possible. We create a project called <code>NZCensus</code>, which will also become
+the name of the package. The basic layout is as follows:</p>
 <pre class="asis"><code>NZCensus/data/datadictionary.rda
 NZCensus/data/dwelling.rda
 NZCensus/data/family.rda
@@ -484,10 +509,16 @@ NZCensus/man/individual.Rd
 NZCensus/R/data.R
 NZCensus/DESCRIPTION
 NZCensus/NAMESPACE</code></pre>
-<p>The <code>*.rda</code> files are datasets in R’s native format, and are compressed. For example, the individual dataset is 209.8MB uncompressed in-memory. But this can be compressed and saved to disk by running:</p>
+<p>The <code>*.rda</code> files are datasets in R’s native format, and are compressed. For
+example, the individual dataset is 209.8MB uncompressed in-memory. But this can
+be compressed and saved to disk by running:</p>
 <pre class="r"><code>save(individual, file = &quot;individual&quot;, compress = TRUE)</code></pre>
 <p>with the resulting file in this case being just 28.7MB.</p>
-<p>R packages are usually very well documented. Here, we take advantage of <code>doxygen2</code> to build help files automatically from the package R scripts. In this case, we don’t actually have any R code, but we fake it anyway. We create entries for each dataset in a file called <code>./NZCensus/R/data.R</code>. For example, for the <code>dwelling</code> dataset we include the following:</p>
+<p>R packages are usually very well documented. Here, we take advantage of
+<code>doxygen2</code> to build help files automatically from the package R scripts.
+In this case, we don’t actually have any R code, but we fake it anyway. We
+create entries for each dataset in a file called <code>./NZCensus/R/data.R</code>. For
+example, for the <code>dwelling</code> dataset we include the following:</p>
 <pre class="r"><code>#&#39; New Zealand Census of Population and Dwellings dwelling data
 #&#39;
 #&#39; A dataset containing dwelling counts at various geographic levels.
@@ -504,13 +535,20 @@ NZCensus/NAMESPACE</code></pre>
 #&#39; @source
 #&#39; \url{http://www.stats.govt.nz/Census/2013-census/data-tables/meshblock-dataset.aspx}
 &quot;dwelling&quot;</code></pre>
-<p>Processing this file yields, among other things, <code>NZCensus/man/dwelling.Rd</code>, which is in R’s own documentation format. And after actually building and installing this package, an HTML version of this file is created which can be queried from R via something like:</p>
+<p>Processing this file yields, among other things, <code>NZCensus/man/dwelling.Rd</code>,
+which is in R’s own documentation format. And after actually building and
+installing this package, an HTML version of this file is created which can
+be queried from R via something like:</p>
 <pre class="r"><code>?NZCensus::dwelling</code></pre>
 <div class="figure">
 <img src="../../img/datapackages/dwellinghelp.png" alt="Help for dwelling dataset." />
 <p class="caption">Help for <code>dwelling</code> dataset.</p>
 </div>
-<p>Besides this, RStudio also automates the creation of other files, but several files were also created manually. For example, files were added to the folder <code>NZCensus/inst/doc/</code>, and once the package has been installed, these are available from the main help page via the <code>User guides, package vignettes and other documentation.</code> link.</p>
+<p>Besides this, RStudio also automates the creation of other files, but several
+files were also created manually. For example, files were added to the folder
+<code>NZCensus/inst/doc/</code>, and once the package has been installed, these are
+available from the main help page via the
+<code>User guides, package vignettes and other documentation.</code> link.</p>
 <div class="figure">
 <img src="../../img/datapackages/NZCensushelp.png" alt="help(package=&quot;NZCensus&quot;)." />
 <p class="caption"><code>help(package=&quot;NZCensus&quot;)</code>.</p>
@@ -519,17 +557,37 @@ NZCensus/NAMESPACE</code></pre>
 <img src="../../img/datapackages/NZCensusdoc.png" alt="NZCensus docs." />
 <p class="caption"><code>NZCensus</code> docs.</p>
 </div>
-<p>In this case, these files are just versions of the <code>datadictionary</code> dataset that can be opened in Excel or LibreOffice (what used to be known as OpenOffice).</p>
+<p>In this case, these files are just versions of the <code>datadictionary</code>
+dataset that can be opened in Excel or LibreOffice (what used to be known as
+OpenOffice).</p>
 </div>
 <div id="extending-the-package" class="section level2">
 <h2>Extending the package</h2>
-<p>Above, we wrapped five datasets up as a package which we called <code>NZCensus</code>. We can add value to packages by bundling other interesting functions along with the data. For example, we could write a function that takes a particular variable name as input, and plots that variable for each Census year.</p>
-<p>In this case, we’ll create two functions that provide <code>shiny</code> applications in the way described above:</p>
+<p>Above, we wrapped five datasets up as a package which we called <code>NZCensus</code>. We
+can add value to packages by bundling other interesting functions along with the
+data. For example, we could write a function that takes a particular variable
+name as input, and plots that variable for each Census year.</p>
+<p>In this case, we’ll create two functions that provide <code>shiny</code> applications
+in the way described above:</p>
 <ul>
-<li><code>mapdemo</code> - an interactive map which displays a choropleth based on user input</li>
-<li><code>distributiondemo</code> - an barplot showing the distribution of a categorical variable selected by the user.</li>
+<li><code>mapdemo</code> - an interactive map which displays a choropleth based on user
+input</li>
+<li><code>distributiondemo</code> - an barplot showing the distribution of a
+categorical variable selected by the user.</li>
 </ul>
-<p>We place these functions in a new package called <a href="https://github.com/cmhh/NZCensusDemos"><code>NZCensusDemos</code></a> which has an explicit dependency on the <code>NZCensus</code> package, among others. The main reason for this is that we will bundle some additional spatial feature classes required to draw geographical features such as regional council areas on a map. The feature classes aren’t terribly large (we haven’t included, amusingly, given the product name, the meshblock feature class, which is pretty large), but at least this way users who only want the Census datasets aren’t burdened with the extra bulk implied by the demo package if they don’t want it. Similarly, the demos have dependencies which would need to be installed along with them, and loaded any time the demo package is. So, again, if users have no need for the demos, then they wouldn’t be forced to install these additional dependencies if they didn’t want them.</p>
+<p>We place these functions in a new package called
+<a href="https://github.com/cmhh/NZCensusDemos"><code>NZCensusDemos</code></a> which has an explicit
+dependency on the <code>NZCensus</code> package, among others. The main reason for this is
+that we will bundle some additional spatial feature classes required to draw
+geographical features such as regional council areas on a map. The feature
+classes aren’t terribly large (we haven’t included, amusingly, given the product
+name, the meshblock feature class, which is pretty large), but at least this way
+users who only want the Census datasets aren’t burdened with the extra bulk
+implied by the demo package if they don’t want it. Similarly, the demos have
+dependencies which would need to be installed along with them, and loaded any
+time the demo package is. So, again, if users have no need for the demos, then
+they wouldn’t be forced to install these additional dependencies if they didn’t
+want them.</p>
 <p>Either way, the <code>mapdemo</code> function, heavily edited, looks as follows:</p>
 <pre class="r"><code>mapdemo &lt;- function(){
    shinyApp(
@@ -568,18 +626,31 @@ mapdemo()</code></pre>
 </div>
 <div id="examplehlfs-time-series-data" class="section level1">
 <h1>Example–HLFS Time Series Data</h1>
-<p>Since looking at the Census meshblock dataset had convinced myself that putting data in R pacakges was a useful thing to do, I started thinking about other datasets for which this sort of treatment might also be useful.</p>
-<p><a href="http://www.stats.govt.nz">Statistics New Zealand</a> puts bulk CSV files on their website containing a number of time series, and that seemed a reasonable choice. We can use this data to produce a <code>shiny</code> application which lets users explore a range time series and make selections to plot.</p>
+<p>Since looking at the Census meshblock dataset had convinced myself that putting
+data in R pacakges was a useful thing to do, I started thinking about other
+datasets for which this sort of treatment might also be useful.</p>
+<p><a href="http://www.stats.govt.nz">Statistics New Zealand</a> puts bulk CSV files on their
+website containing a number of time series, and that seemed a reasonable choice.
+We can use this data to produce a <code>shiny</code> application which lets users explore a
+range time series and make selections to plot.</p>
 <div id="preparing-the-data-sets" class="section level2">
 <h2>Preparing the data sets</h2>
-<p>The data I decided to use is labour market data found via the <a href="http://www.stats.govt.nz/tools_and_services/releases_csv_files.aspx">CSV files for download</a> page here:</p>
+<p>The data I decided to use is labour market data found via the
+<a href="http://www.stats.govt.nz/tools_and_services/releases_csv_files.aspx">CSV files for download</a>
+page here:</p>
 <p><a href="http://www.stats.govt.nz/~/media/Statistics/Browse%20for%20stats/LabourMarketStatistics/HOTPMar16qtr/lms-mar16-zipped-csv-tables.zip">Income and work</a></p>
-<p>The data consists of 14 columns, and 605535 rows. There isn’t any major problems with this data–it’s perfectly usable as it is. However there is a fair bit of duplication:</p>
+<p>The data consists of 14 columns, and 605535 rows.
+There isn’t any major problems with this data–it’s perfectly usable as it is.
+However there is a fair bit of duplication:</p>
 <div class="figure">
 <img src="../../img/datapackages/rawlabmkt.png" alt="lots of duplication!" />
 <p class="caption">lots of duplication!</p>
 </div>
-<p>Specifically, the <code>subject</code>, <code>group</code>, and title columns are unique by <code>series_reference</code>. So, we split the table into two tables which have <code>series_reference</code> as a common key, and remove as much duplication as possible. In addtion, we take the opportunity to cast the variable <code>Period</code> to a genuine date-type variable.</p>
+<p>Specifically, the <code>subject</code>, <code>group</code>, and title columns are unique by
+<code>series_reference</code>. So, we split the table into two tables which have
+<code>series_reference</code> as a common key, and remove as much duplication as possible.
+In addtion, we take the opportunity to cast the variable <code>Period</code> to a genuine
+date-type variable.</p>
 <div class="figure">
 <img src="../../img/datapackages/metadata.png" alt="metadata" />
 <p class="caption">metadata</p>
@@ -591,7 +662,13 @@ mapdemo()</code></pre>
 </div>
 <div id="making-a-package-1" class="section level2">
 <h2>Making a package</h2>
-<p>In this case, the data is relatively small, and for convenience we bundle the data and demos together. We create a package called <a href="https://github.com/cmhh/SNZlabmkt"><code>SNZlabmkt</code></a> which contains the two data sets, <code>metadata</code> and <code>labmkt</code>, as well as a single function, <code>timeseriesdemo</code>, which provides a <code>shiny</code> application which plots time series based on user input. Since it has been discussed above, we skip the details of package creation here. But the demo is triggered by calling:</p>
+<p>In this case, the data is relatively small, and for convenience we bundle the
+data and demos together. We create a package called
+<a href="https://github.com/cmhh/SNZlabmkt"><code>SNZlabmkt</code></a> which contains the two data
+sets, <code>metadata</code> and <code>labmkt</code>, as well as a single function, <code>timeseriesdemo</code>,
+which provides a <code>shiny</code> application which plots time series based on user
+input. Since it has been discussed above, we skip the details of package
+creation here. But the demo is triggered by calling:</p>
 <pre class="r"><code>library(SNZlabmkt)
 timeseriesdemo()</code></pre>
 <p>and it looks as follows:</p>
@@ -603,7 +680,9 @@ timeseriesdemo()</code></pre>
 </div>
 <div id="try-it-out" class="section level1">
 <h1>Try it out…</h1>
-<p>The packages discussed here have all been uploaded to GitHub. RStudio has excellent integration with Git, as noted earlier, and allows users to use GitHub to set a remote repository.</p>
+<p>The packages discussed here have all been uploaded to GitHub. RStudio has
+excellent integration with Git, as noted earlier, and allows users to use GitHub
+to set a remote repository.</p>
 <div class="figure">
 <img src="../../img/datapackages/git01.png" alt="Git" />
 <p class="caption">Git</p>
@@ -784,13 +863,13 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/qgis/">Web Maps and Tiles with QGIS</a></h3>
+                                <h3><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
-                                    '2017-01-26'>
-                                    January 26, 2017</time>
+                                    '2019-09-17'>
+                                    September 17, 2019</time>
                             </header>
                         </article>
                     </li>
@@ -798,13 +877,13 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../../post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h3>
+                                <h3><a href="../../post/">Posts</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
-                                    '2016-11-28'>
-                                    November 28, 2016</time>
+                                    '2019-09-17'>
+                                    September 17, 2019</time>
                             </header>
                         </article>
                     </li>
@@ -815,7 +894,7 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
                         <ul class="actions">
                             <li><a href=
                             
-                                /blog/post/
+                                /post/
                             
                             class="button">View more posts</a></li>
                         </ul>
@@ -851,8 +930,8 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
                     <li>
                         <article>
                             <header>
-                                <a href="../../categories/r/">R</a>
-                                <span style="float:right;">2</span>
+                                <a href="../../categories/r/">r</a>
+                                <span style="float:right;">3</span>
                             </header>
                         </article>
                     </li>
@@ -860,34 +939,7 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
                     <li>
                         <article>
                             <header>
-                                <a href="../../categories/qgis/">QGIS</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/quantum-gis/">Quantum GIS</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/r-packages/">R packages</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/rest/">REST</a>
+                                <a href="../../categories/geoserver/">geoserver</a>
                                 <span style="float:right;">1</span>
                             </header>
                         </article>
@@ -915,6 +967,42 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
                         <article>
                             <header>
                                 <a href="../../categories/node/">node</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/qgis/">qgis</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/quantum-gis/">quantum-gis</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/r-packages/">r-packages</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../../categories/rest/">rest</a>
                                 <span style="float:right;">1</span>
                             </header>
                         </article>

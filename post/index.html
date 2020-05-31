@@ -16,7 +16,7 @@
 
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.20.7" />
+        <meta name="generator" content="Hugo 0.58.1" />
         
 
 
@@ -27,27 +27,18 @@
             
         
 
-        
+        <meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Posts"/>
+<meta name="twitter:description" content="Stuff I find interesting. Powered by Hugo"/>
+
         <meta property="og:title" content="Posts" />
 <meta property="og:description" content="Stuff I find interesting. Powered by Hugo" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="/post/" />
 
+<meta property="og:updated_time" content="2019-09-17T00:00:00+00:00" />
 
-
-<meta property="og:updated_time" content="2017-01-26T00:00:00&#43;00:00"/>
-
-
-
-
-
-
-
-
-
-
-        
-<meta itemprop="name" content="Posts">
+        <meta itemprop="name" content="Posts">
 <meta itemprop="description" content="Stuff I find interesting. Powered by Hugo">
 
 
@@ -90,13 +81,6 @@
 
     <nav class="links">
         <ul>
-            
-                <li>
-                    <a href="../post">
-                        
-                            <i class="fa fa-newspaper-o">&nbsp;</i>Posts
-                    </a>
-                </li>
             
                 <li>
                     <a href="../categories">
@@ -145,17 +129,6 @@
             <ul class="links">
                 
                     <li>
-                        <a href="../post">
-                            <h3>
-                                
-                                    <i class="fa fa-newspaper-o">&nbsp;</i>
-                                
-                                Posts
-                            </h3>
-                        </a>
-                    </li>
-                
-                    <li>
                         <a href="../categories">
                             <h3>
                                 
@@ -188,11 +161,11 @@
 
                 
                     <li>
-                        <a href="../post/qgis/"><p>Web Maps and Tiles with QGIS</p></a>
+                        <a href="../post/geoserver/"><p>Building Tile Services on-the-fly with GeoServer</p></a>
                     </li>
                 
                     <li>
-                        <a href="../post/tiles/"><p>Serving Geospatial Features with Mapnik and TileStache</p></a>
+                        <a href="../post/"><p>Posts</p></a>
                     </li>
                 
             </ul>
@@ -208,6 +181,116 @@
         
             
         
+
+        
+            <article class="post">
+    <header>
+    <div class="title">
+        
+            <h2><a href="../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h2>
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2019-09-17'>
+            September 17, 2019</time>
+        <span class="author">Chris Hansen</span>
+        
+            <p>12 minute read</p>
+        
+        
+    </div>
+</header>
+
+    
+
+    <p>Overview Interactive web applications can be a great way to present information to a diverse audience. If your interface is well designed and intuitive, then almost anybody will be able to use it. And where data has a spatial dimension, slippy maps can be an effective way of presenting information. But sometimes the objects we want to render are a bit on the large side. This means that our web browser can struggle to render all the required features, and it also means that mobile users of an app might end up using excessive amounts of data.</p>
+
+    <footer>
+        <ul class="actions">
+            <li><a href="../post/geoserver/" class="button big">Continue Reading</a></li>
+        </ul>
+        <ul class="stats">
+    
+        
+
+        
+        
+            <li>
+                
+                
+                    
+
+                    
+
+                    
+
+                    
+                        Categories
+                    
+                
+            </li>
+        
+    
+
+    
+    
+        <li><a href='../categoriesr'>R</a></li>
+    
+        <li><a href='../categoriesgeoserver'>GeoServer</a></li>
+    
+</ul>
+
+    </footer>
+</article>
+
+        
+            <article class="post">
+    <header>
+    <div class="title">
+        
+            <h2><a href="../post/">Posts</a></h2>
+        
+        
+    </div>
+    <div class="meta">
+        
+            
+        
+
+        <time class="published"
+            datetime='2019-09-17'>
+            September 17, 2019</time>
+        <span class="author"></span>
+        
+            <p>0 minute read</p>
+        
+        
+    </div>
+</header>
+
+    
+
+    <p></p>
+
+    <footer>
+        <ul class="actions">
+            <li><a href="../post/" class="button big">Continue Reading</a></li>
+        </ul>
+        <ul class="stats">
+    
+
+    
+    
+</ul>
+
+    </footer>
+</article>
 
         
             <article class="post">
@@ -272,141 +355,6 @@ In this post we look at the open source Quantum GIS.</p>
         <li><a href='../categoriesquantum-gis'>Quantum GIS</a></li>
     
         <li><a href='../categoriesqgis'>QGIS</a></li>
-    
-        <li><a href='../categoriesgeospatial'>geospatial</a></li>
-    
-</ul>
-
-    </footer>
-</article>
-
-        
-            <article class="post">
-    <header>
-    <div class="title">
-        
-            <h2><a href="../post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h2>
-        
-        
-    </div>
-    <div class="meta">
-        
-            
-        
-
-        <time class="published"
-            datetime='2016-11-28'>
-            November 28, 2016</time>
-        <span class="author">Chris Hansen</span>
-        
-            <p>15 minute read</p>
-        
-        
-    </div>
-</header>
-
-    
-
-    <p>Overview When making maps for display on the web, the size of the various objects being rendered can quickly become overwhelming. For example, a polygon feature class containing New Zealand Meshblocks, a set of roughly 40,000 mutually exclusive and exhaustive polygons, is more than 100MB when stored as a shapefile, but much larger uncompressed and rendered in a browser window.
-There are various approaches one can take to attempt to deal with this issue, though useful solutions tend to depend on server-side processing.</p>
-
-    <footer>
-        <ul class="actions">
-            <li><a href="../post/tiles/" class="button big">Continue Reading</a></li>
-        </ul>
-        <ul class="stats">
-    
-        
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
-        <li><a href='../categoriesgeospatial'>geospatial</a></li>
-    
-        <li><a href='../categoriesmapping'>mapping</a></li>
-    
-</ul>
-
-    </footer>
-</article>
-
-        
-            <article class="post">
-    <header>
-    <div class="title">
-        
-            <h2><a href="../post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h2>
-        
-        
-    </div>
-    <div class="meta">
-        
-            
-        
-
-        <time class="published"
-            datetime='2016-11-27'>
-            November 27, 2016</time>
-        <span class="author">Chris Hansen</span>
-        
-            <p>5 minute read</p>
-        
-        
-    </div>
-</header>
-
-    
-
-    <p>Overview I often find myself needing to establish the travel time or distance between arrays of addresses. In the past I have used ArcMap’s Network Analyst tool, but have found the syntax to be clunky at best, and the performance to be very mediocre. And, besides, I am often working in R and sometimes it’s nice to be able to do everything in the one environment, rather than doing the routing in Python, say, and then using the results in R.</p>
-
-    <footer>
-        <ul class="actions">
-            <li><a href="../post/routing/" class="button big">Continue Reading</a></li>
-        </ul>
-        <ul class="stats">
-    
-        
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
-        <li><a href='../categoriesr'>R</a></li>
     
         <li><a href='../categoriesgeospatial'>geospatial</a></li>
     
@@ -527,13 +475,13 @@ There are various approaches one can take to attempt to deal with this issue, th
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../post/qgis/">Web Maps and Tiles with QGIS</a></h3>
+                                <h3><a href="../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
-                                    '2017-01-26'>
-                                    January 26, 2017</time>
+                                    '2019-09-17'>
+                                    September 17, 2019</time>
                             </header>
                         </article>
                     </li>
@@ -541,13 +489,13 @@ There are various approaches one can take to attempt to deal with this issue, th
                     <li>
                         <article>
                             <header>
-                                <h3><a href="../post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h3>
+                                <h3><a href="../post/">Posts</a></h3>
                                 
                                     
                                 
                                 <time class="published" datetime=
-                                    '2016-11-28'>
-                                    November 28, 2016</time>
+                                    '2019-09-17'>
+                                    September 17, 2019</time>
                             </header>
                         </article>
                     </li>
@@ -558,7 +506,7 @@ There are various approaches one can take to attempt to deal with this issue, th
                         <ul class="actions">
                             <li><a href=
                             
-                                /blog/post/
+                                /post/
                             
                             class="button">View more posts</a></li>
                         </ul>
@@ -594,8 +542,8 @@ There are various approaches one can take to attempt to deal with this issue, th
                     <li>
                         <article>
                             <header>
-                                <a href="../categories/r/">R</a>
-                                <span style="float:right;">2</span>
+                                <a href="../categories/r/">r</a>
+                                <span style="float:right;">3</span>
                             </header>
                         </article>
                     </li>
@@ -603,34 +551,7 @@ There are various approaches one can take to attempt to deal with this issue, th
                     <li>
                         <article>
                             <header>
-                                <a href="../categories/qgis/">QGIS</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../categories/quantum-gis/">Quantum GIS</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../categories/r-packages/">R packages</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../categories/rest/">REST</a>
+                                <a href="../categories/geoserver/">geoserver</a>
                                 <span style="float:right;">1</span>
                             </header>
                         </article>
@@ -658,6 +579,42 @@ There are various approaches one can take to attempt to deal with this issue, th
                         <article>
                             <header>
                                 <a href="../categories/node/">node</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../categories/qgis/">qgis</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../categories/quantum-gis/">quantum-gis</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../categories/r-packages/">r-packages</a>
+                                <span style="float:right;">1</span>
+                            </header>
+                        </article>
+                    </li>
+                
+                    <li>
+                        <article>
+                            <header>
+                                <a href="../categories/rest/">rest</a>
                                 <span style="float:right;">1</span>
                             </header>
                         </article>
