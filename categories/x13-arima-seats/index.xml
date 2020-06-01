@@ -1,21 +1,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>X13-ARIMA-SEATS on cmhh</title>
-    <link>https://cmhh.github.io/categories/x13-arima-seats/</link>
-    <description>Recent content in X13-ARIMA-SEATS on cmhh</description>
+    <title>x13-arima-seats on cmhh</title>
+    <link>/categories/x13-arima-seats/</link>
+    <description>Recent content in x13-arima-seats on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0000</lastBuildDate>
     
-        <atom:link href="https://cmhh.github.io/categories/x13-arima-seats/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="/categories/x13-arima-seats/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Seasonal Adjustment as a Service</title>
-      <link>https://cmhh.github.io/post/seasadj/</link>
+      <link>/post/seasadj/</link>
       <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/post/seasadj/</guid>
+      <guid>/post/seasadj/</guid>
       <description>Overview X13-ARIMA-SEATS is a widely used seasonal adjustment program developed by the United States Census Bureau. It’s a command-line tool, and I’ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, as useful proposition.</description>
     </item>
     
