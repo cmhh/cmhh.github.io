@@ -1,328 +1,53 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Using R Packages to Disseminate Data</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<html>
-    <head>
-        
-            
-                <title>Using R Packages to Disseminate Data</title>
-            
-        
-
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="generator" content="Hugo 0.58.1" />
-        
-
-
-        
-            <meta name="author" content="Chris Hansen">
-        
-        
-            
-                <meta name="description" content="Stuff I find interesting. Powered by Hugo">
-            
-        
-
-        <meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Using R Packages to Disseminate Data"/>
-<meta name="twitter:description" content="Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
-But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes."/>
-
-        <meta property="og:title" content="Using R Packages to Disseminate Data" />
-<meta property="og:description" content="Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
-But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="/post/datapackages/" />
-<meta property="article:published_time" content="2016-07-20T00:00:00+00:00" />
-<meta property="article:modified_time" content="2016-07-20T00:00:00+00:00" />
-
-        <meta itemprop="name" content="Using R Packages to Disseminate Data">
-<meta itemprop="description" content="Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
-But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes.">
-
-
-<meta itemprop="datePublished" content="2016-07-20T00:00:00&#43;00:00" />
-<meta itemprop="dateModified" content="2016-07-20T00:00:00&#43;00:00" />
-<meta itemprop="wordCount" content="2004">
-
-
-
-<meta itemprop="keywords" content="" />
-
-        
-
-        
-
-        
-        
-            
-        
-
-        
-        
-            <link rel="stylesheet" href="../../css/google-font.css" />
-            <link rel="stylesheet" href="../../css/font-awesome.min.css" />
-            <link rel="stylesheet" href="../../css/main.css" />
-            <link rel="stylesheet" href="../../css/add-on.css" />
-            <link rel="stylesheet" href="../../css/monokai-sublime.css">
-        
-
-        
-
-        
-        
-        
-            
-        
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
     </head>
-    <body>
-
-        
-        <div id="wrapper">
+<body>
 
     
-    
-<header id="header">
-    
-        <h2><a href="../../">cmhh</i></a></h2>
-    
-
-    <nav class="links">
-        <ul>
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
             
-                <li>
-                    <a href="../../categories">
-                        Categories
-                    </a>
-                </li>
-            
-                <li>
-                    <a href="../../about">
-                        About
-                    </a>
-                </li>
-            
-        </ul>
+        </div>
     </nav>
-    <nav class="main">
-        <ul>
-            
-            <li id="share-nav" class="share-menu" style="display:none;">
-                <a class="fa-share-alt" href="#share-menu">Share</a>
-            </li>
-            
-            <li class="search">
-                <a class="fa-search" href="#search">Search</a>
-                <form id="search" method="get" action="//google.com/search">
-                    <input type="text" name="q" placeholder="Search" />
-                    <input type="hidden" name="q" value="site:/">
-                </form>
-            </li>
-            <li class="menu">
-                <a class="fa-bars" href="#menu">Menu</a>
-            </li>
-        </ul>
-    </nav>
-</header>
-
-
-<section id="menu">
+    
 
     
-        <section>
-            <form class="search" method="get" action="//google.com/search">
-                <input type="text" name="q" placeholder="Search" />
-                <input type="hidden" name="q" value="site:/">
-            </form>
-        </section>
-
-    
-        <section>
-            <ul class="links">
-                
-                    <li>
-                        <a href="../../categories">
-                            <h3>
-                                
-                                Categories
-                            </h3>
-                        </a>
-                    </li>
-                
-                    <li>
-                        <a href="../../about">
-                            <h3>
-                                
-                                About
-                            </h3>
-                        </a>
-                    </li>
-                
-            </ul>
-        </section>
-
-    
-        <section>
-            <ul class="links">
-                <header>
-                    <h3>Recent Posts</h3>
-                </header>
-                
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
                     
+                        Using R Packages to Disseminate Data
+                    
+                </h1>
                 
-
-                
-                    <li>
-                        <a href="../../post/geoserver/"><p>Building Tile Services on-the-fly with GeoServer</p></a>
-                    </li>
-                
-                    <li>
-                        <a href="../../post/"><p>Posts</p></a>
-                    </li>
-                
-            </ul>
-        </section>
-
-    
-        
-</section>
-
-    <section id="share-menu">
-    <section id="social-share-nav">
-        <ul class="links">
-            <header>
-                <h3>Share this post <i class="fa fa-smile-o"></i></h3>
-            </header>
-            
-
-
-<li><a href="//twitter.com/share?url=%2fpost%2fdatapackages%2f&text=Using%20R%20Packages%20to%20Disseminate%20Data&via=" target="_blank" class="share-btn twitter">
-    <i class="fa fa-twitter"></i>
-    <p>Twitter</p>
-</a></li>
-
-
-<li><a href="//plus.google.com/share?url=%2fpost%2fdatapackages%2f" target="_blank" class="share-btn google-plus">
-    <i class="fa fa-google-plus"></i>
-    <p>Google+</p>
-</a></li>
-
-
-<li><a href="//www.facebook.com/sharer/sharer.php?u=%2fpost%2fdatapackages%2f" target="_blank" class="share-btn facebook">
-    <i class="fa fa-facebook"></i>
-    <p>Facebook</p>
-</a></li>
-
-
-<li><a href="//reddit.com/submit?url=%2fpost%2fdatapackages%2f&title=Using%20R%20Packages%20to%20Disseminate%20Data" target="_blank" class="share-btn reddit">
-    <i class="fa fa-reddit-alien"></i>
-    <p>Reddit</p>
-</a></li>
-
-
-<li><a href="//www.linkedin.com/shareArticle?url=%2fpost%2fdatapackages%2f&title=Using%20R%20Packages%20to%20Disseminate%20Data" target="_blank" class="share-btn linkedin">
-    <i class="fa fa-linkedin"></i>
-    <p>LinkedIn</p>
-</a></li>
-
-
-<li><a href="//www.stumbleupon.com/submit?url=%2fpost%2fdatapackages%2f&title=Using%20R%20Packages%20to%20Disseminate%20Data" target="_blank" class="share-btn stumbleupon">
-    <i class="fa fa-stumbleupon"></i>
-    <p>StumbleUpon</p>
-</a></li>
-
-
-<li><a href="mailto:?subject=Check out this post by Chris%20Hansen&body=%2fpost%2fdatapackages%2f" target="_blank" class="share-btn email">
-    <i class="fa fa-envelope"></i>
-    <p>Email</p>
-</a></li>
-
-        </ul>
+            </div>
+        </div>
     </section>
-</section>
-
-    
-    <div id="main">
-        
-        
-        <article class="post">
-    <header>
-    <div class="title">
-        
-            <h1><a href="../../post/datapackages/">Using R Packages to Disseminate Data</a></h1>
-            
-        
-        
-    </div>
-    <div class="meta">
-        
-            
-        
-
-        <time class="published"
-            datetime='2016-07-20'>
-            July 20, 2016</time>
-        <span class="author">Chris Hansen</span>
-        
-            <p>10 minute read</p>
-        
-        
-    </div>
-</header>
 
 
-    <section id="social-share">
-        <ul class="icons">
-            
-
-
-<li><a href="//twitter.com/share?url=%2fpost%2fdatapackages%2f&text=Using%20R%20Packages%20to%20Disseminate%20Data&via=" target="_blank" class="share-btn twitter">
-    <i class="fa fa-twitter"></i>
-    <p>Twitter</p>
-</a></li>
-
-
-<li><a href="//plus.google.com/share?url=%2fpost%2fdatapackages%2f" target="_blank" class="share-btn google-plus">
-    <i class="fa fa-google-plus"></i>
-    <p>Google+</p>
-</a></li>
-
-
-<li><a href="//www.facebook.com/sharer/sharer.php?u=%2fpost%2fdatapackages%2f" target="_blank" class="share-btn facebook">
-    <i class="fa fa-facebook"></i>
-    <p>Facebook</p>
-</a></li>
-
-
-<li><a href="//reddit.com/submit?url=%2fpost%2fdatapackages%2f&title=Using%20R%20Packages%20to%20Disseminate%20Data" target="_blank" class="share-btn reddit">
-    <i class="fa fa-reddit-alien"></i>
-    <p>Reddit</p>
-</a></li>
-
-
-<li><a href="//www.linkedin.com/shareArticle?url=%2fpost%2fdatapackages%2f&title=Using%20R%20Packages%20to%20Disseminate%20Data" target="_blank" class="share-btn linkedin">
-    <i class="fa fa-linkedin"></i>
-    <p>LinkedIn</p>
-</a></li>
-
-
-<li><a href="//www.stumbleupon.com/submit?url=%2fpost%2fdatapackages%2f&title=Using%20R%20Packages%20to%20Disseminate%20Data" target="_blank" class="share-btn stumbleupon">
-    <i class="fa fa-stumbleupon"></i>
-    <p>StumbleUpon</p>
-</a></li>
-
-
-<li><a href="mailto:?subject=Check out this post by Chris%20Hansen&body=%2fpost%2fdatapackages%2f" target="_blank" class="share-btn email">
-    <i class="fa fa-envelope"></i>
-    <p>Email</p>
-</a></li>
-
-        </ul>
-    </section>
+<div class="container">
+    <div class="section">
     
 
-    <div id="content">
-        
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                
 
 
 <p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
@@ -551,7 +276,7 @@ available from the main help page via the
 <code>User guides, package vignettes and other documentation.</code> link.</p>
 <div class="figure">
 <img src="../../img/datapackages/NZCensushelp.png" alt="help(package=&quot;NZCensus&quot;)." />
-<p class="caption"><code>help(package=&quot;NZCensus&quot;)</code>.</p>
+<p class="caption"><code>help(package="NZCensus")</code>.</p>
 </div>
 <div class="figure">
 <img src="../../img/datapackages/NZCensusdoc.png" alt="NZCensus docs." />
@@ -712,420 +437,124 @@ devtools::install_local(&quot;path-to-zip/NZCensusDemos-master.zip&quot;)
 devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pre>
 </div>
 
-    </div>
-
-    <footer>
-        <ul class="stats">
-    
-        
-
-        
-        
-            <li>
-                
-                
-                    
-
-                    
-
-                    
-
-                    
-                        Categories
-                    
-                
-            </li>
-        
-    
-
-    
-    
-        <li><a href='../../categoriesr'>R</a></li>
-    
-        <li><a href='../../categoriesshiny'>shiny</a></li>
-    
-        <li><a href='../../categoriesr-packages'>R packages</a></li>
-    
-</ul>
-
-    </footer>
-</article>
-<ul class="actions pagination">
-    
-        <li><a href="../../post/webservice/"
-                class="button big previous">Web Services with Node.js</a></li>
-    
-
-    
-        <li><a href="../../post/routing/"
-                class="button big next">Routing in R Using the Open Source Routing Machine (OSRM)</a></li>
-    
-</ul>
-
-
-
-
-    </div>
-    
-<section id="sidebar">
-
-    
-        <section id="intro">
-            
-            
-                
-                    <img src="../../img/main/logo.jpg" class="intro-circle" width="" alt="" />
-                
-            
-            
-                <header>
-                    <h2></h2>
-                    <p>Just a collection of things I find interesting...</p>
-                </header>
-            
-            <ul class="icons">
-                
-                    
-<li><a href="//github.com/cmhh" target="_blank" title="GitHub" class="fa fa-github"></a></li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<li><a href="mailto:cmhhansen@outlook.com" title="Email" class="fa fa-envelope"></a></li>
-
-
-                
-            </ul>
-        </section>
-
-    
-        <section id="recent-posts">
-            <ul class="posts">
-                <header>
-                    <h3>Recent Posts</h3>
-                </header>
-                
-                    
-                
-
-                
-                    
-                
-
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2019-09-17'>
-                                    September 17, 2019</time>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <h3><a href="../../post/">Posts</a></h3>
-                                
-                                    
-                                
-                                <time class="published" datetime=
-                                    '2019-09-17'>
-                                    September 17, 2019</time>
-                            </header>
-                        </article>
-                    </li>
-                
-
-                
-                    <li>
-                        <ul class="actions">
-                            <li><a href=
-                            
-                                /post/
-                            
-                            class="button">View more posts</a></li>
-                        </ul>
-                    </li>
-                
-            </ul>
-        </section>
-
-    
-    
-    
-    
-        <section id="categories">
-            <ul class="posts">
-                <header>
-                    <h3><a href="../../categories/">Categories</a></h3>
-                </header>
-
-                
-                    
-                
-
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/geospatial/">geospatial</a>
-                                <span style="float:right;">3</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/r/">r</a>
-                                <span style="float:right;">3</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/geoserver/">geoserver</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/javascript/">javascript</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/mapping/">mapping</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/node/">node</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/qgis/">qgis</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/quantum-gis/">quantum-gis</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/r-packages/">r-packages</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/rest/">rest</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/shiny/">shiny</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-                    <li>
-                        <article>
-                            <header>
-                                <a href="../../categories/webservices/">webservices</a>
-                                <span style="float:right;">1</span>
-                            </header>
-                        </article>
-                    </li>
-                
-            </ul>
-        </section>
-    
-
-    
-        
-
-    
-        <section id="footer">
-            <ul class="icons">
-                
-                
-                    
-<li><a href="//github.com/cmhh" target="_blank" title="GitHub" class="fa fa-github"></a></li>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<li><a href="mailto:cmhhansen@outlook.com" title="Email" class="fa fa-envelope"></a></li>
-
-
-                
-            </ul>
-
-            <p class="copyright">&copy; cmhh. Design: <a href="http://html5up.net" target="_blank">HTML5 UP</a>. Ported by <a href="//github.com/jpescador" target="_blank">Julio Pescador</a>. Powered by <a href="//gohugo.io" target="_blank">Hugo</a></p>
-        </section>
-
-</section>
-
             </div>
-        <a id="back-to-top" href="#" class="fa fa-arrow-up fa-border fa-2x"></a>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/node.js">node.js</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <time class="has-text-grey-light is-size-7">1 June 2020</time>
+        
+            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <time class="has-text-grey-light is-size-7">17 September 2019</time>
+        
+            <h1><a href="https://cmhh.github.io/post/qgis/">Web Maps and Tiles with QGIS</a></h1>
+            <time class="has-text-grey-light is-size-7">26 January 2017</time>
+        
+            <h1><a href="https://cmhh.github.io/post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h1>
+            <time class="has-text-grey-light is-size-7">28 November 2016</time>
+        
+            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
+            <time class="has-text-grey-light is-size-7">27 November 2016</time>
+        
+    </div>
+</div>
+    <br>
+                
+  
 
-        
-        
-            
-        
 
-        
-        
-            <script src="../../js/jquery.min.js"></script>
-            <script src="../../js/skel.min.js"></script>
-            <script src="../../js/util.js"></script>
-            <script src="../../js/main.js"></script>
-            <script src="../../js/backToTop.js"></script>
-            <script src="../../js/highlight.pack.js"></script>
-        
 
-        
+<div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Related posts</h1>
+      
+      
+            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <time class="has-text-grey-light is-size-7">17 September 2019</time>
+      
+            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
+            <time class="has-text-grey-light is-size-7">27 November 2016</time>
+      
+    </div>
+</div>
 
-            
-            <script>hljs.initHighlightingOnLoad();</script>
-            
-    </body>
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="https://cmhh.github.io/archives/2020">2020</a> (1)<br>
+        
+            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
+        
+            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
+        
+            <a href="https://cmhh.github.io/archives/2016">2016</a> (4)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
 </html>
-
