@@ -1,0 +1,26 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>node.js on cmhh</title>
+    <link>/categories/node.js/</link>
+    <description>Recent content in node.js on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 28 May 2016 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/categories/node.js/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Web Services with Node.js</title>
+      <link>/post/webservice/</link>
+      <pubDate>Sat, 28 May 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/post/webservice/</guid>
+      <description>What is node.js? According to the Node.js website:
+ Node.js is a JavaScript runtime built on Chrome’s V8 JavaScript engine. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient.
+  Node.js’ package ecosystem, npm, is the largest ecosystem of open source libraries in the world.
+ Event-driven, non-blocking I/O model Node.js program execution consists of a single-threaded event loop. But all I/O methods in the Node.</description>
+    </item>
+    
+  </channel>
+</rss>
