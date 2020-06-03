@@ -1,22 +1,22 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>seasonal adjustment on cmhh</title>
-    <link>/categories/seasonal-adjustment/</link>
-    <description>Recent content in seasonal adjustment on cmhh</description>
+    <title>seasonal-adjustment on cmhh</title>
+    <link>https://cmhh.github.io/categories/seasonal-adjustment/</link>
+    <description>Recent content in seasonal-adjustment on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Mon, 01 Jun 2020 00:00:00 +0000</lastBuildDate>
     
-        <atom:link href="/categories/seasonal-adjustment/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="https://cmhh.github.io/categories/seasonal-adjustment/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Seasonal Adjustment as a Service</title>
-      <link>/post/seasadj/</link>
+      <link>https://cmhh.github.io/post/seasadj/</link>
       <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>/post/seasadj/</guid>
-      <description>Overview X13-ARIMA-SEATS is a widely used seasonal adjustment program developed by the United States Census Bureau. It’s a command-line tool, and I’ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, as useful proposition.</description>
+      <guid>https://cmhh.github.io/post/seasadj/</guid>
+      <description>Overview X13-ARIMA-SEATS is a widely used seasonal adjustment program developed by the United States Census Bureau. It’s a command-line tool, and I’ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, a useful proposition.</description>
     </item>
     
   </channel>

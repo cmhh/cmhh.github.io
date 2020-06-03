@@ -3,197 +3,207 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/tags/akka-http/</loc>
+    <loc>https://cmhh.github.io/tags/akka-http/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/akka-http/</loc>
+    <loc>https://cmhh.github.io/categories/akka-http/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/</loc>
+    <loc>https://cmhh.github.io/categories/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/</loc>
+    <loc>https://cmhh.github.io/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/</loc>
+    <loc>https://cmhh.github.io/post/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/seasonal-adjustment/</loc>
+    <loc>https://cmhh.github.io/post/seasadj/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/seasonal-adjustment/</loc>
+    <loc>https://cmhh.github.io/tags/seasonal-adjustment/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/seasadj/</loc>
+    <loc>https://cmhh.github.io/categories/seasonal-adjustment/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/</loc>
+    <loc>https://cmhh.github.io/tags/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/x13-arima-seats/</loc>
+    <loc>https://cmhh.github.io/tags/vuejs/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/x13-arima-seats/</loc>
+    <loc>https://cmhh.github.io/categories/vuejs/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/geoserver/</loc>
+    <loc>https://cmhh.github.io/tags/x13-arima-seats/</loc>
+    <lastmod>2020-06-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://cmhh.github.io/categories/x13-arima-seats/</loc>
+    <lastmod>2020-06-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://cmhh.github.io/post/geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/geoserver/</loc>
+    <loc>https://cmhh.github.io/tags/geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/geoserver/</loc>
+    <loc>https://cmhh.github.io/categories/geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/r/</loc>
+    <loc>https://cmhh.github.io/tags/r/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/r/</loc>
+    <loc>https://cmhh.github.io/categories/r/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/qgis/</loc>
+    <loc>https://cmhh.github.io/tags/qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/qgis/</loc>
+    <loc>https://cmhh.github.io/categories/qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/tiles/</loc>
+    <loc>https://cmhh.github.io/tags/tiles/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/tiles/</loc>
+    <loc>https://cmhh.github.io/categories/tiles/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/qgis/</loc>
+    <loc>https://cmhh.github.io/post/qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/tiles/</loc>
+    <loc>https://cmhh.github.io/post/tiles/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/tilestache/</loc>
+    <loc>https://cmhh.github.io/tags/tilestache/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/tilestache/</loc>
+    <loc>https://cmhh.github.io/categories/tilestache/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/wmts/</loc>
+    <loc>https://cmhh.github.io/tags/wmts/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/wmts/</loc>
+    <loc>https://cmhh.github.io/categories/wmts/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/geospatial/</loc>
+    <loc>https://cmhh.github.io/tags/geospatial/</loc>
     <lastmod>2016-11-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/geospatial/</loc>
+    <loc>https://cmhh.github.io/categories/geospatial/</loc>
     <lastmod>2016-11-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/osrm/</loc>
+    <loc>https://cmhh.github.io/tags/osrm/</loc>
     <lastmod>2016-11-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/osrm/</loc>
+    <loc>https://cmhh.github.io/categories/osrm/</loc>
     <lastmod>2016-11-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/routing/</loc>
+    <loc>https://cmhh.github.io/post/routing/</loc>
     <lastmod>2016-11-27T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/r-packages/</loc>
+    <loc>https://cmhh.github.io/tags/r-packages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/r-packages/</loc>
+    <loc>https://cmhh.github.io/categories/r-packages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/shiny/</loc>
+    <loc>https://cmhh.github.io/tags/shiny/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/shiny/</loc>
+    <loc>https://cmhh.github.io/categories/shiny/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/datapackages/</loc>
+    <loc>https://cmhh.github.io/post/datapackages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/tags/node.js/</loc>
+    <loc>https://cmhh.github.io/tags/nodejs/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/node.js/</loc>
+    <loc>https://cmhh.github.io/categories/nodejs/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/webservice/</loc>
+    <loc>https://cmhh.github.io/post/webservice/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url>
   

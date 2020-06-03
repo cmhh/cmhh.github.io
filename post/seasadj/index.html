@@ -9,15 +9,15 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
-    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="../../css/blog.css" />
+    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
     </head>
 <body>
 
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="../../">Home</a>
+            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
             
         </div>
     </nav>
@@ -25,7 +25,7 @@
 
     
     <section class="hero is-info is-medium">
-        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
             <div class="container has-text-centered">
                 <br>
                 <h1 class="title is-size-1">
@@ -53,11 +53,11 @@
 <p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
-<p><a href="https://www.census.gov/srd/www/x13as/" target="_blank">X13-ARIMA-SEATS</a> is a widely used seasonal adjustment program developed by the <a href="https://www.census.gov/" target="_blank">United States Census Bureau</a>. It’s a command-line tool, and I’ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, as useful proposition.</p>
+<p><a href="https://www.census.gov/srd/www/x13as/" target="_blank">X13-ARIMA-SEATS</a> is a widely used seasonal adjustment program developed by the <a href="https://www.census.gov/" target="_blank">United States Census Bureau</a>. It’s a command-line tool, and I’ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, a useful proposition.</p>
 </div>
 <div id="a-simple-example" class="section level1">
 <h1>A Simple Example…</h1>
-<p>The X13 binary ships with a relatively simple example base around the famous Box and Jenkins air passengers data in a file called <code>testairline.spc</code>:</p>
+<p>The X13 binary ships with a relatively simple example using the famous Box and Jenkins air passengers data. That is, a simple specification is provided in a file called <code>testairline.spc</code>:</p>
 <pre class="plaintext"><code>series{
   title=&quot;International Airline Passengers Data from Box and Jenkins&quot;
   start=1949.01
@@ -92,9 +92,9 @@ automdl{
 }
 outlier{ }
 x11{}</code></pre>
-<p>You could adjust this at the command line by running something like (there are a number of ways the program can be invoked):</p>
+<p>One could adjust this at the command line by running something like (there are a number of ways the program can be invoked):</p>
 <pre class="bash"><code>x13ashtml testairline -g g</code></pre>
-<p>Adding the <code>g</code> flag with value <code>g</code> tells X13 we wish to save output to subdirectory <code>g</code>, and so we will end up with a number of text files called <code>testairline.*</code>. For example, a range of diagnostics will be written as key-value pairs in a file called <code>g/testairline.udg</code>, the first few lines of which would look similar to:</p>
+<p>Adding the <code>g</code> flag with value <code>g</code> tells X13 we wish to save output to subdirectory <code>g</code>, and we will end up with a number of text files matching the pattern <code>g/testairline.*</code>. For example, a range of diagnostics will be written as key-value pairs in a file called <code>g/testairline.udg</code>, the first few lines of which would look similar to:</p>
 <pre class="plaintext"><code>date: Jun  1, 2020  
 time: 14.19.08 
 version: 1.1
@@ -123,7 +123,7 @@ transform: Automatic selection
 </div>
 <div id="as-a-service" class="section level1">
 <h1>…as a Service</h1>
-<p>I created a <a href="https://github.com/cmhh/seasadj">basic library</a> which can be used to run X13 programmatically on the JVM (the library is written in Scala), and also as a web service (the web service itself is written using Akka HTTP). The above test specification would be converted to JSON as follows:</p>
+<p>I created a <a href="https://github.com/cmhh/seasadj">basic library</a> which can be used to run X13 programmatically on the JVM (the library is written in Scala), and also as a web service (the web service itself is written using Akka HTTP). The above test specification would be converted to JSON in somewhat obvious fashion as follows:</p>
 <pre class="json"><code>{
   &quot;airpassengers&quot;:{
     &quot;series&quot;:{
@@ -175,7 +175,7 @@ transform: Automatic selection
 <img src="../../img/seasadj/postman01.png" alt="POST" />
 <p class="caption">POST</p>
 </div>
-<p>Note that more than a single series can be included in a single JSON in a fairly obvious way, and this would include the use of composites. Moreover, because the full set of results can get somewhat large, it is possible to edit. For example, if we only wanted to keep the seasonally adjusted and trend time series output we could append the query parameter <code>save=sa,trn</code>, and if we wanted to suppress all the dates and just include the start date and frequency we could append <code>allDates=false</code>.</p>
+<p>Note that more than a single series can be included in a single JSON file / string in a fairly obvious way, and the use of composites is permitted. Moreover, because the full set of results can get somewhat large, it is possible to edit the results. For example, if we only wished to keep the seasonally adjusted and trend time series output we could append the query parameter <code>save=sa,trn</code>; and if we wanted to suppress all the dates and just include the start date and frequency we could append <code>allDates=false</code>.</p>
 </div>
 <div id="a-basic-javascript-client" class="section level1">
 <h1>A Basic JavaScript ‘Client’</h1>
@@ -463,33 +463,35 @@ let app = new Vue({
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
-            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
         
-            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
         
-            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
         
-            <span class="tag"><a href="../../tags/node.js">node.js</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
         
-            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
         
-            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
         
-            <span class="tag"><a href="../../tags/r">r</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
         
-            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
         
-            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
-            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
         
-            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
         
-            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
         
-            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/vuejs">vuejs</a></span>
         
-            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
     </div>
@@ -498,19 +500,19 @@ let app = new Vue({
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
-            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
-            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
         
-            <h1><a href="../../post/qgis/">Web Maps and Tiles with QGIS</a></h1>
+            <h1><a href="https://cmhh.github.io/post/qgis/">Web Maps and Tiles with QGIS</a></h1>
             <time class="has-text-grey-light is-size-7">26 January 2017</time>
         
-            <h1><a href="../../post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h1>
+            <h1><a href="https://cmhh.github.io/post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h1>
             <time class="has-text-grey-light is-size-7">28 November 2016</time>
         
-            <h1><a href="../../post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
+            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
             <time class="has-text-grey-light is-size-7">27 November 2016</time>
         
     </div>
@@ -525,13 +527,13 @@ let app = new Vue({
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="../../archives/2020">2020</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2020">2020</a> (1)<br>
         
-            <a href="../../archives/2019">2019</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
         
-            <a href="../../archives/2017">2017</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
         
-            <a href="../../archives/2016">2016</a> (4)<br>
+            <a href="https://cmhh.github.io/archives/2016">2016</a> (4)<br>
         
     </div>
 </div>
@@ -555,7 +557,7 @@ let app = new Vue({
 </footer>
 
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
-<script src="../../js/highlight.pack.js"></script>
+<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 </body>
 </html>
