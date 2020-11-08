@@ -238,7 +238,7 @@ mb_dissolved_sf &lt;-
 ggplot() + 
   geom_sf(
     data = st_read(&quot;meshblock-2020-generalised.gpkg&quot;), 
-    aes(fill = LANDWATER_NAME), linetype = &quot;blank&quot;
+    aes(fill = LANDWATER_NAME)
   ) +
   guides(fill = guide_legend(title = &quot;&quot;))</code></pre>
 <div class="large">
