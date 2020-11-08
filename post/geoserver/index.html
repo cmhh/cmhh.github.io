@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
     <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
     <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    </head>
+    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+</head>
 <body>
 
     
@@ -48,9 +49,11 @@
         <div class="tile is-child box">
             <div class="content">
                 
+<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
 
 
-<p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
 <p>Interactive web applications can be a great way to present information to a diverse audience. If your interface is well designed and intuitive, then almost anybody will be able to use it. And where data has a spatial dimension, slippy maps can be an effective way of presenting information. But sometimes the objects we want to render are a bit on the large side. This means that our web browser can struggle to render all the required features, and it also means that mobile users of an app might end up using excessive amounts of data.</p>
@@ -126,7 +129,7 @@ docker build -t geoserver &quot;/home/cmhh/R/x86_64-pc-linux-gnu-library/3.5/geo
 <pre class="bash"><code>$ docker run -d --name geoserver --rm -p 8080:8080 geoserver</code></pre>
 <p>The container will take a short while to get up and running completely, but when done, simply open a browser at <code>http://localhost:8080/geoserver</code>. To login, the username is <code>admin</code>, and the password is <code>geoserver</code> (obviously, we’d configure this differently in a production setting… more on that later). And that’s it.</p>
 <div class="figure">
-<img src="../../img/geoserveR/geoserver001.png" alt="http://localhost:8080/geoserver" />
+<img src="../../img/geoserveR/geoserver001.png" alt="" />
 <p class="caption"><code>http://localhost:8080/geoserver</code></p>
 </div>
 </div>
@@ -135,12 +138,12 @@ docker build -t geoserver &quot;/home/cmhh/R/x86_64-pc-linux-gnu-library/3.5/geo
 <p>GeoServer includes several data sources by default, and we can use these to test out our install. We’re mostly interested in WMS services which we can display on a leaflet map, though GeoServer can display WCS, WFS, WMS, and WMTS.</p>
 <p>Broadly speaking, GeoServer groups sets of <em>layers</em> together in <em>workspaces</em>, where the layers are the features we’re intrested in displaying on a map. And the layers themselves are built up from <em>data stores</em>. We can inspect workspaces in the main web interface by clicking the Data &gt; Workpaces link:</p>
 <div class="figure">
-<img src="../../img/geoserveR/workspaces.png" alt="Workspaces" />
+<img src="../../img/geoserveR/workspaces.png" alt="" />
 <p class="caption">Workspaces</p>
 </div>
 <p>Any of the listed workspaces can then be accessed as WMS services programmatically via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?</code> (and an XML file describing the service can be accessed via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?request=GetCapabilities</code>). For example, if we wanted to display layers that are part of the <code>topp</code> workspace, we’d use <code>http://localhost:8080/geoserver/topp/wms?</code>. If we click on Data &gt; Layers in the main web interface we see that there is, for example, a layer in the <code>topp</code> workspace called <code>states</code>:</p>
 <div class="figure">
-<img src="../../img/geoserveR/layers.png" alt="Layers" />
+<img src="../../img/geoserveR/layers.png" alt="" />
 <p class="caption">Layers</p>
 </div>
 <p>We can display this in a leaflet map in R by running the following code:</p>
@@ -158,7 +161,7 @@ leaflet() %&gt;%
   )</code></pre>
 <p>which yields the following:</p>
 <div class="figure">
-<img src="../../img/geoserveR/states.png" alt="states" />
+<img src="../../img/geoserveR/states.png" alt="" />
 <p class="caption">states</p>
 </div>
 </div>
@@ -250,7 +253,7 @@ leaflet() %&gt;%
               label = ~code)</code></pre>
 <p>This yields something like the following:</p>
 <div class="figure">
-<img src="../../img/geoserveR/leaflet001.png" alt="meshblocks" />
+<img src="../../img/geoserveR/leaflet001.png" alt="" />
 <p class="caption">meshblocks</p>
 </div>
 <p>Saved as a stand-alone HTML file, this weighs in at over 15MB, and can be sluggish when rendering. In actuality, the features are oversimplified here, so that when zoomed in the shapes have lost far too much detail. But if we’d displayed them at full resolution, our HTML file would be over 100MB!</p>
@@ -286,11 +289,11 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
   )</code></pre>
 <p>Visually:</p>
 <div class="figure">
-<img src="../../img/geoserveR/leaflet003.png" alt="mb2018_with_labels" />
+<img src="../../img/geoserveR/leaflet003.png" alt="" />
 <p class="caption">mb2018_with_labels</p>
 </div>
 <div class="figure">
-<img src="../../img/geoserveR/leaflet004.png" alt="mb2018_with_labels" />
+<img src="../../img/geoserveR/leaflet004.png" alt="" />
 <p class="caption">mb2018_with_labels</p>
 </div>
 <p>Better yet, saved as a stand-alone HTML file, this map is less than 500KB (though the various tiles still need to be transferred, so one can still burn through a bit of data just navigating around).</p>
@@ -320,7 +323,7 @@ leaflet() %&gt;%
   addLegend(position = &quot;bottomright&quot;, pal = pal, values = mapdata$value)</code></pre>
 <p>This yields an interactive map as follows:</p>
 <div class="figure">
-<img src="../../img/geoserveR/leaflet002.png" alt="population by SA2" />
+<img src="../../img/geoserveR/leaflet002.png" alt="" />
 <p class="caption">population by SA2</p>
 </div>
 <p>The resulting HTML file weighs in at 3.2MB–not enormous by any stretch, but still probably not something you want users to be fetching repeatedly over a mobile connection, for example. But this map just shows data for 2018, yet we have data for the years 1996, 2001, and 2006-2018–that’s 15 years all up. What if we want to make all this available on one map? In that case, the resulting stand-alone HTML file weighs in at over 40MB. (Of course, a hosted app could serve up a year based on user selection, but 3MB or so would still be transferred each time the year was switched).</p>
@@ -378,11 +381,11 @@ m %&gt;%
   showGroup(as.character(tail(years, 1)))</code></pre>
 <p>which yields:</p>
 <div class="figure">
-<img src="../../img/geoserveR/leaflet05.png" alt="sa22018_with_counts" />
+<img src="../../img/geoserveR/leaflet05.png" alt="" />
 <p class="caption">sa22018_with_counts</p>
 </div>
 <div class="figure">
-<img src="../../img/geoserveR/leaflet06.png" alt="sa22018_with_counts" />
+<img src="../../img/geoserveR/leaflet06.png" alt="" />
 <p class="caption">sa22018_with_counts</p>
 </div>
 <!--
@@ -475,6 +478,8 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
         
             <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
@@ -482,6 +487,10 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
             <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
         
@@ -501,6 +510,8 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
         
             <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
@@ -510,6 +521,12 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
+            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
+            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
             <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
@@ -518,12 +535,6 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
         
             <h1><a href="https://cmhh.github.io/post/qgis/">Web Maps and Tiles with QGIS</a></h1>
             <time class="has-text-grey-light is-size-7">26 January 2017</time>
-        
-            <h1><a href="https://cmhh.github.io/post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h1>
-            <time class="has-text-grey-light is-size-7">28 November 2016</time>
-        
-            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
-            <time class="has-text-grey-light is-size-7">27 November 2016</time>
         
     </div>
 </div>
@@ -537,6 +548,9 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
     <div class="card-content">
         <h1 class="title is-5">Related posts</h1>
       
+      
+            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
       
             <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
             <time class="has-text-grey-light is-size-7">27 November 2016</time>
@@ -553,7 +567,7 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2020">2020</a> (3)<br>
         
             <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
         
@@ -585,5 +599,11 @@ gs$createLayer(&quot;statsnz&quot;, &quot;mb2018&quot;, &quot;mb2018_with_labels
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
 <script src="https://cmhh.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
 </body>
 </html>

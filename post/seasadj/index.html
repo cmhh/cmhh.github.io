@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
     <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
     <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    </head>
+    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+</head>
 <body>
 
     
@@ -48,9 +49,11 @@
         <div class="tile is-child box">
             <div class="content">
                 
+<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
 
 
-<p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
 <p><a href="https://www.census.gov/srd/www/x13as/" target="_blank">X13-ARIMA-SEATS</a> is a widely used seasonal adjustment program developed by the <a href="https://www.census.gov/" target="_blank">United States Census Bureau</a>. It’s a command-line tool, and I’ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, a useful proposition.</p>
@@ -172,7 +175,7 @@ transform: Automatic selection
   --compressed --output testairline_output.json</code></pre>
 <p>The resulting JSON file contains most of the X13 output where files that can be imported as time series are saved in an array called <code>series</code>, and the diagnostics are parsed into an array called <code>diagnostics</code>.</p>
 <div class="figure">
-<img src="../../img/seasadj/postman01.png" alt="POST" />
+<img src="../../img/seasadj/postman01.png" alt="" />
 <p class="caption">POST</p>
 </div>
 <p>Note that more than a single series can be included in a single JSON file / string in a fairly obvious way, and the use of composites is permitted. Moreover, because the full set of results can get somewhat large, it is possible to edit the results. For example, if we only wished to keep the seasonally adjusted and trend time series output we could append the query parameter <code>save=sa,trn</code>; and if we wanted to suppress all the dates and just include the start date and frequency we could append <code>allDates=false</code>.</p>
@@ -465,6 +468,8 @@ let app = new Vue({
         
             <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
@@ -472,6 +477,10 @@ let app = new Vue({
             <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
         
@@ -491,6 +500,8 @@ let app = new Vue({
         
             <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
@@ -500,6 +511,12 @@ let app = new Vue({
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
+            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
+            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
             <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
@@ -508,12 +525,6 @@ let app = new Vue({
         
             <h1><a href="https://cmhh.github.io/post/qgis/">Web Maps and Tiles with QGIS</a></h1>
             <time class="has-text-grey-light is-size-7">26 January 2017</time>
-        
-            <h1><a href="https://cmhh.github.io/post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h1>
-            <time class="has-text-grey-light is-size-7">28 November 2016</time>
-        
-            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
-            <time class="has-text-grey-light is-size-7">27 November 2016</time>
         
     </div>
 </div>
@@ -527,7 +538,7 @@ let app = new Vue({
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2020">2020</a> (3)<br>
         
             <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
         
@@ -559,5 +570,11 @@ let app = new Vue({
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
 <script src="https://cmhh.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
 </body>
 </html>

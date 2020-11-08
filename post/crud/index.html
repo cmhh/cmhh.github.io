@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Creating a Basic Read-only Service</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    </head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Creating a Basic Read-only Service
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <!-- raw HTML omitted -->
+<h1 id="overview">Overview</h1>
+<p>Data services are great.  Among other use cases, they let others access your data remotely in a relatively user-friendly way, and avoid the need to download a whole database or large flat file just to find a handful of relevant records (and do this again after the next database update).  And having published data (and procedures) in this way, it is also then only too easy to build appealing single page applications (SPAs) on top.</p>
+<p>However, it can be pretty easy to over-engineer things.  There are a number of specifications and formats to select from, like GraphQL or OData.  There are plenty of frameworks, like Spring Boot, ASP.NET Core, or Play.  And having made one or two services, it can be easy to think investing in a generic solution that can address all your future data service needs might be a worthwhile venture.</p>
+<p>But if your use case is simply that you have a moderately sized database that you want to make available in a strictly read-only fashion, then a simple, bespoke solution may suffice.  Put another way, if you have a simple database and it&rsquo;s mostly used to retrieve data using minor variations on a few simple queries, you might not get huge milage out of something that is beautifully engineered for general purpose use.</p>
+<p>Having said all this, let&rsquo;s build a simple data service.  The idea will be to build a service with one or two simple end-points, and without using a framework as such.  We&rsquo;ll make two versions: one using <a href="https://nodejs.org/en/">Node.js</a>, and one using <a href="https://github.com/akka/akka-http">Akka HTTP</a>.  Node.js is wildly popular, with an absolutely huge library of middleware available, so one really can put together something useful with surprisingly little code.  Similarly, Akka HTTP can be used to put together a data service with &lsquo;just enough&rsquo; code.  I like Scala as a language, and I use it a fair bit for general purpose programming.  Akka HTTP lets me take a library made with Scala, and then expose it as a web service to non-Scala users.  (The same can be said for many other languages–R and <a href="https://www.rplumber.io/">plumber</a>, Python and <a href="https://flask.palletsprojects.com/en/1.1.x/">Flask</a>, Julia and <a href="https://genieframework.com/">Genie</a>, and so on).</p>
+<h1 id="the-data">The Data</h1>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+<p>Census SA1 service based on SQLite database?  Include a docker image that creates the database, as well as R scripts.</p>
+<h1 id="creating-a-database">Creating a Database</h1>
+<h1 id="but-do-i-really-need-a-database">But Do I Really Need a Database?</h1>
+<p>You need a database of <em>some</em> kind.  A CSV file itself is a database of sorts.  But do you need a full-blown RDBMS such as MySQL?  Or a NoSQL option such as MongoDB?  The answer is, it depends.  If you have a lot of data that needs to be persistent, highly available, and / or you want some control over who can access it, then databases offer all of this functionality and more.  But if your needs are simpler, then something more basic, perhaps bespoke, might be perfectly plausible.  For example, an in-memory associative array might work perfectly well in the same sort of settings as you might use a key-value store like <a href="https://redis.io/">Redis</a> (which is also a great database option) if your data fits in memory, and can be recreated quickly from source in the case of failure.</p>
+<!-- raw HTML omitted -->
+<ul>
+<li>in-memory database vs. relational database.  even database can be containerised.</li>
+<li>one using node, one using akka http</li>
+</ul>
+<h1 id="service-1-nodejs">Service 1 (Node.js)</h1>
+<h1 id="service-2-akka-http">Service 2 (Akka HTTP)</h1>
+<h1 id="deploying-the-service">Deploying the Service</h1>
+<h1 id="securing-the-service">Securing the Service</h1>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka">akka</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-actor">akka-actor</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-remote">akka-remote</a></span>
+        
+            <span class="tag"><a href="../../tags/convolutional-neural-network">convolutional-neural-network</a></span>
+        
+            <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+        
+            <span class="tag"><a href="../../tags/image-classfication">image-classfication</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../post/chest-xray/">Classifying Chest X-Rays with Deeplearning4j</a></h1>
+            <time class="has-text-grey-light is-size-7">19 June 2020</time>
+        
+            <h1><a href="../../post/crud/">Creating a Basic Read-only Service</a></h1>
+            <time class="has-text-grey-light is-size-7">13 June 2020</time>
+        
+            <h1><a href="../../post/spark-akka/">Collecting Spark DataFrames or RDDs with Akka Actors</a></h1>
+            <time class="has-text-grey-light is-size-7">13 June 2020</time>
+        
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <time class="has-text-grey-light is-size-7">1 June 2020</time>
+        
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <time class="has-text-grey-light is-size-7">17 September 2019</time>
+        
+    </div>
+</div>
+    <br>
+                
+  
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Related posts</h1>
+      
+      
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <time class="has-text-grey-light is-size-7">1 June 2020</time>
+      
+            <h1><a href="../../post/webservice/">Web Services with Node.js</a></h1>
+            <time class="has-text-grey-light is-size-7">28 May 2016</time>
+      
+    </div>
+</div>
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (4)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

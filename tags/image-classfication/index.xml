@@ -1,0 +1,23 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>image-classfication on cmhh</title>
+    <link>/tags/image-classfication/</link>
+    <description>Recent content in image-classfication on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Fri, 19 Jun 2020 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/image-classfication/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Classifying Chest X-Rays with Deeplearning4j</title>
+      <link>/post/chest-xray/</link>
+      <pubDate>Fri, 19 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/chest-xray/</guid>
+      <description>Overview In this post we demonstrate the use of a convolutional neural network in the classificaton of X-ray images, and using deeplearning4j (dl4j) as the framework of choice. The code itself is written using Scala, but it should be obvious enough how something similar could be done in either Java or Kotlin. Note that we use Scala 2.11.12 here. This is deliberate since I hope to modify this example in a later post to run on a Spark cluster, which requires Scala 2.</description>
+    </item>
+    
+  </channel>
+</rss>

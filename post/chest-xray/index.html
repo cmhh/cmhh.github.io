@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Classifying Chest X-Rays with Deeplearning4j</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    </head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Classifying Chest X-Rays with Deeplearning4j
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                
+
+
+<p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>In this post we demonstrate the use of a convolutional neural network in the classificaton of X-ray images, and using <a href="https://deeplearning4j.org/">deeplearning4j</a> (dl4j) as the framework of choice. The code itself is written using Scala, but it should be obvious enough how something similar could be done in either Java or Kotlin. Note that we use Scala 2.11.12 here. This is deliberate since I hope to modify this example in a later post to run on a Spark cluster, which requires Scala 2.10.x or 2.11.x (Spark 3.0 has been upgraded to Scalal 2.12, but the cluster I’ll be using has Spark 2.x).</p>
+</div>
+<div id="source-data" class="section level1">
+<h1>Source Data</h1>
+<p>All the data for this exercise can be found at <a href="https://nihcc.app.box.com/v/ChestXray-NIHCC">https://nihcc.app.box.com/v/ChestXray-NIHCC</a>, and further detail can be found in the following article:</p>
+<blockquote>
+<p><a href="https://arxiv.org/abs/1705.02315">Wang, Xiaosong et al. “ChestX-Ray8: Hospital-Scale Chest X-Ray Database and Benchmarks on Weakly-Supervised Classification and Localization of Common Thorax Diseases.” 2017 IEEE Conference on Computer Vision and Pattern Recognition (CVPR) (2017): n. pag. Crossref. Web.</a></p>
+</blockquote>
+<p>The image data itself is contained in 12 <code>tar.gz</code> files, totalling 45GB. Extracted, there are 112,120 PNG images in total, each 1024x1024 pixels, still totalling roughly 45GB. Each image is listed in a control file, <code>Data_Entry_2017_v2020.csv</code> which lists the image name, along with several other features. Importantly, the field <code>Finding Labels</code> contains a <code>|</code> delimited list of outcomes which will ultimately form our feature labels. By way of illustration, the following is reproduced from the included reference:</p>
+<div class="figure">
+<img src="../../img/chest-xray/fig01.png" alt="Eight common thoracic diseases observed in chest X-rays that validate a challenging task of fully-automated diagnosis." />
+<p class="caption">Eight common thoracic diseases observed in chest X-rays that validate a challenging task of fully-automated diagnosis.</p>
+</div>
+<p>In actual fact, the database has 14 possible labels, not including ‘No Finding’:</p>
+<ul>
+<li>Atelectasis (11559)</li>
+<li>Cardiomegaly (2776)</li>
+<li>Consolidation (4667)</li>
+<li>Edema (2303)</li>
+<li>Effusion (13317)</li>
+<li>Emphysema (2516)</li>
+<li>Fibrosis (1686)</li>
+<li>Hernia (227)</li>
+<li>Infiltration (19894)</li>
+<li>Mass (5782)</li>
+<li>Nodule (6331)</li>
+<li>Pleural (3385)</li>
+<li>Pneumonia (1431)</li>
+<li>Pneumothorax (5302)</li>
+</ul>
+<p>From a purely practical point of view, this means there are <span class="math inline">\(2^{14} = 16384\)</span> possible combinations, though <em>only</em> 836 were observed in practice. Of the 51759 images with at least one finding, 59.8% had one, 27.6% had 2, 9.4% had 3, and 0.7% had 4 or more.</p>
+<!--
+![`00000001_000.png`](/img/chest-xray/00000001_000.png)
+
+Each image is listed in a control file, `Data_Entry_2017_v2020.csv` which lists the image name, along with several other features.  Importantly, the field `Finding Labels` contains a `|` delimited list of outcomes which will ultimately form our feature labels.  For example, the image above is an X-ray of a 57-year old male, with a single finding of cardiomegaly (an enlarged heart).
+
+<div class="table-container">
+|Image Index      |Finding Labels              | Follow-up #| Patient ID| Patient Age|Patient Gender |View Position | OriginalImage[Width| Height]| OriginalImagePixelSpacing[x|    y]|
+|:----------------|:---------------------------|-----------:|----------:|-----------:|:--------------|:-------------|-------------------:|-------:|---------------------------:|-----:|
+|00000001_000.png |Cardiomegaly                |           0|          1|          57|M              |PA            |                2682|    2749|                       0.143| 0.143|
+|00000001_001.png |Cardiomegaly&#124;Emphysema |           1|          1|          58|M              |PA            |                2894|    2729|                       0.143| 0.143|
+|00000001_002.png |Cardiomegaly&#124;Effusion  |           2|          1|          58|M              |PA            |                2500|    2048|                       0.168| 0.168|
+|00000002_000.png |No Finding                  |           0|          2|          80|M              |PA            |                2500|    2048|                       0.171| 0.171|
+|00000003_001.png |Hernia                      |           0|          3|          74|F              |PA            |                2500|    2048|                       0.168| 0.168|
+</div>
+-->
+</div>
+<div id="data-preparation" class="section level1">
+<h1>Data Preparation</h1>
+<p>The basic setup when using dl4j is to create a model, and to pass it some sort of dataset iterator for training and evaluation. So, creating the required iterator will be our first task. dl4j supplies a class <code>org.datavec.image.recordreader.ImageRecordReader</code> (note that I will attempt to describe classes fully–it doesn’t seem to be standard practice, but it bugs me when I read online examples that won’t run until I figure out for myself exactly which packages I need to import to make everything work, fancy IDE or not) which we can use. There are several constructors, one of which has the following signature:</p>
+<pre class="scala"><code>ImageRecordReader(
+  long height, long width, long channels, PathMultiLabelGenerator labelGenerator
+)</code></pre>
+<p>described as follows:</p>
+<blockquote>
+<p>Loads images with given height, width, and channels, appending labels returned by the generator.</p>
+</blockquote>
+<p><code>PathMultiLabelGenerator</code> is an interface, and so we will implement this ourselves, using the information in <code>Data_Entry_2017_v2020.csv</code> in order to return the determine the correct labels to return. There are similar constructors that instead use the class <code>PathLabelGenerator</code>, and we consider this also.</p>
+<!--
+sigmoid, not softmax for output layer
+need an appropriate loss--LossMultiLabel
+-->
+<script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+<!-- MathJax configuration -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+    tex2jax: {
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true,
+        processEnvironments: true
+    },
+    // Center justify equations in code and markdown cells. Elsewhere
+    // we use CSS to left justify single line equations in code cells.
+    displayAlign: 'center',
+    "HTML-CSS": {
+        styles: {'.MathJax_Display': {"margin": 0}},
+        linebreaks: { automatic: true }
+    }
+});
+</script>
+<!-- End of mathjax configuration -->
+</div>
+
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka">akka</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-actor">akka-actor</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-remote">akka-remote</a></span>
+        
+            <span class="tag"><a href="../../tags/convolutional-neural-network">convolutional-neural-network</a></span>
+        
+            <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+        
+            <span class="tag"><a href="../../tags/image-classfication">image-classfication</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../post/chest-xray/">Classifying Chest X-Rays with Deeplearning4j</a></h1>
+            <time class="has-text-grey-light is-size-7">19 June 2020</time>
+        
+            <h1><a href="../../post/crud/">Creating a Basic Read-only Service</a></h1>
+            <time class="has-text-grey-light is-size-7">13 June 2020</time>
+        
+            <h1><a href="../../post/spark-akka/">Collecting Spark DataFrames or RDDs with Akka Actors</a></h1>
+            <time class="has-text-grey-light is-size-7">13 June 2020</time>
+        
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <time class="has-text-grey-light is-size-7">1 June 2020</time>
+        
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <time class="has-text-grey-light is-size-7">17 September 2019</time>
+        
+    </div>
+</div>
+    <br>
+                
+
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (4)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+</body>
+</html>

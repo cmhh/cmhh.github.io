@@ -1,9 +1,28 @@
+.section.level1 {
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
 .level1 h1 {
   font-size: 140% !important;
 }
 
-.level2 h2{
+.section.level2 {
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 20px;
+  padding-bottom: 20px;
+}
+
+.level2 h2 {
   font-size: 120% !important;
+}
+
+.section.level3 {
+  padding-left: 0;
+  padding-right: 0;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 .level3 h3{
@@ -73,11 +92,53 @@ pre + pre {
 *::-webkit-scrollbar {
   width: 1px!important;
 }
+
 *::-webkit-scrollbar-track {
   background: none;
 }
+
 *::-webkit-scrollbar-thumb {
   background-color: #cccccc;
   border-radius: 20px;
   border: 5px solid #282c34;
 }
+
+table {
+  overflow-x: scroll;
+}
+
+.small {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 60%;
+}
+
+div.small > p > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 4px;
+  padding-bottom: 20px;
+}
+
+.large {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 85%;
+}
+
+div.large > p > img, img.large {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 4px;
+  padding-bottom: 20px;
+  max-width: 85%;
+}
+
+/*
+style="max-width: 60%; margin-left: auto; margin-right: auto; padding-bottom: 20px;"
+style="display: block; margin-left: auto; margin-right: auto;"
+*/

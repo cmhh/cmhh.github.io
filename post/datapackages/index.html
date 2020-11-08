@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
     <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
     <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    </head>
+    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+</head>
 <body>
 
     
@@ -48,9 +49,11 @@
         <div class="tile is-child box">
             <div class="content">
                 
+<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
 
 
-<p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
 <p>R packages can include datasets, and it is very common to do so. This shouldn’t
@@ -92,26 +95,26 @@ interested in the detail should refer to:</p>
 of packages. RStudio allows users to work with projects, and packages can be
 authored by creating a project with type ‘R Package’:</p>
 <div class="figure">
-<img src="../../img/datapackages/package01.png" alt="Project-&gt;New Project…" />
+<img src="../../img/datapackages/package01.png" alt="" />
 <p class="caption">Project-&gt;New Project…</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/package02.png" alt="Create Project" />
+<img src="../../img/datapackages/package02.png" alt="" />
 <p class="caption">Create Project</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/package03.png" alt="Project Type" />
+<img src="../../img/datapackages/package03.png" alt="" />
 <p class="caption">Project Type</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/package04.png" alt="Create R Package" />
+<img src="../../img/datapackages/package04.png" alt="" />
 <p class="caption">Create R Package</p>
 </div>
 <p>When working on a package, RStudio provides a number of useful tools via a
 ‘Build’ menu. From there you can build the package and create source or binary
 packages for dissemination.</p>
 <div class="figure">
-<img src="../../img/datapackages/package05.png" alt="Build menu" />
+<img src="../../img/datapackages/package05.png" alt="" />
 <p class="caption">Build menu</p>
 </div>
 <p>In addition to this, help files can be built automatically from source code
@@ -123,7 +126,7 @@ see:</p>
 <p>Finally, a package source code can be managed via either of git or subversion,
 which brings obvious advantage.</p>
 <div class="figure">
-<img src="../../img/datapackages/versioning.png" alt="Version control" />
+<img src="../../img/datapackages/versioning.png" alt="" />
 <p class="caption">Version control</p>
 </div>
 </div>
@@ -137,15 +140,15 @@ tries to help out here as well.</p>
 will cause RStudio to create a small working app which you can use as a starting
 point:</p>
 <div class="figure">
-<img src="../../img/datapackages/shiny01.png" alt="Shiny web app" />
+<img src="../../img/datapackages/shiny01.png" alt="" />
 <p class="caption">Shiny web app</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/shiny02.png" alt="New Shiny Web Application" />
+<img src="../../img/datapackages/shiny02.png" alt="" />
 <p class="caption">New Shiny Web Application</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/shiny03.png" alt="Shiny application running within RStudio IDE" />
+<img src="../../img/datapackages/shiny03.png" alt="" />
 <p class="caption">Shiny application running within RStudio IDE</p>
 </div>
 <p>A <code>shiny</code> application is essentially made of a <code>ui</code> component which contains the
@@ -266,7 +269,7 @@ installing this package, an HTML version of this file is created which can
 be queried from R via something like:</p>
 <pre class="r"><code>?NZCensus::dwelling</code></pre>
 <div class="figure">
-<img src="../../img/datapackages/dwellinghelp.png" alt="Help for dwelling dataset." />
+<img src="../../img/datapackages/dwellinghelp.png" alt="" />
 <p class="caption">Help for <code>dwelling</code> dataset.</p>
 </div>
 <p>Besides this, RStudio also automates the creation of other files, but several
@@ -275,11 +278,11 @@ files were also created manually. For example, files were added to the folder
 available from the main help page via the
 <code>User guides, package vignettes and other documentation.</code> link.</p>
 <div class="figure">
-<img src="../../img/datapackages/NZCensushelp.png" alt="help(package=&quot;NZCensus&quot;)." />
+<img src="../../img/datapackages/NZCensushelp.png" alt="" />
 <p class="caption"><code>help(package="NZCensus")</code>.</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/NZCensusdoc.png" alt="NZCensus docs." />
+<img src="../../img/datapackages/NZCensusdoc.png" alt="" />
 <p class="caption"><code>NZCensus</code> docs.</p>
 </div>
 <p>In this case, these files are just versions of the <code>datadictionary</code>
@@ -337,14 +340,14 @@ want them.</p>
 mapdemo()</code></pre>
 <p>and looks as follows:</p>
 <div class="figure">
-<img src="../../img/datapackages/NZCensusMapDemo.png" alt="NZCensusDemos::mapdemo()" />
+<img src="../../img/datapackages/NZCensusMapDemo.png" alt="" />
 <p class="caption"><code>NZCensusDemos::mapdemo()</code></p>
 </div>
 <p>Similarly, the <code>distributiondemo</code> can be called via:</p>
 <pre class="r"><code>distributiondemo()</code></pre>
 <p>and looks as follows:</p>
 <div class="figure">
-<img src="../../img/datapackages/NZCensusDistributionDemo.png" alt="NZCensusDemos::distributiondemo()" />
+<img src="../../img/datapackages/NZCensusDistributionDemo.png" alt="" />
 <p class="caption"><code>NZCensusDemos::distributiondemo()</code></p>
 </div>
 </div>
@@ -368,7 +371,7 @@ page here:</p>
 There isn’t any major problems with this data–it’s perfectly usable as it is.
 However there is a fair bit of duplication:</p>
 <div class="figure">
-<img src="../../img/datapackages/rawlabmkt.png" alt="lots of duplication!" />
+<img src="../../img/datapackages/rawlabmkt.png" alt="" />
 <p class="caption">lots of duplication!</p>
 </div>
 <p>Specifically, the <code>subject</code>, <code>group</code>, and title columns are unique by
@@ -377,11 +380,11 @@ However there is a fair bit of duplication:</p>
 In addtion, we take the opportunity to cast the variable <code>Period</code> to a genuine
 date-type variable.</p>
 <div class="figure">
-<img src="../../img/datapackages/metadata.png" alt="metadata" />
+<img src="../../img/datapackages/metadata.png" alt="" />
 <p class="caption">metadata</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/labmkt.png" alt="metadata" />
+<img src="../../img/datapackages/labmkt.png" alt="" />
 <p class="caption">metadata</p>
 </div>
 </div>
@@ -398,7 +401,7 @@ creation here. But the demo is triggered by calling:</p>
 timeseriesdemo()</code></pre>
 <p>and it looks as follows:</p>
 <div class="figure">
-<img src="../../img/datapackages/SNZlabmktTSDemo.png" alt="timeseriesdemo()" />
+<img src="../../img/datapackages/SNZlabmktTSDemo.png" alt="" />
 <p class="caption"><code>timeseriesdemo()</code></p>
 </div>
 </div>
@@ -409,15 +412,15 @@ timeseriesdemo()</code></pre>
 excellent integration with Git, as noted earlier, and allows users to use GitHub
 to set a remote repository.</p>
 <div class="figure">
-<img src="../../img/datapackages/git01.png" alt="Git" />
+<img src="../../img/datapackages/git01.png" alt="" />
 <p class="caption">Git</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/git02.png" alt="Git" />
+<img src="../../img/datapackages/git02.png" alt="" />
 <p class="caption">Git</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/git03.png" alt="Git diff" />
+<img src="../../img/datapackages/git03.png" alt="" />
 <p class="caption">Git diff</p>
 </div>
 <p>To install the packages:</p>
@@ -448,6 +451,8 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
         
             <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
@@ -455,6 +460,10 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
             <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
         
@@ -474,6 +483,8 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
         
             <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
@@ -483,6 +494,12 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
+            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
+            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
             <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
@@ -491,12 +508,6 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
         
             <h1><a href="https://cmhh.github.io/post/qgis/">Web Maps and Tiles with QGIS</a></h1>
             <time class="has-text-grey-light is-size-7">26 January 2017</time>
-        
-            <h1><a href="https://cmhh.github.io/post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h1>
-            <time class="has-text-grey-light is-size-7">28 November 2016</time>
-        
-            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
-            <time class="has-text-grey-light is-size-7">27 November 2016</time>
         
     </div>
 </div>
@@ -510,6 +521,9 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
     <div class="card-content">
         <h1 class="title is-5">Related posts</h1>
       
+      
+            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
       
             <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
@@ -526,7 +540,7 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2020">2020</a> (3)<br>
         
             <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
         
@@ -558,5 +572,11 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
 <script src="https://cmhh.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
 </body>
 </html>

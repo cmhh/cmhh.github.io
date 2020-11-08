@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
     <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
     <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    </head>
+    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+</head>
 <body>
 
     
@@ -48,9 +49,11 @@
         <div class="tile is-child box">
             <div class="content">
                 
+<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
 
 
-<p><link rel="stylesheet" type="text/css" href="../../css/custom.css"></p>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
 <p>When making maps for display on the web, the size of the various objects
@@ -67,7 +70,7 @@ viewport. One way of doing this is to use a tile server whereby a map is
 represented as a grid made of individual <em>tiles</em>, and each tile is an image
 which can be rendered and served on request. For example:</p>
 <div class="figure">
-<img src="../../img/tiles/020302.png" alt="http://tile.openstreetmap.org/2/3/2.png" />
+<img src="../../img/tiles/020302.png" alt="" />
 <p class="caption"><a href="http://tile.openstreetmap.org/2/3/2.png" class="uri">http://tile.openstreetmap.org/2/3/2.png</a></p>
 </div>
 <p>In this document we consider two main tools: <a href="http://mapnik.org">Mapnik</a>, which
@@ -123,13 +126,13 @@ we create one as follows:</p>
 <p>which will then make the server available at
 <a href="http://localhost:8080">http://localhost:8080</a>:</p>
 <div class="figure">
-<img src="../../img/tiles/tiles.png" alt="http://localhost:8080" />
+<img src="../../img/tiles/tiles.png" alt="" />
 <p class="caption"><a href="http://localhost:8080" class="uri">http://localhost:8080</a></p>
 </div>
 <p>In this case, tiles from openstreetmap.org are available at
 <code>/osm/{z}/{x}/{y}.png</code>:</p>
 <div class="figure">
-<img src="../../img/tiles/000.crop.png" alt="http://localhost:8080/osm/0/0/0.png" />
+<img src="../../img/tiles/000.crop.png" alt="" />
 <p class="caption"><a href="http://localhost:8080/osm/0/0/0.png" class="uri">http://localhost:8080/osm/0/0/0.png</a></p>
 </div>
 </div>
@@ -274,7 +277,7 @@ it is, apparently, possible to do something like:</p>
 <code>http://localhost/tiles/</code> or <code>http://&lt;domain name&gt;/tiles/</code> if the server is
 available externally.</p>
 <div class="figure">
-<img src="../../img/tiles/000nginxlocal.png" alt="http://localhost/tiles/" />
+<img src="../../img/tiles/000nginxlocal.png" alt="" />
 <p class="caption"><a href="http://localhost/tiles/" class="uri">http://localhost/tiles/</a></p>
 </div>
 </div>
@@ -320,7 +323,7 @@ source ~/.bashrc</code></pre>
 <p>Then browse to <code>http://localhost:9090</code> in a web browser and you’ll see something
 like:</p>
 <div class="figure">
-<img src="../../img/tiles/tileoven.png" alt="TileMill (local)" />
+<img src="../../img/tiles/tileoven.png" alt="" />
 <p class="caption">TileMill (local)</p>
 </div>
 </div>
@@ -352,26 +355,26 @@ network by the name <code>debian</code>, or by the IP address <code>192.168.20.2
 true for my local network). We start PuTTY and enter either the hostname or
 IP address as follows:</p>
 <div class="figure">
-<img src="../../img/tiles/putty01.png" alt="hostname" />
+<img src="../../img/tiles/putty01.png" alt="" />
 <p class="caption">hostname</p>
 </div>
 <p>Then, navigate to Connection→SSH→Auth→Tunnels, and enter ports
 20008 and 20009 as required:</p>
 <div class="figure">
-<img src="../../img/tiles/putty02.png" alt="tunnels" />
+<img src="../../img/tiles/putty02.png" alt="" />
 <p class="caption">tunnels</p>
 </div>
 <p>Click the connect button, and you will be asked to enter a username and, and
 a terminal will open as follows:</p>
 <div class="figure">
-<img src="../../img/tiles/putty03.png" alt="terminal" />
+<img src="../../img/tiles/putty03.png" alt="" />
 <p class="caption">terminal</p>
 </div>
 <p>The terminal isn’t terribly important in this instance since we just want to
 acces TileMill. Simply open a browser and point it at <code>http://localhost:20009</code>
 as follows:</p>
 <div class="figure">
-<img src="../../img/tiles/putty04.png" alt="TileMill (remote)" />
+<img src="../../img/tiles/putty04.png" alt="" />
 <p class="caption">TileMill (remote)</p>
 </div>
 <p>This was done using a remote machine on the same local network as the TileMill
@@ -480,7 +483,7 @@ repostiory:</p>
 from the sidebar, and then click the ‘+ New project’. Fill in the resulting
 dialog as follows:</p>
 <div class="figure">
-<img src="../../img/tiles/river01.png" alt="river - create project" />
+<img src="../../img/tiles/river01.png" alt="" />
 <p class="caption">river - create project</p>
 </div>
 <p>The default map canvas will contain a modestly styled countries feature class
@@ -490,7 +493,7 @@ which you can safely delete–click the layers control
 <p>Next, click the ‘+ Add layer’ button, and fill in the resulting dialog as
 in the following screenshot, before clicking the ‘Save &amp; Style’ button:</p>
 <div class="figure">
-<img src="../../img/tiles/river02.png" alt="river - add layer" />
+<img src="../../img/tiles/river02.png" alt="" />
 <p class="caption">river - add layer</p>
 </div>
 <p>Now edit the <code>style.mss</code> tab so it contains:</p>
@@ -511,7 +514,7 @@ in the following screenshot, before clicking the ‘Save &amp; Style’ button:<
 <p>Upon clicking the save button, the map should update and (after a little
 panning and zooming) looks as follows:</p>
 <div class="figure">
-<img src="../../img/tiles/river03.png" alt="river - final map" />
+<img src="../../img/tiles/river03.png" alt="" />
 <p class="caption">river - final map</p>
 </div>
 <p>To serve a map like this via TileStache, save <code>style.mss</code> as a Mapnik XML file
@@ -765,6 +768,8 @@ leaflet() %&gt;% addTiles() %&gt;%
         
             <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
@@ -772,6 +777,10 @@ leaflet() %&gt;% addTiles() %&gt;%
             <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
         
             <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
         
@@ -791,6 +800,8 @@ leaflet() %&gt;% addTiles() %&gt;%
         
             <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
         
+            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+        
             <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
@@ -800,6 +811,12 @@ leaflet() %&gt;% addTiles() %&gt;%
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
+            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
+            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
             <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
@@ -808,12 +825,6 @@ leaflet() %&gt;% addTiles() %&gt;%
         
             <h1><a href="https://cmhh.github.io/post/qgis/">Web Maps and Tiles with QGIS</a></h1>
             <time class="has-text-grey-light is-size-7">26 January 2017</time>
-        
-            <h1><a href="https://cmhh.github.io/post/tiles/">Serving Geospatial Features with Mapnik and TileStache</a></h1>
-            <time class="has-text-grey-light is-size-7">28 November 2016</time>
-        
-            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
-            <time class="has-text-grey-light is-size-7">27 November 2016</time>
         
     </div>
 </div>
@@ -827,7 +838,7 @@ leaflet() %&gt;% addTiles() %&gt;%
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2020">2020</a> (3)<br>
         
             <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
         
@@ -859,5 +870,11 @@ leaflet() %&gt;% addTiles() %&gt;%
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
 <script src="https://cmhh.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
 </body>
 </html>

@@ -1,0 +1,24 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>wsl2 on cmhh</title>
+    <link>https://cmhh.github.io/categories/wsl2/</link>
+    <description>Recent content in wsl2 on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 31 Oct 2020 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="https://cmhh.github.io/categories/wsl2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Docker on Windows with Windows Subsystem for Linux 2</title>
+      <link>https://cmhh.github.io/post/docker_wsl2/</link>
+      <pubDate>Sat, 31 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>https://cmhh.github.io/post/docker_wsl2/</guid>
+      <description>Overview Windows Subsystem for Linux version 2 (WSL2) brings something like a native Linux environment to Windows. And because it’s native, we can even run Docker on WSL2 and access the running containers from the Windows host without hassle.
+ Dependencies All that is required to run WSL2 is Windows Server 2019 or higher, or Windows 10 (any edition) build 2004 or higher. And, of course, we must also install a working Linux distribution.</description>
+    </item>
+    
+  </channel>
+</rss>

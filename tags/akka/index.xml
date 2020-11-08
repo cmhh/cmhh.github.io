@@ -1,0 +1,23 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>akka on cmhh</title>
+    <link>/tags/akka/</link>
+    <description>Recent content in akka on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sat, 13 Jun 2020 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/akka/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Collecting Spark DataFrames or RDDs with Akka Actors</title>
+      <link>/post/spark-akka/</link>
+      <pubDate>Sat, 13 Jun 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/spark-akka/</guid>
+      <description>Overview I was recently running a process mostly using Spark SQL, but at one point ended up collecting a large DataFrame and converting it to a standard Scala Map. The source was a large DataFrame containing several records for each of a number of IDs, and I needed to do some reasonably complicated processing by ID (or at least complicated enough that an efficient solution using either DataFrames or RDDs wasn&amp;rsquo;t obvious to me).</description>
+    </item>
+    
+  </channel>
+</rss>
