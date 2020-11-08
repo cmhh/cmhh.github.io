@@ -92,7 +92,7 @@ gis_osm_waterways_free_1   | line    |
 * [Statistical Area Level 2 2020 Clipped (generalised)](https://datafinder.stats.govt.nz/layer/104270-statistical-area-2-2020-clipped-generalised/)
 * [Meshblock 2020 (generalised)](https://datafinder.stats.govt.nz/layer/104280-meshblock-2020-generalised/)
 -->
-<p>Finally we will make use of <a href="https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/">Wellington 0.10m Urban Aerial Photos (2017)</a> from the <a href="https://data.linz.govt.nz/">LINZ Data Service</a>. This is a set of high resolution aerial imagery covering Wellington City. This data can be downloaded in a range of formats, and a JPEG was chosen here.</p>
+<p>Finally we will make use of <a href="https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/">Wellington 0.10m Urban Aerial Photos (2017)</a> from the <a href="https://data.linz.govt.nz/">LINZ Data Service</a>. This is a set of high resolution aerial imagery covering Wellington City. This data can be downloaded in a range of formats, and JPEG was chosen here.</p>
 <!-- * [Wellington 0.10m Urban Aerial Photos (2017)](https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/) -->
 </div>
 <div id="loading-the-source-data-to-postgis" class="section level1">
@@ -105,7 +105,7 @@ gis_osm_waterways_free_1   | line    |
 </ul>
 <div id="vector-data" class="section level2">
 <h2>Vector data</h2>
-<p>We can load vector data to PostGIS using the <code>ogr2ogr</code> program provided by <code>gdal</code>. For example, in the following we load a geopackage called <code>meshblock-2020-generalised.gpkg</code> to <code>statsnz.meshblock2020</code>:</p>
+<p>We can load vector data to PostGIS using the <code>ogr2ogr</code> program provided by <code>gdal</code>. For example, in the following we load a GeoPackage called <code>meshblock-2020-generalised.gpkg</code> to <code>statsnz.meshblock2020</code>:</p>
 <pre class="bash"><code>ogr2ogr \
   -f PostgreSQL PG:&quot;dbname=&#39;gis&#39; user=&#39;gisuser&#39; password=&#39;gisuser&#39;&quot; \
   meshblock-2020-generalised.gpkg \
@@ -121,8 +121,8 @@ gis_osm_waterways_free_1   | line    |
 <pre class="bash"><code>ogr2ogr -f PGDUMP mb2020.sql \
   meshblock-2020-generalised.gpkg \
   -nln statsnz.meshblock2020</code></pre>
-<p>Actually, this approach should be preferred since transferring to shapefile as an intermediate step will cause attribute names to be truncated / normalised, and if the geopackage contains indexes, comments, and so forth, they will be retained.</p>
-<p>Finally, one could load the data via R itself, though it probably isn’t the best approach in general. Still, to load the same geopackage:</p>
+<p>Actually, this approach should be preferred since transferring to shapefile as an intermediate step will cause attribute names to be truncated / normalised, and if the GeoPackage contains indexes, comments, and so forth, they will be retained.</p>
+<p>Finally, one could load the data via R itself, though it probably isn’t the best approach in general. Still, to load the same GeoPackage:</p>
 <pre class="r"><code>library(sf)
 
 conn &lt;- RPostgreSQL::dbConnect(
@@ -130,8 +130,8 @@ conn &lt;- RPostgreSQL::dbConnect(
   dbname = &quot;gis&quot;, user = &quot;gisuser&quot;, password = &quot;gisuser&quot;
 )
 
-sa1 &lt;- st_read(&quot;meshblock-2020-generalised.gpkg&quot;)
-st_write(sa1, conn, c(&quot;statsnz&quot;, &quot;meshblock2020&quot;))
+mb &lt;- st_read(&quot;meshblock-2020-generalised.gpkg&quot;)
+st_write(mb, conn, c(&quot;statsnz&quot;, &quot;meshblock2020&quot;))
 DBI::dbDisconnect(conn)</code></pre>
 </div>
 <div id="raster-data" class="section level2">
@@ -212,7 +212,7 @@ Maybe do building outlines for a single SA2 or something?
 </div>
 <div id="dissolving-features" class="section level2">
 <h2>Dissolving features</h2>
-<p>A feature class can be dissolve by some categorical attribute using the <code>sf</code> package simply by performing a grouped aggregate, in this case with <code>dplyr</code>:</p>
+<p>A feature class can be dissolved by some categorical attribute using the <code>sf</code> package simply by performing a grouped aggregate, in this case with <code>dplyr</code>:</p>
 <pre class="r"><code>library(dplyr)
 
 mb_dissolved_sf &lt;- 
@@ -299,7 +299,7 @@ gdalwarp(
   crop_to_cutline = TRUE,
   dstnodata = &quot;nodata&quot;
 )</code></pre>
-<p>This outputs a single TIF file, which can be read into R using <code>raster::stack("2122700.tif")</code>, and looks as follows:</p>
+<p>Note that this took only a few seconds in practice, and outputs a single TIF file which can be read into R using <code>raster::stack("2122700.tif")</code>, and looks as follows:</p>
 <p><a href="../../img/rpostgis/wgtnrail.jpeg" target="_blank">
 <img src="../../img/rpostgis/wgtnraillo.jpeg" class="small">
 </a></p>
