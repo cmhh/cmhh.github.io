@@ -4,22 +4,37 @@
   
   <url>
     <loc>https://cmhh.github.io/categories/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://cmhh.github.io/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://cmhh.github.io/tags/docker/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://cmhh.github.io/categories/docker/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://cmhh.github.io/post/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://cmhh.github.io/tags/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://cmhh.github.io/post/dockerdev/</loc>
+    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -48,22 +63,12 @@
   </url>
   
   <url>
-    <loc>https://cmhh.github.io/post/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>https://cmhh.github.io/tags/r/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
   </url>
   
   <url>
     <loc>https://cmhh.github.io/categories/r/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://cmhh.github.io/tags/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
   </url>
   

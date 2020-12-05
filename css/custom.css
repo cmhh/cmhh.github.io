@@ -1,3 +1,11 @@
+span.key {
+  /* box-shadow: 0 -10rem 10rem 3rem #f6e5d6, inset 0rem 1rem 2rem #baaf9e;*/
+  border: 2px solid #aaa;
+  border-radius: 6px;
+  padding: 0px 5px;
+  background-color: #ccc;
+}
+
 .section.level1 {
   padding-top: 24px;
   padding-bottom: 24px;
@@ -138,7 +146,18 @@ div.large > p > img, img.large {
   max-width: 85%;
 }
 
-/*
-style="max-width: 60%; margin-left: auto; margin-right: auto; padding-bottom: 20px;"
-style="display: block; margin-left: auto; margin-right: auto;"
-*/
+.Large {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 90%;
+}
+
+div.Large > p > img, img.Large {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 4px;
+  padding-bottom: 20px;
+  max-width: 90%;
+}
