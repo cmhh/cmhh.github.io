@@ -1,183 +1,183 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on cmhh</title>
-    <link>https://cmhh.github.io/categories/</link>
+    <link>/categories/</link>
     <description>Recent content in Categories on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 05 Dec 2020 00:00:00 +0000</lastBuildDate>
     
-        <atom:link href="https://cmhh.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>docker</title>
-      <link>https://cmhh.github.io/categories/docker/</link>
+      <link>/categories/docker/</link>
       <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/docker/</guid>
+      <guid>/categories/docker/</guid>
       <description></description>
     </item>
     
     <item>
       <title>postgis</title>
-      <link>https://cmhh.github.io/categories/postgis/</link>
+      <link>/categories/postgis/</link>
       <pubDate>Sat, 31 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/postgis/</guid>
+      <guid>/categories/postgis/</guid>
       <description></description>
     </item>
     
     <item>
       <title>postgresql</title>
-      <link>https://cmhh.github.io/categories/postgresql/</link>
+      <link>/categories/postgresql/</link>
       <pubDate>Sat, 31 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/postgresql/</guid>
+      <guid>/categories/postgresql/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R</title>
-      <link>https://cmhh.github.io/categories/r/</link>
+      <link>/categories/r/</link>
       <pubDate>Sat, 31 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/r/</guid>
+      <guid>/categories/r/</guid>
       <description></description>
     </item>
     
     <item>
       <title>wsl2</title>
-      <link>https://cmhh.github.io/categories/wsl2/</link>
+      <link>/categories/wsl2/</link>
       <pubDate>Sat, 31 Oct 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/wsl2/</guid>
+      <guid>/categories/wsl2/</guid>
       <description></description>
     </item>
     
     <item>
       <title>akka-http</title>
-      <link>https://cmhh.github.io/categories/akka-http/</link>
+      <link>/categories/akka-http/</link>
       <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/akka-http/</guid>
+      <guid>/categories/akka-http/</guid>
       <description></description>
     </item>
     
     <item>
       <title>seasonal-adjustment</title>
-      <link>https://cmhh.github.io/categories/seasonal-adjustment/</link>
+      <link>/categories/seasonal-adjustment/</link>
       <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/seasonal-adjustment/</guid>
+      <guid>/categories/seasonal-adjustment/</guid>
       <description></description>
     </item>
     
     <item>
       <title>vuejs</title>
-      <link>https://cmhh.github.io/categories/vuejs/</link>
+      <link>/categories/vuejs/</link>
       <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/vuejs/</guid>
+      <guid>/categories/vuejs/</guid>
       <description></description>
     </item>
     
     <item>
       <title>x13-arima-seats</title>
-      <link>https://cmhh.github.io/categories/x13-arima-seats/</link>
+      <link>/categories/x13-arima-seats/</link>
       <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/x13-arima-seats/</guid>
+      <guid>/categories/x13-arima-seats/</guid>
       <description></description>
     </item>
     
     <item>
       <title>GeoServer</title>
-      <link>https://cmhh.github.io/categories/geoserver/</link>
+      <link>/categories/geoserver/</link>
       <pubDate>Tue, 17 Sep 2019 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/geoserver/</guid>
+      <guid>/categories/geoserver/</guid>
       <description></description>
     </item>
     
     <item>
       <title>QGIS</title>
-      <link>https://cmhh.github.io/categories/qgis/</link>
+      <link>/categories/qgis/</link>
       <pubDate>Thu, 26 Jan 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/qgis/</guid>
+      <guid>/categories/qgis/</guid>
       <description></description>
     </item>
     
     <item>
       <title>tiles</title>
-      <link>https://cmhh.github.io/categories/tiles/</link>
+      <link>/categories/tiles/</link>
       <pubDate>Thu, 26 Jan 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/tiles/</guid>
+      <guid>/categories/tiles/</guid>
       <description></description>
     </item>
     
     <item>
       <title>TileStache</title>
-      <link>https://cmhh.github.io/categories/tilestache/</link>
+      <link>/categories/tilestache/</link>
       <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/tilestache/</guid>
+      <guid>/categories/tilestache/</guid>
       <description></description>
     </item>
     
     <item>
       <title>WMTS</title>
-      <link>https://cmhh.github.io/categories/wmts/</link>
+      <link>/categories/wmts/</link>
       <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/wmts/</guid>
+      <guid>/categories/wmts/</guid>
       <description></description>
     </item>
     
     <item>
       <title>geospatial</title>
-      <link>https://cmhh.github.io/categories/geospatial/</link>
+      <link>/categories/geospatial/</link>
       <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/geospatial/</guid>
+      <guid>/categories/geospatial/</guid>
       <description></description>
     </item>
     
     <item>
       <title>OSRM</title>
-      <link>https://cmhh.github.io/categories/osrm/</link>
+      <link>/categories/osrm/</link>
       <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/osrm/</guid>
+      <guid>/categories/osrm/</guid>
       <description></description>
     </item>
     
     <item>
       <title>R packages</title>
-      <link>https://cmhh.github.io/categories/r-packages/</link>
+      <link>/categories/r-packages/</link>
       <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/r-packages/</guid>
+      <guid>/categories/r-packages/</guid>
       <description></description>
     </item>
     
     <item>
       <title>shiny</title>
-      <link>https://cmhh.github.io/categories/shiny/</link>
+      <link>/categories/shiny/</link>
       <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/shiny/</guid>
+      <guid>/categories/shiny/</guid>
       <description></description>
     </item>
     
     <item>
       <title>nodejs</title>
-      <link>https://cmhh.github.io/categories/nodejs/</link>
+      <link>/categories/nodejs/</link>
       <pubDate>Sat, 28 May 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/categories/nodejs/</guid>
+      <guid>/categories/nodejs/</guid>
       <description></description>
     </item>
     

@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
-    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
 </head>
 <body>
 
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
+            <a class="navbar-item" href="../../">Home</a>
             
         </div>
     </nav>
@@ -26,7 +26,7 @@
 
     
     <section class="hero is-info is-medium">
-        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
             <div class="container has-text-centered">
                 <br>
                 <h1 class="title is-size-1">
@@ -49,9 +49,7 @@
         <div class="tile is-child box">
             <div class="content">
                 
-<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
-<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
-<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+<script src="../../post/webservice/index_files/header-attrs/header-attrs.js"></script>
 
 
 <div id="what-is-node.js" class="section level1">
@@ -96,7 +94,7 @@
 <h1>Postman / Testing APIs</h1>
 <p>Before getting into it, it’s useful to think about how we would go about testing our web services.</p>
 <p>In an earlier post on OpenCPU we simply used the <code>curl</code> command line utility. In this post we’ll instead use a useful Chrome extension called Postman.</p>
-<p><img src="../../img/webservice/postman.png" /></p>
+<p><img src="img/postman.png" /></p>
 </div>
 <div id="making-an-http-server" class="section level1">
 <h1>Making an HTTP server</h1>
@@ -115,7 +113,7 @@ var server = http.createServer(function(request, response){
 server.listen(3000);</code></pre>
 <p>Since this is the first service we’re running, we note that we start it simply by executing:</p>
 <pre class="bash"><code>node server</code></pre>
-<p><img src="../../img/webservice/0101.png" /></p>
+<p><img src="img/0101.png" /></p>
 <p>It can also be fun to benchmark a service. You can do this with <code>ab</code>, the ApacheBench tool, or <code>siege</code>. For example, for the simple service above:</p>
 <pre class="asis"><code>cmhh@debian:~$ ab -kc 1000 -n 10000 http://debian:3000/
 This is ApacheBench, Version 2.3 &lt;$Revision: 1706008 $&gt;
@@ -203,7 +201,7 @@ server.listen(3000);</code></pre>
    &lt;p&gt;Hello, World!&lt;/p&gt;
 &lt;/body&gt;
 &lt;/html&gt;</code></pre>
-<p><img src="../../img/webservice/0201.png" /></p>
+<p><img src="img/0201.png" /></p>
 <p>In this example, more than twice the amount of data is transferred compared to the previous example, and so the throughput falls accordingly:</p>
 <pre class="asis"><code>cmhh@debian:~$ ab -kc 1000 -n 10000 http://debian:3000/
 This is ApacheBench, Version 2.3 &lt;$Revision: 1706008 $&gt;
@@ -271,11 +269,11 @@ var app = express();
 app.use(express.static(__dirname + &#39;/public&#39;)).listen(3000);</code></pre>
 <p>The service will serve any file found in the <code>public</code> folder, and will return an error for any file that does not exist.</p>
 <div class="figure">
-<img src="../../img/webservice/0301.png" alt="" />
+<img src="img/0301.png" alt="" />
 <p class="caption">found</p>
 </div>
 <div class="figure">
-<img src="../../img/webservice/0302.png" alt="" />
+<img src="img/0302.png" alt="" />
 <p class="caption">not found</p>
 </div>
 <p><code>express.static</code> is an example of <em>middleware</em>. You simply pass the middleware to the <code>use</code> method, and you can chain lots of different middleware together. You could add more folders, compress content, cache content, and so on. In fact, let’s add compression to the above example:</p>
@@ -312,11 +310,11 @@ app.use(compression())
 <p>If all we want to do is select meshblock data by meshblock code, then a key-value store like Redis might be sufficient, and would probably offer better performance. However, if we want to extend the example and allow more complicated queries, then MongoDB is a better option.</p>
 <p>As noted, the Census ‘meshblock’ data is not in a particularly usable state as is. So, I’ve imported the data and tidied it up, then put the tidied data in an R package called <code>NZCensus</code>. This provides datasets such as the following:</p>
 <div class="figure">
-<img src="../../img/webservice/datadictionary.png" alt="" />
+<img src="img/datadictionary.png" alt="" />
 <p class="caption"><code>datadictionary</code></p>
 </div>
 <div class="figure">
-<img src="../../img/webservice/dwelling.png" alt="" />
+<img src="img/dwelling.png" alt="" />
 <p class="caption"><code>dwelling</code></p>
 </div>
 <p>The full set of datasets is:</p>
@@ -409,7 +407,7 @@ app.get(&#39;/metadata/:name&#39;, function(request, response){
       });
    });
 });</code></pre>
-<p><img src="../../img/webservice/metadata01.png" /></p>
+<p><img src="img/metadata01.png" /></p>
 <p>And, for giggles, let’s benchmark the service:</p>
 <pre class="asis"><code>cmhh@debian:~$ ab -kc 1000 -n 10000 http://debian:3000/V0001
 This is ApacheBench, Version 2.3 &lt;$Revision: 1706008 $&gt;
@@ -556,11 +554,11 @@ app.get(&#39;/:dataset/:geography/:code&#39;, function(request, response){
    });
 });</code></pre>
 <div class="figure">
-<img src="../../img/webservice/metadata02.png" alt="" />
+<img src="img/metadata02.png" alt="" />
 <p class="caption"><code>/metadata/</code></p>
 </div>
 <div class="figure">
-<img src="../../img/webservice/dwelling01.png" alt="" />
+<img src="img/dwelling01.png" alt="" />
 <p class="caption"><code>/dwelling/RC/01</code></p>
 </div>
 </div>
@@ -707,19 +705,19 @@ app.get(&#39;/:series/:output&#39;, function(request, response){
 
 app.listen(3000);</code></pre>
 <div class="figure">
-<img src="../../img/webservice/x13post.png" alt="" />
+<img src="img/x13post.png" alt="" />
 <p class="caption"><code>/adjust</code></p>
 </div>
 <div class="figure">
-<img src="../../img/webservice/x13get01.png" alt="" />
+<img src="img/x13get01.png" alt="" />
 <p class="caption"><code>/&lt;output&gt;/d11</code></p>
 </div>
 <div class="figure">
-<img src="../../img/webservice/x13get02.png" alt="" />
+<img src="img/x13get02.png" alt="" />
 <p class="caption"><code>/&lt;output&gt;/out</code></p>
 </div>
 <div class="figure">
-<img src="../../img/webservice/x13delete.png" alt="" />
+<img src="img/x13delete.png" alt="" />
 <p class="caption"><code>/&lt;output&gt;</code> - <code>DELETE</code></p>
 </div>
 <p>And we might as well visualise the results:</p>
@@ -740,7 +738,7 @@ app.listen(3000);</code></pre>
    box()
 }</code></pre>
 <pre class="r"><code>getandplot()</code></pre>
-<p><img src="../../img/webservice/plot.png" /></p>
+<p><img src="img/plot.png" /></p>
 </div>
 </div>
 <div id="summary" class="section level1">
@@ -773,43 +771,43 @@ app.listen(3000);</code></pre>
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
+            <span class="tag"><a href="../../tags/r">r</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/vuejs">vuejs</a></span>
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
     </div>
@@ -818,19 +816,19 @@ app.listen(3000);</code></pre>
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
-            <h1><a href="https://cmhh.github.io/post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <h1><a href="../../post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
             <time class="has-text-grey-light is-size-7">5 December 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <h1><a href="../../post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <h1><a href="../../post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
         
     </div>
@@ -845,13 +843,13 @@ app.listen(3000);</code></pre>
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (4)<br>
+            <a href="../../archives/2020">2020</a> (4)<br>
         
-            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
+            <a href="../../archives/2019">2019</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
+            <a href="../../archives/2017">2017</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2016">2016</a> (4)<br>
+            <a href="../../archives/2016">2016</a> (4)<br>
         
     </div>
 </div>
@@ -869,13 +867,13 @@ app.listen(3000);</code></pre>
             <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
             <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
             <br><br>
-            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+            Copyright &copy; cmhh 2021 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
         </p>
     </div>
 </footer>
 
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
-<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
+<script src="../../js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 
 <script src="//yihui.org/js/math-code.js"></script>

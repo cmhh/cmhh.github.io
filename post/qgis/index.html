@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
-    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
 </head>
 <body>
 
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
+            <a class="navbar-item" href="../../">Home</a>
             
         </div>
     </nav>
@@ -26,7 +26,7 @@
 
     
     <section class="hero is-info is-medium">
-        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
             <div class="container has-text-centered">
                 <br>
                 <h1 class="title is-size-1">
@@ -49,9 +49,7 @@
         <div class="tile is-child box">
             <div class="content">
                 
-<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
-<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
-<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+<script src="../../post/qgis/index_files/header-attrs/header-attrs.js"></script>
 
 
 <div id="overview" class="section level1">
@@ -135,7 +133,7 @@ print &quot;&lt;body&gt;&lt;h1&gt;Hello, World!&lt;/h1&gt;&lt;/body&gt;&lt;/html
 <pre class="bash"><code>sudo chmod go+rx /usr/lib/cgi-bin/hello.cgi</code></pre>
 <p>Then, browsing to <code>http://localhost/test/hello.cgi</code> will yield something like:</p>
 <div class="figure">
-<img src="../../img/qgis/hello.png" alt="" />
+<img src="img/hello.png" alt="" />
 <p class="caption">hello.cgi</p>
 </div>
 </div>
@@ -169,17 +167,17 @@ exact same feature class exported to SQLite does not seem to have this issue.)</
 feature classes is saved in the same directory as the project. In addition we
 also place a copy of <code>/usr/lib/cgi-bin/qgis-mapserve.fcgi</code> in the directory.</p>
 <div class="figure">
-<img src="../../img/qgis/qgis.2013.01.png" alt="" />
+<img src="img/qgis.2013.01.png" alt="" />
 <p class="caption"><code>2013.qgs</code></p>
 </div>
 <p>Only basic styling is applied–simple black outlines for each feature class,
 and labels only visible at certain scales.</p>
 <div class="figure">
-<img src="../../img/qgis/qgis.2013.02.png" alt="" />
+<img src="img/qgis.2013.02.png" alt="" />
 <p class="caption">Style</p>
 </div>
 <div class="figure">
-<img src="../../img/qgis/qgis.2013.03.png" alt="" />
+<img src="img/qgis.2013.03.png" alt="" />
 <p class="caption">Labels</p>
 </div>
 <p>Next, to enable the map as a web service, open the the project properties
@@ -190,13 +188,13 @@ labelled ‘WFS capabilities (also influences DXF export)’. Click the ‘Launc
 button in the ‘Test configuration’ section to confirm everything is okay, the
 click ‘OK’, and save the project.</p>
 <div class="figure">
-<img src="../../img/qgis/qgis.2013.04.png" alt="" />
+<img src="img/qgis.2013.04.png" alt="" />
 <p class="caption">OWS server</p>
 </div>
 <p>At this point, the service isn’t yet published. To do this, first ensure that
 the ‘Save paths’ option in the project properties is set to ‘relative’:</p>
 <div class="figure">
-<img src="../../img/qgis/qgis.2013.05.png" alt="" />
+<img src="img/qgis.2013.05.png" alt="" />
 <p class="caption">General settings</p>
 </div>
 <p>Then, copy the project to <code>/usr/lib/cgi-bin/</code>, which is where the webserver is
@@ -213,7 +211,7 @@ parameters. For example:</p>
 <pre class="asis"><code>https://localhost/cgi-bin/2013/qgis_mapserv.fcgi?&amp;SERVICE=WMS&amp;REQUEST=GetMap&amp;VERSION=1.1.1&amp;LAYERS=REGC2013&amp;STYLES=&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;HEIGHT=256&amp;WIDTH=256&amp;SRS=EPSG%3A2193&amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260</code></pre>
 <p>yields the following thumbnail:</p>
 <div class="figure">
-<img src="../../img/qgis/qgis_mapserv.01.png" alt="" />
+<img src="img/qgis_mapserv.01.png" alt="" />
 <p class="caption"><code>GetMap</code></p>
 </div>
 <p>As a further example, we use R to create a leaflet map containing each layer:</p>
@@ -244,7 +242,7 @@ leaflet() %&gt;%
                                   &quot;Area Unit&quot;, &quot;Meshblock&quot;),
                    options = layersControlOptions(collapsed = FALSE))</code></pre>
 <div class="figure">
-<img src="../../img/qgis/leaflet.01.png" alt="" />
+<img src="img/leaflet.01.png" alt="" />
 <p class="caption">leaflet</p>
 </div>
 </div>
@@ -254,19 +252,19 @@ leaflet() %&gt;%
 project is saved as <code>~/Maps/nitrogen.qgs</code>, and both the raster and a copy of
 <code>/usr/lib/cgi-bin/qgis-mapserve.fcgi</code> is placed in the same directory.</p>
 <div class="figure">
-<img src="../../img/qgis/qgis.nitrogen.01.png" alt="" />
+<img src="img/qgis.nitrogen.01.png" alt="" />
 <p class="caption"><code>nitrogen.qgs</code></p>
 </div>
 <p>Some basic styling is applied. Specifically, the colouring is changed from
 greyscale to psuedo-colour (yellow to red).</p>
 <div class="figure">
-<img src="../../img/qgis/qgis.nitrogen.02.png" alt="" />
+<img src="img/qgis.nitrogen.02.png" alt="" />
 <p class="caption">Style</p>
 </div>
 <p>Making the map available as a web service is similar to before, except we check
 features under the ‘WCS’ heading rather than ‘WFS’.</p>
 <div class="figure">
-<img src="../../img/qgis/qgis.nitrogen.03.png" alt="" />
+<img src="img/qgis.nitrogen.03.png" alt="" />
 <p class="caption">OWS server</p>
 </div>
 <p>As before, we copy the project to the web server root directory, and alter
@@ -281,7 +279,7 @@ the right set of parameters. For example:</p>
 <pre class="asis"><code>https://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?&amp;SERVICE=WMS&amp;REQUEST=GetMap&amp;VERSION=1.1.1&amp;LAYERS=nitrogen&amp;STYLES=&amp;FORMAT=image%2Fpng&amp;HEIGHT=256&amp;WIDTH=256&amp;SRS=EPSG%3A2193&amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260</code></pre>
 <p>yields the following thumbnail:</p>
 <div class="figure">
-<img src="../../img/qgis/qgis_mapserv.02.png" alt="" />
+<img src="img/qgis_mapserv.02.png" alt="" />
 <p class="caption"><code>GetMap</code></p>
 </div>
 <p>As a further example, we use R to create a leaflet map containing each layer:</p>
@@ -299,7 +297,7 @@ leaflet() %&gt;%
   addLayersControl(overlayGroups = c(&quot;nitrogen&quot;),
                    options = layersControlOptions(collapsed = FALSE))</code></pre>
 <div class="figure">
-<img src="../../img/qgis/leaflet.02.png" alt="" />
+<img src="img/leaflet.02.png" alt="" />
 <p class="caption">leaflet</p>
 </div>
 </div>
@@ -312,7 +310,7 @@ install. Once installed, we simply open the previous <code>nitrogen.qgs</code> p
 and run the QMetaTiles plugin. We simply chose a target directory, and the
 zoom levels required, and then run the plugin.</p>
 <div class="figure">
-<img src="../../img/qgis/qmetatiles.01.png" alt="" />
+<img src="img/qmetatiles.01.png" alt="" />
 <p class="caption">QMetaTiles</p>
 </div>
 <p>Of course, the problem with a tile cache is size. A tileset covering just New
@@ -338,7 +336,7 @@ leaflet() %&gt;%
   addLayersControl(overlayGroups = c(&quot;nitrogen&quot;),
                    options = layersControlOptions(collapsed = FALSE))</code></pre>
 <div class="figure">
-<img src="../../img/qgis/leaflet.03.png" alt="" />
+<img src="img/leaflet.03.png" alt="" />
 <p class="caption">leaflet</p>
 </div>
 <!--
@@ -371,43 +369,43 @@ sudo ./install.sh /var/www/html/qgis-web-client/projects
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
+            <span class="tag"><a href="../../tags/r">r</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/vuejs">vuejs</a></span>
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
     </div>
@@ -416,19 +414,19 @@ sudo ./install.sh /var/www/html/qgis-web-client/projects
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
-            <h1><a href="https://cmhh.github.io/post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <h1><a href="../../post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
             <time class="has-text-grey-light is-size-7">5 December 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <h1><a href="../../post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <h1><a href="../../post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
         
     </div>
@@ -443,13 +441,13 @@ sudo ./install.sh /var/www/html/qgis-web-client/projects
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (4)<br>
+            <a href="../../archives/2020">2020</a> (4)<br>
         
-            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
+            <a href="../../archives/2019">2019</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
+            <a href="../../archives/2017">2017</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2016">2016</a> (4)<br>
+            <a href="../../archives/2016">2016</a> (4)<br>
         
     </div>
 </div>
@@ -467,13 +465,13 @@ sudo ./install.sh /var/www/html/qgis-web-client/projects
             <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
             <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
             <br><br>
-            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+            Copyright &copy; cmhh 2021 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
         </p>
     </div>
 </footer>
 
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
-<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
+<script src="../../js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 
 <script src="//yihui.org/js/math-code.js"></script>

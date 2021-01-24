@@ -161,3 +161,14 @@ div.Large > p > img, img.Large {
   padding-bottom: 20px;
   max-width: 90%;
 }
+
+div.label > p {
+  display: block!important;
+  margin-left: auto!important;
+  margin-right: auto!important;
+  text-align: center;
+}
+
+.large + div.label > p, .Large + div.label > p {
+  margin-top: -20px!important;
+}

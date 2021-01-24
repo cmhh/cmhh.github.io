@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
-    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
 </head>
 <body>
 
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
+            <a class="navbar-item" href="../../">Home</a>
             
         </div>
     </nav>
@@ -26,7 +26,7 @@
 
     
     <section class="hero is-info is-medium">
-        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
             <div class="container has-text-centered">
                 <br>
                 <h1 class="title is-size-1">
@@ -49,9 +49,7 @@
         <div class="tile is-child box">
             <div class="content">
                 
-<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
-<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
-<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+<script src="../../post/datapackages/index_files/header-attrs/header-attrs.js"></script>
 
 
 <div id="introduction" class="section level1">
@@ -95,26 +93,38 @@ interested in the detail should refer to:</p>
 of packages. RStudio allows users to work with projects, and packages can be
 authored by creating a project with type ‘R Package’:</p>
 <div class="figure">
-<img src="../../img/datapackages/package01.png" alt="" />
-<p class="caption">Project-&gt;New Project…</p>
+<img src="img/package01.png" alt="" />
+<p class="caption">Project -&gt; New Project…</p>
 </div>
-<div class="figure">
-<img src="../../img/datapackages/package02.png" alt="" />
-<p class="caption">Create Project</p>
+<a href="img/package02.png" target="_blank">
+<img src="img/package02.png" class="small" style="margin-top: 20px">
+<div class="label">
+<p>
+create project
+</p>
 </div>
-<div class="figure">
-<img src="../../img/datapackages/package03.png" alt="" />
-<p class="caption">Project Type</p>
+<p></a></p>
+<a href="img/package03.png" target="_blank">
+<img src="img/package03.png" class="small">
+<div class="label">
+<p>
+project type
+</p>
 </div>
-<div class="figure">
-<img src="../../img/datapackages/package04.png" alt="" />
-<p class="caption">Create R Package</p>
+<p></a></p>
+<a href="img/package04.png" target="_blank">
+<img src="img/package04.png" class="small">
+<div class="label">
+<p>
+create R package
+</p>
 </div>
+<p></a></p>
 <p>When working on a package, RStudio provides a number of useful tools via a
 ‘Build’ menu. From there you can build the package and create source or binary
 packages for dissemination.</p>
 <div class="figure">
-<img src="../../img/datapackages/package05.png" alt="" />
+<img src="img/package05.png" alt="" />
 <p class="caption">Build menu</p>
 </div>
 <p>In addition to this, help files can be built automatically from source code
@@ -125,10 +135,14 @@ see:</p>
 <p><a href="http://r-pkgs.had.co.nz/man.html">Object documentation</a></p>
 <p>Finally, a package source code can be managed via either of git or subversion,
 which brings obvious advantage.</p>
-<div class="figure">
-<img src="../../img/datapackages/versioning.png" alt="" />
-<p class="caption">Version control</p>
+<a href="img/versioning.png" target="_blank">
+<img src="img/versioning.png" class="large">
+<div class="label">
+<p>
+version control
+</p>
 </div>
+<p></a></p>
 </div>
 </div>
 <div id="single-function-shiny-applications" class="section level1">
@@ -139,16 +153,24 @@ tries to help out here as well.</p>
 <p>For example, selecting File → New File → Shiny Web App… in RStudio
 will cause RStudio to create a small working app which you can use as a starting
 point:</p>
-<div class="figure">
-<img src="../../img/datapackages/shiny01.png" alt="" />
-<p class="caption">Shiny web app</p>
+<a href="img/shiny01.png" target="_blank">
+<img src="img/shiny01.png" class="large">
+<div class="label">
+<p>
+Shiny web app
+</p>
 </div>
-<div class="figure">
-<img src="../../img/datapackages/shiny02.png" alt="" />
-<p class="caption">New Shiny Web Application</p>
+<p></a></p>
+<a href="img/shiny02.png" target="_blank">
+<img src="img/shiny02.png" class="small">
+<div class="label">
+<p>
+new Shiny web application
+</p>
 </div>
+<p></a></p>
 <div class="figure">
-<img src="../../img/datapackages/shiny03.png" alt="" />
+<img src="img/shiny03.png" alt="" />
 <p class="caption">Shiny application running within RStudio IDE</p>
 </div>
 <p>A <code>shiny</code> application is essentially made of a <code>ui</code> component which contains the
@@ -269,8 +291,8 @@ installing this package, an HTML version of this file is created which can
 be queried from R via something like:</p>
 <pre class="r"><code>?NZCensus::dwelling</code></pre>
 <div class="figure">
-<img src="../../img/datapackages/dwellinghelp.png" alt="" />
-<p class="caption">Help for <code>dwelling</code> dataset.</p>
+<img src="img/dwellinghelp.png" alt="" />
+<p class="caption">help for <code>dwelling</code> dataset</p>
 </div>
 <p>Besides this, RStudio also automates the creation of other files, but several
 files were also created manually. For example, files were added to the folder
@@ -278,12 +300,12 @@ files were also created manually. For example, files were added to the folder
 available from the main help page via the
 <code>User guides, package vignettes and other documentation.</code> link.</p>
 <div class="figure">
-<img src="../../img/datapackages/NZCensushelp.png" alt="" />
-<p class="caption"><code>help(package="NZCensus")</code>.</p>
+<img src="img/NZCensushelp.png" alt="" />
+<p class="caption"><code>help(package="NZCensus")</code></p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/NZCensusdoc.png" alt="" />
-<p class="caption"><code>NZCensus</code> docs.</p>
+<img src="img/NZCensusdoc.png" alt="" />
+<p class="caption"><code>NZCensus</code> docs</p>
 </div>
 <p>In this case, these files are just versions of the <code>datadictionary</code>
 dataset that can be opened in Excel or LibreOffice (what used to be known as
@@ -340,14 +362,14 @@ want them.</p>
 mapdemo()</code></pre>
 <p>and looks as follows:</p>
 <div class="figure">
-<img src="../../img/datapackages/NZCensusMapDemo.png" alt="" />
+<img src="img/NZCensusMapDemo.png" alt="" />
 <p class="caption"><code>NZCensusDemos::mapdemo()</code></p>
 </div>
 <p>Similarly, the <code>distributiondemo</code> can be called via:</p>
 <pre class="r"><code>distributiondemo()</code></pre>
 <p>and looks as follows:</p>
 <div class="figure">
-<img src="../../img/datapackages/NZCensusDistributionDemo.png" alt="" />
+<img src="img/NZCensusDistributionDemo.png" alt="" />
 <p class="caption"><code>NZCensusDemos::distributiondemo()</code></p>
 </div>
 </div>
@@ -370,22 +392,26 @@ page here:</p>
 <p>The data consists of 14 columns, and 605535 rows.
 There isn’t any major problems with this data–it’s perfectly usable as it is.
 However there is a fair bit of duplication:</p>
-<div class="figure">
-<img src="../../img/datapackages/rawlabmkt.png" alt="" />
-<p class="caption">lots of duplication!</p>
+<a href="img/rawlabmkt.png" target="_blank">
+<img src="img/rawlabmkt.png" class="Large">
+<div class="label">
+<p>
+lots of duplication!
+</p>
 </div>
+<p></a></p>
 <p>Specifically, the <code>subject</code>, <code>group</code>, and title columns are unique by
 <code>series_reference</code>. So, we split the table into two tables which have
 <code>series_reference</code> as a common key, and remove as much duplication as possible.
 In addtion, we take the opportunity to cast the variable <code>Period</code> to a genuine
 date-type variable.</p>
 <div class="figure">
-<img src="../../img/datapackages/metadata.png" alt="" />
+<img src="img/metadata.png" alt="" />
 <p class="caption">metadata</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/labmkt.png" alt="" />
-<p class="caption">metadata</p>
+<img src="img/labmkt.png" alt="" />
+<p class="caption">normalised</p>
 </div>
 </div>
 <div id="making-a-package-1" class="section level2">
@@ -401,7 +427,7 @@ creation here. But the demo is triggered by calling:</p>
 timeseriesdemo()</code></pre>
 <p>and it looks as follows:</p>
 <div class="figure">
-<img src="../../img/datapackages/SNZlabmktTSDemo.png" alt="" />
+<img src="img/SNZlabmktTSDemo.png" alt="" />
 <p class="caption"><code>timeseriesdemo()</code></p>
 </div>
 </div>
@@ -411,17 +437,21 @@ timeseriesdemo()</code></pre>
 <p>The packages discussed here have all been uploaded to GitHub. RStudio has
 excellent integration with Git, as noted earlier, and allows users to use GitHub
 to set a remote repository.</p>
+<a href="img/git01.png" target="_blank">
+<img src="img/git01.png" class="small">
+<div class="label">
+<p>
+git
+</p>
+</div>
+<p></a></p>
 <div class="figure">
-<img src="../../img/datapackages/git01.png" alt="" />
-<p class="caption">Git</p>
+<img src="img/git02.png" alt="" />
+<p class="caption">git</p>
 </div>
 <div class="figure">
-<img src="../../img/datapackages/git02.png" alt="" />
-<p class="caption">Git</p>
-</div>
-<div class="figure">
-<img src="../../img/datapackages/git03.png" alt="" />
-<p class="caption">Git diff</p>
+<img src="img/git03.png" alt="" />
+<p class="caption">git diff</p>
 </div>
 <p>To install the packages:</p>
 <pre class="r"><code>if (!require(devtools)) install.packages(&quot;devtools&quot;)
@@ -449,43 +479,43 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
+            <span class="tag"><a href="../../tags/r">r</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/vuejs">vuejs</a></span>
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
     </div>
@@ -494,19 +524,19 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
-            <h1><a href="https://cmhh.github.io/post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <h1><a href="../../post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
             <time class="has-text-grey-light is-size-7">5 December 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <h1><a href="../../post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <h1><a href="../../post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
         
     </div>
@@ -522,13 +552,13 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
         <h1 class="title is-5">Related posts</h1>
       
       
-            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <h1><a href="../../post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
       
-            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
       
-            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
+            <h1><a href="../../post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
             <time class="has-text-grey-light is-size-7">27 November 2016</time>
       
     </div>
@@ -540,13 +570,13 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (4)<br>
+            <a href="../../archives/2020">2020</a> (4)<br>
         
-            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
+            <a href="../../archives/2019">2019</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
+            <a href="../../archives/2017">2017</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2016">2016</a> (4)<br>
+            <a href="../../archives/2016">2016</a> (4)<br>
         
     </div>
 </div>
@@ -564,13 +594,13 @@ devtools::install_local(&quot;path-to-zip/SNZlabmkt-master.zip&quot;)</code></pr
             <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
             <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
             <br><br>
-            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+            Copyright &copy; cmhh 2021 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
         </p>
     </div>
 </footer>
 
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
-<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
+<script src="../../js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 
 <script src="//yihui.org/js/math-code.js"></script>

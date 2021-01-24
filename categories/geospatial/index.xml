@@ -1,21 +1,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>geospatial on cmhh</title>
-    <link>https://cmhh.github.io/categories/geospatial/</link>
+    <link>/categories/geospatial/</link>
     <description>Recent content in geospatial on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 27 Nov 2016 00:00:00 +0000</lastBuildDate>
     
-        <atom:link href="https://cmhh.github.io/categories/geospatial/index.xml" rel="self" type="application/rss+xml" />
+        <atom:link href="/categories/geospatial/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Routing in R Using the Open Source Routing Machine (OSRM)</title>
-      <link>https://cmhh.github.io/post/routing/</link>
+      <link>/post/routing/</link>
       <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
       
-      <guid>https://cmhh.github.io/post/routing/</guid>
+      <guid>/post/routing/</guid>
       <description>Overview I often find myself needing to establish the travel time or distance between arrays of addresses. In the past I have used ArcMap’s Network Analyst tool, but have found the syntax to be clunky at best, and the performance to be very mediocre. And, besides, I am often working in R and sometimes it’s nice to be able to do everything in the one environment, rather than doing the routing in Python, say, and then using the results in R.</description>
     </item>
     

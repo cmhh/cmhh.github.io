@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
-    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
 </head>
 <body>
 
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
+            <a class="navbar-item" href="../../">Home</a>
             
         </div>
     </nav>
@@ -26,7 +26,7 @@
 
     
     <section class="hero is-info is-medium">
-        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
             <div class="container has-text-centered">
                 <br>
                 <h1 class="title is-size-1">
@@ -49,9 +49,7 @@
         <div class="tile is-child box">
             <div class="content">
                 
-<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
-<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
-<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+<script src="../../post/dockerdev/index_files/header-attrs/header-attrs.js"></script>
 
 
 <div id="overview" class="section level1">
@@ -60,7 +58,7 @@
 <p>Here we discuss the use of Windows Subsystem for Linux 2 (WSL2), along with Docker, as a means of end-user enablement that might offer a reasonable compromise between safety and productivity. WSL2 allows Windows users to install a largely feature-complete version of Linux within Windows itself, which can be used ‘remotely’ via Visual Studio Code (vscode) for almost anything. Normal users will have administrative rights within the Linux installation, but will not have any heightened access over the host OS itself, meaning users are free to experiment with little risk to the host.</p>
 <p>Linux on WSL is a perfectly reasonable sandpit in its own right–we can experiment as suggested, and if we somehow break the install we can simply blow it away and start again. Even so, we can choose to use the Linux instance only to build Docker images and run Docker containers, ensuring the Linux system remains free of clutter, while providing yet another layer of abstraction. That is, we run tools via Docker, which runs via Linux on WSL2, rather than installing those tools in Windows. The target tools are then accessed remotely via SSH or similar, or via some other client interface, such as a web browser or web service.</p>
 <div class="large">
-<p><img src="../../img/dockerdev/dev.png" /></p>
+<p><img src="img/dev.png" /></p>
 </div>
 </div>
 <div id="prerequisites" class="section level1">
@@ -154,19 +152,19 @@ RUN  apt-get update &amp;&amp; apt-get -y dist-upgrade &amp;&amp; \
   User root</code></pre>
 <p>and we can then use Visual Studio Code to develop in the usual way, but using the running container. We bring up the command palette (<span class="key">CTRL</span>+<span class="key">SHIFT</span>+<span class="key">P</span>) and select “Remote-SSH: Connect to Host…”</p>
 <div class="small">
-<p><img src="../../img/dockerdev/vscode01.png" /></p>
+<p><img src="img/vscode01.png" /></p>
 </div>
 <p>Then select “dockerdev”:</p>
 <div class="small">
-<p><img src="../../img/dockerdev/vscode02.png" /></p>
+<p><img src="img/vscode02.png" /></p>
 </div>
 <p>At this point, a new vscode window will open, connected remotely to the running container:</p>
-<p><a href="../../img/dockerdev/vscode03.png" target="_blank">
-<img src="../../img/dockerdev/vscode03.png" class="Large">
+<p><a href="img/vscode03.png" target="_blank">
+<img src="img/vscode03.png" class="Large">
 </a></p>
 <p>We can clone repositories from a version control system, and commit changes; and provided the right ports are open, we can also test web services and so forth locally:</p>
-<p><a href="../../img/dockerdev/vscode04.png" target="_blank">
-<img src="../../img/dockerdev/vscode04.png" class="Large">
+<p><a href="img/vscode04.png" target="_blank">
+<img src="img/vscode04.png" class="Large">
 </a></p>
 </div>
 <div id="deployment-via-containers" class="section level1">
@@ -227,8 +225,8 @@ ENTRYPOINT [&quot;java&quot;, &quot;-cp&quot;, &quot;/seasadj.jar&quot;, &quot;o
   localhost:9001/seasadj/adjust \
   --compressed --output airpassengers.output.json</code></pre>
 <p>We could even build a SPA. The following is a screenshot of a basic app written using Vue.js, for example:</p>
-<p><a href="../../img/dockerdev/seasadjclient.png" target="_blank">
-<img src="../../img/dockerdev/seasadjclient.png" class="Large">
+<p><a href="img/seasadjclient.png" target="_blank">
+<img src="img/seasadjclient.png" class="Large">
 </a></p>
 <p>Under basic load testing, the service could handle around 230 transactions per second on a laptop with an 8 core AMD Ryzen 5 2500U with Radeon Vega Mobile Gfx 2.00 GHz processor. And while no security is provided directly, authentication methods can be added easily if required, and communication can be encrypted easily enough using Nginx or similar.</p>
 </div>
@@ -253,8 +251,8 @@ CMD /bin/bash ./entrypoint.sh</code></pre>
   -p 1433:1433 \
   adventureworks</code></pre>
 <p>Once running, one can then connect using database clients such as the excellent <a href="https://dbeaver.com/">DBeaver</a>:</p>
-<p><a href="../../img/dockerdev/dbeaver.png" target="_blank">
-<img src="../../img/dockerdev/dbeaver.png" class="Large">
+<p><a href="img/dbeaver.png" target="_blank">
+<img src="img/dbeaver.png" class="Large">
 </a></p>
 <p>The database provided is a full-featured version of SQL Server, and so is sufficient for local development, but also general purpose testing. Want to know what sort of performance improvement would be achieved with the addition of a columnstore index? You can test the locally–no need to appeal to a physical or remote test environment, certainly if one doesn’t already exist, or if a process must be followed to be granted access.</p>
 </div>
@@ -325,8 +323,8 @@ CMD service rstudio-server start &amp;&amp; \
   -v ${PWD}/.local:/home/guest/.local \
   rstudio:4.0.3</code></pre>
 <p>At this point, RStudio Server will be available via a web browser at <code>localhost:8787</code>:</p>
-<p><a href="../../img/dockerdev/rstudioex.png" target="_blank">
-<img src="../../img/dockerdev/rstudioex.png" class="Large">
+<p><a href="img/rstudioex.png" target="_blank">
+<img src="img/rstudioex.png" class="Large">
 </a></p>
 </div>
 <div id="using-a-registry" class="section level1">
@@ -362,8 +360,8 @@ networks:
 <pre class="bash"><code>docker tag rstudio:4.0.3 localhost:8080/rstudio:4.0.3
 docker push localhost:8080/rstudio:4.0.3</code></pre>
 <p>The UI itself will be available in our web browser at <code>localhost:8080</code>:</p>
-<p><a href="../../img/dockerdev/registryui.png" target="_blank">
-<img src="../../img/dockerdev/registryui.png" class="Large">
+<p><a href="img/registryui.png" target="_blank">
+<img src="img/registryui.png" class="Large">
 </a></p>
 </div>
 <div id="summary" class="section level1">
@@ -388,43 +386,43 @@ docker push localhost:8080/rstudio:4.0.3</code></pre>
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
+            <span class="tag"><a href="../../tags/r">r</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/vuejs">vuejs</a></span>
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
     </div>
@@ -433,19 +431,19 @@ docker push localhost:8080/rstudio:4.0.3</code></pre>
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
-            <h1><a href="https://cmhh.github.io/post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <h1><a href="../../post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
             <time class="has-text-grey-light is-size-7">5 December 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <h1><a href="../../post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <h1><a href="../../post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
         
     </div>
@@ -461,7 +459,7 @@ docker push localhost:8080/rstudio:4.0.3</code></pre>
         <h1 class="title is-5">Related posts</h1>
       
       
-            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <h1><a href="../../post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
       
     </div>
@@ -473,13 +471,13 @@ docker push localhost:8080/rstudio:4.0.3</code></pre>
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (4)<br>
+            <a href="../../archives/2020">2020</a> (4)<br>
         
-            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
+            <a href="../../archives/2019">2019</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
+            <a href="../../archives/2017">2017</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2016">2016</a> (4)<br>
+            <a href="../../archives/2016">2016</a> (4)<br>
         
     </div>
 </div>
@@ -497,13 +495,13 @@ docker push localhost:8080/rstudio:4.0.3</code></pre>
             <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
             <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
             <br><br>
-            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+            Copyright &copy; cmhh 2021 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
         </p>
     </div>
 </footer>
 
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
-<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
+<script src="../../js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 
 <script src="//yihui.org/js/math-code.js"></script>

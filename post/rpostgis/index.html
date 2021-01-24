@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
-    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
-    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
 </head>
 <body>
 
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
+            <a class="navbar-item" href="../../">Home</a>
             
         </div>
     </nav>
@@ -26,7 +26,7 @@
 
     
     <section class="hero is-info is-medium">
-        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
             <div class="container has-text-centered">
                 <br>
                 <h1 class="title is-size-1">
@@ -49,9 +49,7 @@
         <div class="tile is-child box">
             <div class="content">
                 
-<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
-<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
-<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+<script src="../../post/rpostgis/index_files/header-attrs/header-attrs.js"></script>
 
 
 <div id="overview" class="section level1">
@@ -92,7 +90,7 @@ gis_osm_waterways_free_1   | line    |
 * [Statistical Area Level 2 2020 Clipped (generalised)](https://datafinder.stats.govt.nz/layer/104270-statistical-area-2-2020-clipped-generalised/)
 * [Meshblock 2020 (generalised)](https://datafinder.stats.govt.nz/layer/104280-meshblock-2020-generalised/)
 -->
-<p>Finally we will make use of <a href="https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/">Wellington 0.10m Urban Aerial Photos (2017)</a> from the <a href="https://data.linz.govt.nz/">LINZ Data Service</a>. This is a set of high resolution aerial imagery covering Wellington City. This data can be downloaded in a range of formats, and a JPEG was chosen here.</p>
+<p>Finally we will make use of <a href="https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/">Wellington 0.10m Urban Aerial Photos (2017)</a> from the <a href="https://data.linz.govt.nz/">LINZ Data Service</a>. This is a set of high resolution aerial imagery covering Wellington City. This data can be downloaded in a range of formats, and JPEG was chosen here.</p>
 <!-- * [Wellington 0.10m Urban Aerial Photos (2017)](https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/) -->
 </div>
 <div id="loading-the-source-data-to-postgis" class="section level1">
@@ -105,7 +103,7 @@ gis_osm_waterways_free_1   | line    |
 </ul>
 <div id="vector-data" class="section level2">
 <h2>Vector data</h2>
-<p>We can load vector data to PostGIS using the <code>ogr2ogr</code> program provided by <code>gdal</code>. For example, in the following we load a geopackage called <code>meshblock-2020-generalised.gpkg</code> to <code>statsnz.meshblock2020</code>:</p>
+<p>We can load vector data to PostGIS using the <code>ogr2ogr</code> program provided by <code>gdal</code>. For example, in the following we load a GeoPackage called <code>meshblock-2020-generalised.gpkg</code> to <code>statsnz.meshblock2020</code>:</p>
 <pre class="bash"><code>ogr2ogr \
   -f PostgreSQL PG:&quot;dbname=&#39;gis&#39; user=&#39;gisuser&#39; password=&#39;gisuser&#39;&quot; \
   meshblock-2020-generalised.gpkg \
@@ -121,8 +119,8 @@ gis_osm_waterways_free_1   | line    |
 <pre class="bash"><code>ogr2ogr -f PGDUMP mb2020.sql \
   meshblock-2020-generalised.gpkg \
   -nln statsnz.meshblock2020</code></pre>
-<p>Actually, this approach should be preferred since transferring to shapefile as an intermediate step will cause attribute names to be truncated / normalised, and if the geopackage contains indexes, comments, and so forth, they will be retained.</p>
-<p>Finally, one could load the data via R itself, though it probably isn’t the best approach in general. Still, to load the same geopackage:</p>
+<p>Actually, this approach should be preferred since transferring to shapefile as an intermediate step will cause attribute names to be truncated / normalised, and if the GeoPackage contains indexes, comments, and so forth, they will be retained.</p>
+<p>Finally, one could load the data via R itself, though it probably isn’t the best approach in general. Still, to load the same GeoPackage:</p>
 <pre class="r"><code>library(sf)
 
 conn &lt;- RPostgreSQL::dbConnect(
@@ -130,8 +128,8 @@ conn &lt;- RPostgreSQL::dbConnect(
   dbname = &quot;gis&quot;, user = &quot;gisuser&quot;, password = &quot;gisuser&quot;
 )
 
-sa1 &lt;- st_read(&quot;meshblock-2020-generalised.gpkg&quot;)
-st_write(sa1, conn, c(&quot;statsnz&quot;, &quot;meshblock2020&quot;))
+mb &lt;- st_read(&quot;meshblock-2020-generalised.gpkg&quot;)
+st_write(mb, conn, c(&quot;statsnz&quot;, &quot;meshblock2020&quot;))
 DBI::dbDisconnect(conn)</code></pre>
 </div>
 <div id="raster-data" class="section level2">
@@ -171,8 +169,8 @@ DBI::dbDisconnect(conn)</code></pre>
 <div id="transforming-reprojecting-and-simplifying-features" class="section level2">
 <h2>Transforming / reprojecting and simplifying features</h2>
 <p>Consider the <code>osm.gis_osm_landuse_a_free_1</code> feature class. This is reasonably large, consisting of some 373272 features, and totalling 327MB as a shapefile on disk. The features themselves are polygons that describe various types of land use, a section of which looks as follows:</p>
-<p><a href="../../img/rpostgis/upperhuttlanduse.png" target="_blank">
-<img src="../../img/rpostgis/upperhuttlanduselo.png" class="large">
+<p><a href="img/upperhuttlanduse.png" target="_blank">
+<img src="img/upperhuttlanduselo.png" class="large">
 </a></p>
 <p>Assume we wish to do the following:</p>
 <ul>
@@ -212,7 +210,7 @@ Maybe do building outlines for a single SA2 or something?
 </div>
 <div id="dissolving-features" class="section level2">
 <h2>Dissolving features</h2>
-<p>A feature class can be dissolve by some categorical attribute using the <code>sf</code> package simply by performing a grouped aggregate, in this case with <code>dplyr</code>:</p>
+<p>A feature class can be dissolved by some categorical attribute using the <code>sf</code> package simply by performing a grouped aggregate, in this case with <code>dplyr</code>:</p>
 <pre class="r"><code>library(dplyr)
 
 mb_dissolved_sf &lt;- 
@@ -238,11 +236,11 @@ mb_dissolved_sf &lt;-
 ggplot() + 
   geom_sf(
     data = st_read(&quot;meshblock-2020-generalised.gpkg&quot;), 
-    aes(fill = LANDWATER_NAME), linetype = &quot;blank&quot;
+    aes(fill = LANDWATER_NAME)
   ) +
   guides(fill = guide_legend(title = &quot;&quot;))</code></pre>
 <div class="large">
-<p><img src="../../img/rpostgis/mb.png" /></p>
+<p><img src="img/mb.png" /></p>
 </div>
 <p>After dissolving we have:</p>
 <pre class="r"><code>ggplot() + 
@@ -252,26 +250,26 @@ ggplot() +
   ) +
   guides(fill = guide_legend(title = &quot;&quot;))</code></pre>
 <div class="large">
-<p><img src="../../img/rpostgis/mbdissolve.png" /></p>
+<p><img src="img/mbdissolve.png" /></p>
 </div>
 </div>
 <div id="clipping-a-large-raster" class="section level2">
 <h2>Clipping a large raster</h2>
 <p>The <a href="https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/">Wellington 0.10m Urban Aerial Photos (2017)</a> raster was downloaded in JPEG format. Unpacked, the ‘raster’ is 5.4GB, and is made up of 1667 individual JPEG files, each about 3.5MB in size. Collectively, they look as follows:</p>
-<p><a href="../../img/rpostgis/wgtnaerial01.jpeg" target="_blank">
-<img src="../../img/rpostgis/wgtnaerial01lo.jpeg" class="large">
+<p><a href="img/wgtnaerial01.jpeg" target="_blank">
+<img src="img/wgtnaerial01lo.jpeg" class="large">
 </a></p>
 <p>In principle, these can be imported into R using the raster package. For example, to create a raster from the first 2 JPEG files:</p>
 <pre class="r"><code>f &lt;- dir(&quot;/home/cmhh/Downloads/shp/linz&quot;, full.names = TRUE)
 f &lt;- f[grepl(&quot;^.+(.jpg)$&quot;, f)]
 r &lt;- merge(brick(f[1]), brick(f[2]))</code></pre>
 <p>which yields:</p>
-<p><a href="../../img/rpostgis/wgtnaerial02.jpeg" target="_blank">
-<img src="../../img/rpostgis/wgtnaerial02lo.jpeg" class="large">
+<p><a href="img/wgtnaerial02.jpeg" target="_blank">
+<img src="img/wgtnaerial02lo.jpeg" class="large">
 </a></p>
 <p>In practice, however, this approach is excruciatingly slow, and far from practical. (Loading the raster to PostGIS is also excruciatingly slow, but it only needs to be done once, and then many users can use the result.) Now consider this same raster with the <code>statsnz.meshblock2020</code> feature class overlaid:</p>
-<p><a href="../../img/rpostgis/wgtnaerial03.jpeg" target="_blank">
-<img src="../../img/rpostgis/wgtnaerial03lo.jpeg" class="large">
+<p><a href="img/wgtnaerial03.jpeg" target="_blank">
+<img src="img/wgtnaerial03lo.jpeg" class="large">
 </a></p>
 <p>Assume that we just wish to use a single meshblock, 2122700, to mask the raster. This can be done in R using the <code>gdalUtils::gdalwarp</code> function (which is just a wrapper for the <code>gdalwarp</code> command-line tool) as follows:</p>
 <pre class="r"><code>library(gdalUtils)
@@ -299,9 +297,9 @@ gdalwarp(
   crop_to_cutline = TRUE,
   dstnodata = &quot;nodata&quot;
 )</code></pre>
-<p>This outputs a single TIF file, which can be read into R using <code>raster::stack("2122700.tif")</code>, and looks as follows:</p>
-<p><a href="../../img/rpostgis/wgtnrail.jpeg" target="_blank">
-<img src="../../img/rpostgis/wgtnraillo.jpeg" class="small">
+<p>Note that this took only a few seconds in practice, and outputs a single TIF file which can be read into R using <code>raster::stack("2122700.tif")</code>, and looks as follows:</p>
+<p><a href="img/wgtnrail.jpeg" target="_blank">
+<img src="img/wgtnraillo.jpeg" class="small">
 </a></p>
 </div>
 </div>
@@ -310,7 +308,7 @@ gdalwarp(
 <p>PostGIS has a number of other uses. One interesting use case is to pair it with <a href="http://geoserver.org/">GeoServer</a> so feature classes can be served as WMS features which can be included in <a href="https://leafletjs.com/">Leaflet</a> maps. For an example of using GeoServer from R to create tile services on the fly, see <a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a>.</p>
 <div style="padding-bottom: 10px;">
 <video width="878" controls>
-<source src="../../vid/geoserver.mp4" type="video/mp4">
+<source src="../geoserver/vid/geoserver.mp4" type="video/mp4">
 Your browser does not support the video tag.
 </video>
 </div>
@@ -431,7 +429,7 @@ CMD service rstudio-server start &amp;&amp; \
 <p>The image can be started by running:</p>
 <pre class="bash"><code>docker run -d --rm --name rstudio -p 8787:8787 rstudio</code></pre>
 <p>When done, RStudio will be available via a web browser at <code>http://localhost:8787</code>.</p>
-<p><img src="../../img/rpostgis/rdocker.png" /></p>
+<p><img src="img/rdocker.png" /></p>
 </div>
 </div>
 
@@ -444,43 +442,43 @@ CMD service rstudio-server start &amp;&amp; \
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/geospatial">geospatial</a></span>
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/osrm">osrm</a></span>
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
+            <span class="tag"><a href="../../tags/r">r</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/vuejs">vuejs</a></span>
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
         
-            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
     </div>
@@ -489,19 +487,19 @@ CMD service rstudio-server start &amp;&amp; \
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
-            <h1><a href="https://cmhh.github.io/post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <h1><a href="../../post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
             <time class="has-text-grey-light is-size-7">5 December 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <h1><a href="../../post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <h1><a href="../../post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
         
-            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
         
     </div>
@@ -517,13 +515,13 @@ CMD service rstudio-server start &amp;&amp; \
         <h1 class="title is-5">Related posts</h1>
       
       
-            <h1><a href="https://cmhh.github.io/post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
       
-            <h1><a href="https://cmhh.github.io/post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
+            <h1><a href="../../post/routing/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
             <time class="has-text-grey-light is-size-7">27 November 2016</time>
       
-            <h1><a href="https://cmhh.github.io/post/datapackages/">Using R Packages to Disseminate Data</a></h1>
+            <h1><a href="../../post/datapackages/">Using R Packages to Disseminate Data</a></h1>
             <time class="has-text-grey-light is-size-7">20 July 2016</time>
       
     </div>
@@ -535,13 +533,13 @@ CMD service rstudio-server start &amp;&amp; \
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="https://cmhh.github.io/archives/2020">2020</a> (4)<br>
+            <a href="../../archives/2020">2020</a> (4)<br>
         
-            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
+            <a href="../../archives/2019">2019</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
+            <a href="../../archives/2017">2017</a> (1)<br>
         
-            <a href="https://cmhh.github.io/archives/2016">2016</a> (4)<br>
+            <a href="../../archives/2016">2016</a> (4)<br>
         
     </div>
 </div>
@@ -559,13 +557,13 @@ CMD service rstudio-server start &amp;&amp; \
             <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
             <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
             <br><br>
-            Copyright &copy; cmhh 2020 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+            Copyright &copy; cmhh 2021 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
         </p>
     </div>
 </footer>
 
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
-<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
+<script src="../../js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 
 <script src="//yihui.org/js/math-code.js"></script>
