@@ -1,265 +1,167 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
-  
   <url>
-    <loc>/categories/</loc>
+    <loc>https://cmhh.github.io/post/sedona/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/geospark/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/geospark/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/postgis/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/postgis/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/post/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/sedona/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/sedona/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/spark/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/spark/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/</loc>
+    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/docker/</loc>
     <lastmod>2020-12-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/docker/</loc>
     <lastmod>2020-12-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/docker/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/dockerdev/</loc>
     <lastmod>2020-12-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/docker/</loc>
-    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/</loc>
-    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
-    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/dockerdev/</loc>
-    <lastmod>2020-12-05T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/docker_wsl2/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/docker_wsl2/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/postgis/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/postgresql/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/postgis/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/postgresql/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/postgresql/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/r/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/postgresql/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/r/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/r/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/rpostgis/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/r/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/wsl2/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/rpostgis/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/wsl2/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/wsl2/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/wsl2/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/akka-http/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/akka-http/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/akka-http/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/akka-http/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/seasadj/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/seasadj/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/seasonal-adjustment/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/seasonal-adjustment/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/seasonal-adjustment/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/seasonal-adjustment/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/vuejs/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/vuejs/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/vuejs/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/vuejs/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/x13-arima-seats/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/x13-arima-seats/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/x13-arima-seats/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/x13-arima-seats/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/geoserver/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/geoserver/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/geoserver/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/qgis/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/qgis/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/tiles/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/tiles/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/tiles/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/tiles/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/qgis/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/tiles/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/tiles/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/tilestache/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/tilestache/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/tilestache/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/tilestache/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/wmts/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/wmts/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/wmts/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/wmts/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/geospatial/</loc>
-    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/geospatial/</loc>
-    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/osrm/</loc>
-    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/osrm/</loc>
-    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/routing/</loc>
-    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/r-packages/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/r-packages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/r-packages/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/r-packages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/shiny/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/shiny/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/shiny/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/shiny/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/datapackages/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/post/datapackages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/nodejs/</loc>
+  </url><url>
+    <loc>https://cmhh.github.io/tags/nodejs/</loc>
+    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/categories/nodejs/</loc>
+    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>https://cmhh.github.io/post/webservice/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url>
-  
-  <url>
-    <loc>/categories/nodejs/</loc>
-    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/webservice/</loc>
-    <lastmod>2016-05-28T00:00:00+00:00</lastmod>
-  </url>
-  
 </urlset>

@@ -9,16 +9,16 @@
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
-    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
-    <link rel="stylesheet" href="../../css/blog.css" />
-    <link rel="stylesheet" href="../../css/custom.css" />
+    <link href="https://cmhh.github.io/css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="https://cmhh.github.io/css/blog.css" />
+    <link rel="stylesheet" href="https://cmhh.github.io/css/custom.css" />
 </head>
 <body>
 
     
     <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-            <a class="navbar-item" href="../../">Home</a>
+            <a class="navbar-item" href="https://cmhh.github.io/">Home</a>
             
         </div>
     </nav>
@@ -26,7 +26,7 @@
 
     
     <section class="hero is-info is-medium">
-        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+        <div class="hero-body" style="background-image: url(https://cmhh.github.io/img/bg-blog-2.jpg);">
             <div class="container has-text-centered">
                 <br>
                 <h1 class="title is-size-1">
@@ -49,7 +49,9 @@
         <div class="tile is-child box">
             <div class="content">
                 
-<script src="../../post/tiles/index_files/header-attrs/header-attrs.js"></script>
+<script src="../../rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<link href="../../rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="../../rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
 
 
 <div id="overview" class="section level1">
@@ -68,7 +70,7 @@ viewport. One way of doing this is to use a tile server whereby a map is
 represented as a grid made of individual <em>tiles</em>, and each tile is an image
 which can be rendered and served on request. For example:</p>
 <div class="figure">
-<img src="img/020302.png" alt="" />
+<img src="../../img/tiles/020302.png" alt="" />
 <p class="caption"><a href="http://tile.openstreetmap.org/2/3/2.png" class="uri">http://tile.openstreetmap.org/2/3/2.png</a></p>
 </div>
 <p>In this document we consider two main tools: <a href="http://mapnik.org">Mapnik</a>, which
@@ -124,13 +126,13 @@ we create one as follows:</p>
 <p>which will then make the server available at
 <a href="http://localhost:8080">http://localhost:8080</a>:</p>
 <div class="figure">
-<img src="img/tiles.png" alt="" />
+<img src="../../img/tiles/tiles.png" alt="" />
 <p class="caption"><a href="http://localhost:8080" class="uri">http://localhost:8080</a></p>
 </div>
 <p>In this case, tiles from openstreetmap.org are available at
 <code>/osm/{z}/{x}/{y}.png</code>:</p>
 <div class="figure">
-<img src="img/000.crop.png" alt="" />
+<img src="../../img/tiles/000.crop.png" alt="" />
 <p class="caption"><a href="http://localhost:8080/osm/0/0/0.png" class="uri">http://localhost:8080/osm/0/0/0.png</a></p>
 </div>
 </div>
@@ -275,7 +277,7 @@ it is, apparently, possible to do something like:</p>
 <code>http://localhost/tiles/</code> or <code>http://&lt;domain name&gt;/tiles/</code> if the server is
 available externally.</p>
 <div class="figure">
-<img src="img/000nginxlocal.png" alt="" />
+<img src="../../img/tiles/000nginxlocal.png" alt="" />
 <p class="caption"><a href="http://localhost/tiles/" class="uri">http://localhost/tiles/</a></p>
 </div>
 </div>
@@ -321,7 +323,7 @@ source ~/.bashrc</code></pre>
 <p>Then browse to <code>http://localhost:9090</code> in a web browser and you’ll see something
 like:</p>
 <div class="figure">
-<img src="img/tileoven.png" alt="" />
+<img src="../../img/tiles/tileoven.png" alt="" />
 <p class="caption">TileMill (local)</p>
 </div>
 </div>
@@ -353,26 +355,26 @@ network by the name <code>debian</code>, or by the IP address <code>192.168.20.2
 true for my local network). We start PuTTY and enter either the hostname or
 IP address as follows:</p>
 <div class="figure">
-<img src="img/putty01.png" alt="" />
+<img src="../../img/tiles/putty01.png" alt="" />
 <p class="caption">hostname</p>
 </div>
 <p>Then, navigate to Connection→SSH→Auth→Tunnels, and enter ports
 20008 and 20009 as required:</p>
 <div class="figure">
-<img src="img/putty02.png" alt="" />
+<img src="../../img/tiles/putty02.png" alt="" />
 <p class="caption">tunnels</p>
 </div>
 <p>Click the connect button, and you will be asked to enter a username and, and
 a terminal will open as follows:</p>
 <div class="figure">
-<img src="img/putty03.png" alt="" />
+<img src="../../img/tiles/putty03.png" alt="" />
 <p class="caption">terminal</p>
 </div>
 <p>The terminal isn’t terribly important in this instance since we just want to
 acces TileMill. Simply open a browser and point it at <code>http://localhost:20009</code>
 as follows:</p>
 <div class="figure">
-<img src="img/putty04.png" alt="" />
+<img src="../../img/tiles/putty04.png" alt="" />
 <p class="caption">TileMill (remote)</p>
 </div>
 <p>This was done using a remote machine on the same local network as the TileMill
@@ -481,17 +483,17 @@ repostiory:</p>
 from the sidebar, and then click the ‘+ New project’. Fill in the resulting
 dialog as follows:</p>
 <div class="figure">
-<img src="img/river01.png" alt="" />
+<img src="../../img/tiles/river01.png" alt="" />
 <p class="caption">river - create project</p>
 </div>
 <p>The default map canvas will contain a modestly styled countries feature class
 which you can safely delete–click the layers control
-(<img src="img/layers.png" />), hover over <code>#countries</code>, and click delete
-(<img src="img/delete.png" />).</p>
+(<img src="../../img/tiles/layers.png" />), hover over <code>#countries</code>, and click delete
+(<img src="../../img/tiles/delete.png" />).</p>
 <p>Next, click the ‘+ Add layer’ button, and fill in the resulting dialog as
 in the following screenshot, before clicking the ‘Save &amp; Style’ button:</p>
 <div class="figure">
-<img src="img/river02.png" alt="" />
+<img src="../../img/tiles/river02.png" alt="" />
 <p class="caption">river - add layer</p>
 </div>
 <p>Now edit the <code>style.mss</code> tab so it contains:</p>
@@ -512,7 +514,7 @@ in the following screenshot, before clicking the ‘Save &amp; Style’ button:<
 <p>Upon clicking the save button, the map should update and (after a little
 panning and zooming) looks as follows:</p>
 <div class="figure">
-<img src="img/river03.png" alt="" />
+<img src="../../img/tiles/river03.png" alt="" />
 <p class="caption">river - final map</p>
 </div>
 <p>To serve a map like this via TileStache, save <code>style.mss</code> as a Mapnik XML file
@@ -547,7 +549,7 @@ with a convenient way of testing things are working:</p>
 leaflet(width=&quot;100%&quot;, height=500) %&gt;% addTiles() %&gt;% 
   fitBounds(166.70047, -34.45676, 178.52966, -47.06345) %&gt;%
   addTiles(urlTemplate = &quot;http://localhost/tiles/river/{z}/{x}/{y}.png&quot;)</code></pre>
-<p><img src="img/river04.png" /></p>
+<p><img src="../../img/tiles/river04.png" /></p>
 <p>(Of course, you get a live preview of the tiles in TileMill, but we want to
 confirm that we can server these via TileStache. That is, we want to confirm
 that we can access the tile server remotely with a ‘Google Maps-style URL’.)</p>
@@ -560,7 +562,7 @@ the default <code>countries</code> layer.</p>
 <p>We will add each of MB2013, AU2013, TA2013, and REGC2013 from PostGIS tables,
 though it would be just as easy to add them via shapefiles. They are all
 entered the same way, so we show the setup for just the one, MB2013, as follows:</p>
-<p><img src="img/composite01.png" /></p>
+<p><img src="../../img/tiles/composite01.png" /></p>
 <p>After all 4 layers are added, edit <code>style.mss</code> so it contains the following:</p>
 <pre class="asis"><code>Map {
   background-color: transparent;
@@ -696,16 +698,16 @@ R:</p>
 leaflet() %&gt;% addTiles() %&gt;%
   fitBounds(166.70047, -34.45676, 178.52966, -47.06345) %&gt;%
   addTiles(urlTemplate = &quot;http://localhost/tiles/composite/{z}/{x}/{y}.png&quot;)</code></pre>
-<p><img src="img/composite02.png" /></p>
-<p><img src="img/composite03.png" /></p>
-<p><img src="img/composite04.png" /></p>
-<p><img src="img/composite05.png" /></p>
+<p><img src="../../img/tiles/composite02.png" /></p>
+<p><img src="../../img/tiles/composite03.png" /></p>
+<p><img src="../../img/tiles/composite04.png" /></p>
+<p><img src="../../img/tiles/composite05.png" /></p>
 </div>
 <div id="rasters" class="section level2">
 <h2>Rasters</h2>
 <p>Finally, create a new project called <code>nleach</code>, and add the
 <code>Nitrogen_Leaching_20150903.tif</code> as follows:</p>
-<p><img src="img/nleach01.png" /></p>
+<p><img src="../../img/tiles/nleach01.png" /></p>
 <p>Then edit <code>style.mss</code> as follows:</p>
 <pre class="asis"><code>Map {
   background-color: transparent;
@@ -750,8 +752,8 @@ layer to <code>/etch/tilestache/tilestache.cfg</code>:</p>
 leaflet() %&gt;% addTiles() %&gt;%
   fitBounds(166.70047, -34.45676, 178.52966, -47.06345) %&gt;%
   addTiles(urlTemplate = &quot;http://localhost/tiles/nleach/{z}/{x}/{y}.png&quot;)</code></pre>
-<p><img src="img/nleach02.png" /></p>
-<p><img src="img/nleach03.png" /></p>
+<p><img src="../../img/tiles/nleach02.png" /></p>
+<p><img src="../../img/tiles/nleach03.png" /></p>
 </div>
 </div>
 
@@ -764,43 +766,45 @@ leaflet() %&gt;% addTiles() %&gt;%
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
-            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/akka-http">akka-http</a></span>
         
-            <span class="tag"><a href="../../tags/docker">docker</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/docker">docker</a></span>
         
-            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/geoserver">geoserver</a></span>
         
-            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/geospark">geospark</a></span>
         
-            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/nodejs">nodejs</a></span>
         
-            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgis">postgis</a></span>
         
-            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/postgresql">postgresql</a></span>
         
-            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/qgis">qgis</a></span>
         
-            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/r">r</a></span>
         
-            <span class="tag"><a href="../../tags/r">r</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/r-packages">r-packages</a></span>
         
-            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
-            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/sedona">sedona</a></span>
         
-            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/shiny">shiny</a></span>
         
-            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/spark">spark</a></span>
         
-            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/tiles">tiles</a></span>
         
-            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/tilestache">tilestache</a></span>
         
-            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/vuejs">vuejs</a></span>
         
-            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/wmts">wmts</a></span>
         
-            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+            <span class="tag"><a href="https://cmhh.github.io/tags/wsl2">wsl2</a></span>
+        
+            <span class="tag"><a href="https://cmhh.github.io/tags/x13-arima-seats">x13-arima-seats</a></span>
         
         </div>          
     </div>
@@ -809,20 +813,20 @@ leaflet() %&gt;% addTiles() %&gt;%
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
-            <h1><a href="../../post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <h1><a href="https://cmhh.github.io/post/sedona/">A Brief Look at Apache Sedona</a></h1>
+            <time class="has-text-grey-light is-size-7">19 April 2021</time>
+        
+            <h1><a href="https://cmhh.github.io/post/dockerdev/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
             <time class="has-text-grey-light is-size-7">5 December 2020</time>
         
-            <h1><a href="../../post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <h1><a href="https://cmhh.github.io/post/rpostgis/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="../../post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <h1><a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
         
-            <h1><a href="../../post/seasadj/">Seasonal Adjustment as a Service</a></h1>
+            <h1><a href="https://cmhh.github.io/post/seasadj/">Seasonal Adjustment as a Service</a></h1>
             <time class="has-text-grey-light is-size-7">1 June 2020</time>
-        
-            <h1><a href="../../post/geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
-            <time class="has-text-grey-light is-size-7">17 September 2019</time>
         
     </div>
 </div>
@@ -836,13 +840,15 @@ leaflet() %&gt;% addTiles() %&gt;%
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="../../archives/2020">2020</a> (4)<br>
+            <a href="https://cmhh.github.io/archives/2021">2021</a> (1)<br>
         
-            <a href="../../archives/2019">2019</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2020">2020</a> (4)<br>
         
-            <a href="../../archives/2017">2017</a> (1)<br>
+            <a href="https://cmhh.github.io/archives/2019">2019</a> (1)<br>
         
-            <a href="../../archives/2016">2016</a> (4)<br>
+            <a href="https://cmhh.github.io/archives/2017">2017</a> (1)<br>
+        
+            <a href="https://cmhh.github.io/archives/2016">2016</a> (3)<br>
         
     </div>
 </div>
@@ -866,7 +872,7 @@ leaflet() %&gt;% addTiles() %&gt;%
 </footer>
 
 <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
-<script src="../../js/highlight.pack.js"></script>
+<script src="https://cmhh.github.io/js/highlight.pack.js"></script>
 <script>hljs.initHighlightingOnLoad();</script>
 
 <script src="//yihui.org/js/math-code.js"></script>
