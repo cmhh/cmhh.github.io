@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Web Services with Node.js</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
+</head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Web Services with Node.js
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <h1 id="what-is-nodejs">What is node.js?</h1>
+<p>According to the <a href="https://nodejs.org/en/">Node.js website</a>:</p>
+<blockquote>
+<p>Node.js is a JavaScript runtime built on Chrome&rsquo;s V8 JavaScript engine.  Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient.</p>
+</blockquote>
+<blockquote>
+<p>Node.js' package ecosystem, npm, is the largest ecosystem of open source libraries in the world.</p>
+</blockquote>
+<h2 id="event-driven-non-blocking-io-model">Event-driven, non-blocking I/O model</h2>
+<p>Node.js program execution consists of a single-threaded event loop.  But all I/O methods in the Node.js standard library have asynchronous versions which accept a callback.  This is what is meant by non-blocking I/O.  The event loop doesn&rsquo;t wait for I/O to complete&ndash;the callback is executed when the I/O task is finished, but the event loop carries on happily executing other code in the meantime.</p>
+<p>Digging around on the web shows some of this is pretty poorly understood.  For example, a lot of people fixate on the fact that the event loop is single threaded, and make erroneous assumptions regarding performance.  However, Node.js is <em>not</em> single-threaded&ndash;just the event loop.  As long as the event loop isn&rsquo;t blocked with CPU intensive tasks or synchronous I/O, then Node.js will generally deliver excellent performance.</p>
+<h2 id="extensible">Extensible</h2>
+<p>As mentioned, Node.js is extensible, with functionality added via packages.  There are currently over 280,000 packages available from npm!  We can&rsquo;t pretend that they&rsquo;re all of a high quality, of course, but still&hellip;</p>
+<p><a href="https://www.npmjs.com/browse/star">most starred</a><br>
+<a href="https://www.npmjs.com/browse/depended">most dependent</a><br>
+<a href="https://github.com/sindresorhus/awesome-nodejs">Awesome Node.js</a><br>
+<a href="http://npm-stat.com/charts.html">npm-stat</a></p>
+<p>Here are the download counts for May 2016 for a few popular packages:</p>
+<ul>
+<li>async - 29,431,852</li>
+<li>lodash - 28,420,265</li>
+<li>commander - 20,670,541</li>
+<li>request - 14,928,496</li>
+<li>underscore - 11,911,351</li>
+<li>express - 6,321,315</li>
+</ul>
+<p>Note that a package might not be a Node.js package per se, but rather a repackaging of some other popular Javascript library&ndash;<code>lodash</code>, for example But this should only make the use of Node.js an even more attractive proposition since there are a great number of extremely useful Javascript libraries out there&hellip; why not make use of them if you can?</p>
+<p>Actually, it&rsquo;s fun to look at download counts to get an idea of what&rsquo;s popular.  For example, <code>mysql</code> provides a MySQL driver, and was downloaded 503,893 times; <code>pg</code> provides bindings for PostgreSQL and was downloaded 389,851 times; and <code>mssql</code> is a client for MS SQL Server and was downloaded 54,824 times.</p>
+<p>Among NoSQL options, <code>redis</code>, a Redis client, was downloaded 1,827,226 times; <code>mongoose</code>, a MongoDB modelling tool, was downloaded 684,530 times; and <code>cassandra-driver</code>, a driver for Cassandra, was downloaded 28,385 times.</p>
+<p>This would imply that NoSQL databases, and key-value stores in particular, are very popular when it comes to building network applications with Node.</p>
+<p>Node.js comes bundled with <code>npm</code>, the Node Package Manager, so installing a new package is straightforward:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">npm install <span style="color:#f92672">[</span>-g<span style="color:#f92672">]</span> &lt;package&gt;
+</code></pre></div><h1 id="postman--testing-apis">Postman / Testing APIs</h1>
+<p>Before getting into it, it&rsquo;s useful to think about how we would go about testing our web services.</p>
+<p>In an earlier post on OpenCPU we simply used the <code>curl</code> command line utility.  In this post we&rsquo;ll instead use a useful Chrome extension called Postman.</p>
+<img src=assets/postman.png class=large>
+<h1 id="making-an-http-server">Making an HTTP server</h1>
+<p>Before moving on to some useful practical examples, let us look at a few simple cases.</p>
+<h2 id="simplest-possible-server">Simplest possible server</h2>
+<p>The next listing shows the simplest possible webserver we can come up with (without using third-party modules).  It does nothing but listen on port 3000, and sends the string &ldquo;Hello, World!&rdquo; in response to every request.</p>
+<p><strong><code>server.js</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#34;http&#34;</span>);
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">write</span>(<span style="color:#e6db74">&#34;Hello, World!&#34;</span>);
+   <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+});
+
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+</code></pre></div><p>Since this is the first service we&rsquo;re running, we note that we start it simply by executing:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">node server
+</code></pre></div><img src=assets/0101.png class=large>
+<p>It can also be fun to benchmark a service.  You can do this with <code>ab</code>, the ApacheBench tool, or <code>siege</code>.  For example, for the simple service above:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">cmhh@debian:~$ ab -kc 1000 -n 10000 http://debian:3000/
+This is ApacheBench, Version 2.3 &lt;$Revision: 1706008 $&gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking debian (be patient)
+Completed 1000 requests
+Completed 2000 requests
+Completed 3000 requests
+Completed 4000 requests
+Completed 5000 requests
+Completed 6000 requests
+Completed 7000 requests
+Completed 8000 requests
+Completed 9000 requests
+Completed 10000 requests
+Finished 10000 requests
+
+
+Server Software:        
+Server Hostname:        debian
+Server Port:            3000
+
+Document Path:          /
+Document Length:        14 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   1.699 seconds
+Complete requests:      10000
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      890000 bytes
+HTML transferred:       140000 bytes
+Requests per second:    5884.73 [#/sec] (mean)
+Time per request:       169.931 [ms] (mean)
+Time per request:       0.170 [ms] (mean, across all concurrent requests)
+Transfer rate:          511.47 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   89 281.0      0    1040
+Processing:     3   35  23.7     29     287
+Waiting:        2   33  22.8     28     287
+Total:         10  124 286.7     31    1300
+
+Percentage of the requests served within a certain time (ms)
+  50%     31
+  66%     48
+  75%     65
+  80%     74
+  90%    110
+  95%   1065
+  98%   1078
+  99%   1095
+ 100%   1300 (longest request)
+</code></pre></div><p>While not the most sophisticated service, we processed the requests at an average of 5884 per second.  Seems decent enough&hellip;</p>
+<h2 id="serving-a-file">Serving a file</h2>
+<p>Now we consider a slightly more complicated example.  In this case, we simply serve the file <code>index.html</code>, a simple HTML landing page.  If not found,  we issue 404.</p>
+<p><strong><code>server.js</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">http</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;http&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">fs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;fs&#39;</span>);
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">http</span>.<span style="color:#a6e22e">createServer</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">method</span><span style="color:#f92672">==</span><span style="color:#e6db74">&#34;GET&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">url</span><span style="color:#f92672">==</span><span style="color:#e6db74">&#34;/&#34;</span>){
+      <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">200</span>, {<span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;text/html&#39;</span>});
+      <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">createReadStream</span>(<span style="color:#e6db74">&#39;./index.html&#39;</span>).<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">response</span>);
+   }
+   <span style="color:#66d9ef">else</span>{
+      <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">writeHead</span>(<span style="color:#ae81ff">404</span>, {<span style="color:#e6db74">&#39;Content-Type&#39;</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;text/html&#39;</span>});
+      <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">write</span>(<span style="color:#e6db74">&#34;&lt;h1&gt;404&lt;/h1&gt;&lt;p&gt;Sorry, bro.  There&#39;s no such resource.&lt;/p&gt;&#34;</span>);
+      <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+   }
+})
+
+<span style="color:#a6e22e">server</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+</code></pre></div><p><strong><code>index.html</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">pre</span>&gt;&lt;<span style="color:#f92672">code</span> <span style="color:#a6e22e">data-trim</span> <span style="color:#a6e22e">contenteditable</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;html hljs&#34;</span>&gt;&lt;<span style="color:#f92672">html</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+   &lt;<span style="color:#f92672">title</span>&gt;Hello, World!&lt;/<span style="color:#f92672">title</span>&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+&lt;<span style="color:#f92672">body</span>&gt;
+   &lt;<span style="color:#f92672">p</span>&gt;Hello, World!&lt;/<span style="color:#f92672">p</span>&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div><img src=assets/0201.png class=large>
+<p>In this example, more than twice the amount of data is transferred compared to the previous example, and so the throughput falls accordingly:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">cmhh@debian:~$ ab -kc 1000 -n 10000 http://debian:3000/
+This is ApacheBench, Version 2.3 &lt;$Revision: 1706008 $&gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking debian (be patient)
+Completed 1000 requests
+Completed 2000 requests
+Completed 3000 requests
+Completed 4000 requests
+Completed 5000 requests
+Completed 6000 requests
+Completed 7000 requests
+Completed 8000 requests
+Completed 9000 requests
+Completed 10000 requests
+Finished 10000 requests
+
+
+Server Software:        
+Server Hostname:        debian
+Server Port:            3000
+
+Document Path:          /
+Document Length:        101 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   3.835 seconds
+Complete requests:      10000
+Failed requests:        0
+Keep-Alive requests:    0
+Total transferred:      2010000 bytes
+HTML transferred:       1010000 bytes
+Requests per second:    2607.54 [#/sec] (mean)
+Time per request:       383.503 [ms] (mean)
+Time per request:       0.384 [ms] (mean, across all concurrent requests)
+Transfer rate:          511.83 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0  186 579.4      3    3009
+Processing:    10  109  72.5     87     422
+Waiting:        4   83  60.1     64     406
+Total:         35  295 592.8     92    3426
+
+Percentage of the requests served within a certain time (ms)
+  50%     92
+  66%    107
+  75%    143
+  80%    256
+  90%   1092
+  95%   1188
+  98%   3092
+  99%   3096
+ 100%   3426 (longest request)
+</code></pre></div><p>We&rsquo;re now down to a lowly 2607 requests per second!</p>
+<h2 id="serving-files">Serving files</h2>
+<p>Now we make an even more flexible service&ndash;one capable of serving any file.  This time, however, we make use of the module <code>express</code>.  Brace yourself&hellip;</p>
+<p><strong><code>server.js</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#66d9ef">static</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/public&#39;</span>)).<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+</code></pre></div><p>The service will serve any file found in the <code>public</code> folder, and will return an error for any file that does not exist.</p>
+<img src=assets/0301.png class=large alt="found">
+<img src=assets/0302.png class=large alt="not found">
+<p><code>express.static</code> is an example of <em>middleware</em>.  You simply pass the middleware to the <code>use</code> method, and you can chain lots of different middleware together.  You could add more folders, compress content, cache content, and so on.  In fact, let&rsquo;s add compression to the above example:</p>
+<p><strong><code>server.js</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">compression</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;compression&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">compression</span>())
+   .<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#66d9ef">static</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/public&#39;</span>))
+   .<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+</code></pre></div><h1 id="practical-examples">Practical Examples</h1>
+<p>Let us now ramp things up a little and work through a couple of (somewhat) realistic and practical examples.  I thought of two that I thought would be fun:</p>
+<ul>
+<li>provide a set of endpoints to query the
+<a href="http://www.stats.govt.nz/Census/2013-census/data-tables/meshblock-dataset.aspx#csv">Census Meshblock datasets</a></li>
+<li>provide an endpoint for executing the X13-ARIMA-SEATS program</li>
+</ul>
+<p>This presentation consists of my first and only attempt to use node.js, so we&rsquo;ll aim to keep things simple.  In that spirit, arguments will be passed as part of the URI, for example:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">/value1/value2/...
+</code></pre></div><p>Moreover, responses, when provided, will generally be plain text or JSON format, but that shouldn&rsquo;t prove any real issue for consumption.  And just as I&rsquo;m not exactly an expert in Node.js, I&rsquo;m not an expert in writing fully compliant RESTful services.  For the examples here, I&rsquo;ll assume the following:</p>
+<ul>
+<li><code>GET</code> will yield a status of 200 on success, and will return content; and 404   on failure, with no content.</li>
+<li><code>POST</code> will yield a status of 200 or 204 on success&ndash;200 if content is   returned, and 204 if no content is returned; and 404 on failure, with no   content.</li>
+<li><code>DELETE</code> will yield a status of 204 on success, and 404 on failure; no content will be returned in either case.</li>
+</ul>
+<p>This may or may not conform to common practice, but that&rsquo;s hardly the point.</p>
+<h2 id="census-meshblock-service">Census Meshblock service</h2>
+<p>In this example we are just serving data, so we first need to store the data where it can be easily retrieved by Node.js.  There are a range of options available, but we choose to put the data in a MongoDB database in this case.</p>
+<p>If all we want to do is select meshblock data by meshblock code, then a key-value store like Redis might be sufficient, and would probably offer better performance.  However, if we want to extend the example and allow more complicated queries, then MongoDB is a better option.</p>
+<p>As noted, the Census &lsquo;meshblock&rsquo; data is not in a particularly usable state as is.  So, I&rsquo;ve imported the data and tidied it up, then put the tidied data in an R package called <code>NZCensus</code>.  This provides datasets such as the following:</p>
+<img src=assets/datadictionary.png class=large alt="datadictionary">
+<img src=assets/dwelling.png class=large alt=dwelling>
+<p>The full set of datasets is:</p>
+<ul>
+<li><code>dwelling</code></li>
+<li><code>household</code></li>
+<li><code>family</code></li>
+<li><code>individual</code></li>
+<li><code>datadictionary</code> - metadata describing columns in the above datasets</li>
+</ul>
+<p>Each dataset (excluding <code>datadictionary</code>) contains data at a number of geographic levels: <code>MB</code> - meshblock, <code>AU</code> - area unit, <code>Ward</code> - ward, <code>TA</code> - territorial authority, <code>CMB</code> - community board, and <code>RC</code> - regional council.</p>
+<p>So, let&rsquo;s aim for the following endpoints for the <code>datadictionary</code> dataset:</p>
+<ul>
+<li><code>/metadata</code> - return the whole dataset</li>
+<li><code>/metadata/{column}</code> - return metadata for column <code>column</code>.</li>
+</ul>
+<p>For the other datasets, let&rsquo;s aim for:</p>
+<ul>
+<li><code>/{dataset}/{MB|AU|Ward|TA|CMB|RC}/{code}</code></li>
+</ul>
+<p>For example, <code>/datadictionary/V0001</code> will return the metadata for the column named <code>V0001</code>.  Similarly, <code>/dwelling/RC/01</code> will return the &lsquo;row&rsquo; of data from the <code>dwelling</code> dataset corresponding to Northland regional council.</p>
+<p>Before making the service, though, we need to load the data into a database.  We use MongoDB to store the data, and there&rsquo;s a nice package in R called <code>mongolite</code> which we can use to do the loading.  As a simple example:</p>
+<p><strong><code>loadmongodb.R</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(NZCensusLite)
+<span style="color:#a6e22e">library</span>(mongolite)
+
+m <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">mongo</span>(collection<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;dwelling&#34;</span>, db<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;census&#34;</span>)
+m<span style="color:#f92672">$</span><span style="color:#a6e22e">insert</span>(dwelling)
+
+<span style="color:#75715e"># and so on...</span>
+</code></pre></div><p>As an aside, this is nice and generic and would work for any dataset–not a schema in sight!  This, among other things, can be extremely useful.  SQL Server is not the answer for absolutely every application that needs persistent storage, and using something else on occasion doesn&rsquo;t necessarily diminish the value of relational database management systems.  Something to think about (for those who haven&rsquo;t given NoSQL options a look).</p>
+<p>Anyway, we can run a few queries to ensure our data is loaded:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">cmhh@debian:~$ mongo
+MongoDB shell version: 2.4.14
+connecting to: test
+&gt; 
+&gt; use census
+switched to db census
+&gt; 
+&gt; db.dwelling.find({&#34;geography&#34;:&#34;RC&#34;, &#34;code&#34;:&#34;01&#34;, &#34;year&#34;:2013},
+... {&#34;code&#34;:1, &#34;description&#34;: 1, &#34;year&#34;: 1, &#34;V0001&#34;:1})
+{
+	&#34;_id&#34; : ObjectId(&#34;5753a9346e955210cf07bd90&#34;),
+	&#34;code&#34; : &#34;01&#34;,
+	&#34;description&#34; : &#34;Northland Region&#34;,
+	&#34;year&#34; : 2013,
+	&#34;V0001&#34; : 47820
+}
+&gt; 
+&gt; db.metadata.find({$or: [{&#34;name&#34;:&#34;V0001&#34;}, {&#34;name&#34;:&#34;V0002&#34;}]})
+{
+	&#34;_id&#34; : ObjectId(&#34;5753a9a76e955210cf0e77d9&#34;),
+	&#34;name&#34; : &#34;V0001&#34;,
+	&#34;type&#34; : &#34;dwelling&#34;,
+	&#34;subtype&#34; : &#34;dwelling&#34;,
+	&#34;variable&#34; : &#34;Occupied private dwelling type&#34;,
+	&#34;outcome&#34; : &#34;Separate House&#34;,
+	&#34;notes&#34; : &#34;&#34;
+}
+{
+	&#34;_id&#34; : ObjectId(&#34;5753a9a76e955210cf0e77da&#34;),
+	&#34;name&#34; : &#34;V0002&#34;,
+	&#34;type&#34; : &#34;dwelling&#34;,
+	&#34;subtype&#34; : &#34;dwelling&#34;,
+	&#34;variable&#34; : &#34;Occupied private dwelling type&#34;,
+	&#34;outcome&#34; : &#34;Two or More Flats/Units/Townhouses/ Apartments/Houses Joined Together&#34;,
+	&#34;notes&#34; : &#34;&#34;
+}
+</code></pre></div><p>Let&rsquo;s look at a service where we define a single endpoint, <code>/metadata/column</code>:</p>
+<p><strong><code>server.js</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">assert</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;assert&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">client</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;mongodb&#39;</span>).<span style="color:#a6e22e">MongoClient</span>;
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;mongodb://127.0.0.1:27017/census&#39;</span>;
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">db</span>;
+
+<span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">connect</span>(<span style="color:#a6e22e">url</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">database</span>) {
+  <span style="color:#a6e22e">assert</span>.<span style="color:#a6e22e">equal</span>(<span style="color:#66d9ef">null</span>, <span style="color:#a6e22e">err</span>);
+  <span style="color:#a6e22e">db</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">database</span>;
+  <span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+});
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/metadata/:name&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>);
+   <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">collection</span>(<span style="color:#e6db74">&#39;metadata&#39;</span>).<span style="color:#a6e22e">find</span>({<span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">name</span>}, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">items</span>){
+      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">items</span>.<span style="color:#a6e22e">toArray</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">results</span>){
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">write</span>(<span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">results</span>));
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+      });
+   });
+});
+</code></pre></div><img src=assets/metadata01.png class=large>
+<p>And, for giggles, let&rsquo;s benchmark the service:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">cmhh@debian:~$ ab -kc 1000 -n 10000 http://debian:3000/V0001
+This is ApacheBench, Version 2.3 &lt;$Revision: 1706008 $&gt;
+Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
+Licensed to The Apache Software Foundation, http://www.apache.org/
+
+Benchmarking debian (be patient)
+Completed 1000 requests
+Completed 2000 requests
+Completed 3000 requests
+Completed 4000 requests
+Completed 5000 requests
+Completed 6000 requests
+Completed 7000 requests
+Completed 8000 requests
+Completed 9000 requests
+Completed 10000 requests
+Finished 10000 requests
+
+
+Server Software:        
+Server Hostname:        debian
+Server Port:            3000
+
+Document Path:          /V0001
+Document Length:        18 bytes
+
+Concurrency Level:      1000
+Time taken for tests:   1.823 seconds
+Complete requests:      10000
+Failed requests:        0
+Non-2xx responses:      10000
+Keep-Alive requests:    10000
+Total transferred:      2210000 bytes
+HTML transferred:       180000 bytes
+Requests per second:    5485.41 [#/sec] (mean)
+Time per request:       182.302 [ms] (mean)
+Time per request:       0.182 [ms] (mean, across all concurrent requests)
+Transfer rate:          1183.86 [Kbytes/sec] received
+
+Connection Times (ms)
+              min  mean[+/-sd] median   max
+Connect:        0   19 133.2      0    1006
+Processing:    12   57  27.1     53     326
+Waiting:       12   57  27.1     53     326
+Total:         12   76 148.5     54    1330
+
+Percentage of the requests served within a certain time (ms)
+  50%     54
+  66%     64
+  75%     71
+  80%     74
+  90%     84
+  95%     94
+  98%    151
+  99%   1092
+ 100%   1330 (longest request)
+</code></pre></div><p>So, 5485 requests per second.  Not too shabby&hellip;</p>
+<p>Now let&rsquo;s add the <code>/metadata</code> and <code>/dataset/</code> endpoints:</p>
+<p><strong><code>server.js</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">client</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;mongodb&#39;</span>).<span style="color:#a6e22e">MongoClient</span>;
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;mongodb://127.0.0.1:27017/census&#39;</span>;
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">db</span>;
+
+<span style="color:#a6e22e">client</span>.<span style="color:#a6e22e">connect</span>(<span style="color:#a6e22e">url</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">database</span>) {
+  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+     <span style="color:#a6e22e">db</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">database</span>;
+     <span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+  }
+});
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/metadata&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">collection</span>(<span style="color:#e6db74">&#39;metadata&#39;</span>).<span style="color:#a6e22e">find</span>({}, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">items</span>){
+      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+         <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">items</span>.<span style="color:#a6e22e">toArray</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">results</span>){
+            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>);
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">write</span>(<span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">results</span>));
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+            <span style="color:#66d9ef">else</span>{
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+         });
+      }
+      <span style="color:#66d9ef">else</span>{
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+      }
+   });
+});
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/metadata/:name&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">collection</span>(<span style="color:#e6db74">&#39;metadata&#39;</span>).<span style="color:#a6e22e">find</span>({<span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">name</span>}, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">items</span>){
+      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+         <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">items</span>.<span style="color:#a6e22e">toArray</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">results</span>){
+            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>);
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">write</span>(<span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">results</span>));
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+            <span style="color:#66d9ef">else</span>{
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+         });
+      }
+      <span style="color:#66d9ef">else</span> {
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+      }
+   });
+});
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/:dataset/:geography/:code&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">dataset</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">dataset</span>;
+   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">geography</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">geography</span>;
+   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">code</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">code</span>;
+   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">collection</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">db</span>.<span style="color:#a6e22e">collection</span>(<span style="color:#a6e22e">dataset</span>);
+   <span style="color:#a6e22e">collection</span>.<span style="color:#a6e22e">find</span>({<span style="color:#e6db74">&#34;geography&#34;</span><span style="color:#f92672">:</span><span style="color:#a6e22e">geography</span>, <span style="color:#e6db74">&#34;code&#34;</span><span style="color:#f92672">:</span><span style="color:#a6e22e">code</span>}, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">items</span>){
+      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+         <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">a</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">items</span>.<span style="color:#a6e22e">toArray</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">results</span>){
+            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#39;Content-Type&#39;</span>, <span style="color:#e6db74">&#39;application/json&#39;</span>);
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">write</span>(<span style="color:#a6e22e">JSON</span>.<span style="color:#a6e22e">stringify</span>(<span style="color:#a6e22e">results</span>));
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+            <span style="color:#66d9ef">else</span> {
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+         });
+      }
+      <span style="color:#66d9ef">else</span> {
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+      }
+   });
+});
+</code></pre></div><img src=assets/metadata02.png class=large alt="/metadata/">
+<img src=assets/dwelling01.png class=large alt="/dwelling/RC/01">
+<h2 id="x13-arima-seats-service">X13-ARIMA-SEATS service</h2>
+<p>This example is somewhat more complicated.  But, again, to keep things a little simple, we will assume that the required input for an adjustment is a single &lsquo;<code>spc</code>&rsquo; file containing both the raw data to be adjusted as well as the adjustment specifications.  The <code>spc</code> file will be submitted via a <code>POST</code> request.</p>
+<p>Taking inspiration from <a href="https://www.opencpu.org/">OpenCPU</a>, the result will be a series of endpoints available via a <code>GET</code> request where each corresponds to a text file generated by the X13 program.</p>
+<p>For example, assume we upload <code>foo.spc</code> and conduct an adjustment, and this yields the remote file <code>foo.d12</code>.  Then this file will be available via <code>/foo/d12</code>.</p>
+<p>Attempting to <code>POST</code> an adjustment that has already been run will result in failure.  But using the <code>DELETE</code> method on <code>/foo</code> will remove any trace of the adjustment from the server.</p>
+<p>To install X13-ARIMA-SEATS on Linux:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">wget https://www.census.gov/ts/x13as/unix/x13assrc_V1.1_B26.tar.gz
+tar -xvf x13assrc_V1.1_B26.tar.gz
+make -f makefile.gf
+sudo mv x13asv11b26o1 /usr/local/bin/x13as
+</code></pre></div><p>Let us just use the <code>Testairline.spc</code> file that comes bundled with the <code>x13as</code> program (note that this <code>spc</code> format looks like a prime candidate for conversion to some other format, such as JSON):</p>
+<p><strong><code>Testairline.spc</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">series{
+  title=&#34;International Airline Passengers Data from Box and Jenkins&#34;
+  start=1949.01
+  data=(
+	112 118 132 129 121 135 148 148 136 119 104 118
+	115 126 141 135 125 149 170 170 158 133 114 140
+	145 150 178 163 172 178 199 199 184 162 146 166
+	171 180 193 181 183 218 230 242 209 191 172 194
+	196 196 236 235 229 243 264 272 237 211 180 201
+	204 188 235 227 234 264 302 293 259 229 203 229
+	242 233 267 269 270 315 364 347 312 274 237 278
+	284 277 317 313 318 374 413 405 355 306 271 306
+	315 301 356 348 355 422 465 467 404 347 305 336
+	340 318 362 348 363 435 491 505 404 359 310 337
+	360 342 406 396 420 472 548 559 463 407 362 405
+	417 391 419 461 472 535 622 606 508 461 390 432)
+  span=(1952.01, )
+}
+spectrum{
+  savelog=peaks	
+}
+transform{
+  function=auto
+  savelog=autotransform  
+}
+regression{
+  aictest=(td easter)
+  savelog=aictest  
+}
+automdl{  
+  savelog=automodel  
+}
+outlier{ }
+x11{
+  save=(d10 d11 d12)
+}
+</code></pre></div><p>Here&rsquo;s the full service:</p>
+<p><strong><code>server.js</code></strong></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">fs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;fs&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">rimraf</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;rimraf&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">exec</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;child_process&#39;</span>).<span style="color:#a6e22e">exec</span>;
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">busboy</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;connect-busboy&#39;</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">path</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;path&#39;</span>);
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">busboy</span>());
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">post</span>(<span style="color:#e6db74">&#39;/adjust&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">busboy</span>);
+   <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">busboy</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#39;file&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">fieldname</span>, <span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">filename</span>){
+      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">fstream</span>;
+      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">basename</span>(<span style="color:#a6e22e">filename</span>, <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">extname</span>(<span style="color:#a6e22e">filename</span>));
+      <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">mkdir</span>(<span style="color:#a6e22e">__dirname</span>  <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>){
+         <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+            <span style="color:#a6e22e">fstream</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">createWriteStream</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/work/&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">filename</span>);
+            <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">fstream</span>);
+            <span style="color:#a6e22e">fstream</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#39;close&#39;</span>, <span style="color:#66d9ef">function</span>(){
+               <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">cmd</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;cd &#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39; &amp;&amp; x13as &#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>;
+               <span style="color:#a6e22e">exec</span>(<span style="color:#a6e22e">cmd</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">error</span>, <span style="color:#a6e22e">stdout</span>, <span style="color:#a6e22e">stderr</span>) {
+                  <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">error</span>){
+                     <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
+                     <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readdir</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">files</span>){
+                        <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+                           <span style="color:#a6e22e">files</span>.<span style="color:#a6e22e">forEach</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">file</span>){
+                              <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">thisext</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">extname</span>(<span style="color:#a6e22e">file</span>);
+                              <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">thisbase</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">basename</span>(<span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">thisext</span>);
+                              <span style="color:#a6e22e">thisext</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">thisext</span>.<span style="color:#a6e22e">split</span>(<span style="color:#e6db74">&#39;.&#39;</span>).<span style="color:#a6e22e">pop</span>();
+                              <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">basename</span><span style="color:#f92672">==</span><span style="color:#a6e22e">thisbase</span>) <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">write</span>(<span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">thisext</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;\n&#39;</span>);
+                           });
+                           <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+                        }
+                     });
+                  }
+                  <span style="color:#66d9ef">else</span>{
+                     <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+                     <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+                  }
+               });
+            });
+         }
+         <span style="color:#66d9ef">else</span>{
+            <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+            <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+         }
+      });
+   });
+});
+
+<span style="color:#a6e22e">app</span>.<span style="color:#66d9ef">delete</span>(<span style="color:#e6db74">&#39;/:series&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCcode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">series</span>;
+   <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">stat</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">stat</span>){
+      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+         <span style="color:#a6e22e">rimraf</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>){
+            <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">204</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+            <span style="color:#66d9ef">else</span>{
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+               <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+            }
+         });
+      }
+      <span style="color:#66d9ef">else</span>{
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+      }
+   });
+});
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/:series/:output&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
+   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">series</span>;
+   <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">output</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">output</span>;
+   <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">stat</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">output</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">stat</span>){
+      <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#34;Content-Type&#34;</span>, <span style="color:#e6db74">&#34;text/html&#34;</span>);
+         <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">createReadStream</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">output</span>).<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">response</span>);
+      }
+      <span style="color:#66d9ef">else</span>{
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
+         <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
+      }
+   });
+});
+
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+</code></pre></div><img src=assets/x13post.png class=large alt="/adjust">
+<img src=assets/x13get01.png class=large alt="/<output>/d11">
+<img src=assets/x13get02.png class=large alt="/<output>/out">
+<img src=assets/x13delete.png class=large alt="/<output> - DELETE">
+<p>And we might as well visualise the results:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">getandplot <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(){
+   <span style="color:#a6e22e">if </span>(<span style="color:#f92672">!</span><span style="color:#a6e22e">require</span>(magrittr)) <span style="color:#a6e22e">stop</span>(<span style="color:#e6db74">&#34;Nope.&#34;</span>)
+   d10 <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">read.table</span>(<span style="color:#e6db74">&#34;http://127.0.0.1:3000/Testairline/d10&#34;</span>, 
+                     col.names<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;date&#34;</span>, <span style="color:#e6db74">&#34;d10&#34;</span>), skip<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+   d11 <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">read.table</span>(<span style="color:#e6db74">&#34;http://127.0.0.1:3000/Testairline/d11&#34;</span>, 
+                     col.names<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;date&#34;</span>, <span style="color:#e6db74">&#34;d11&#34;</span>), skip<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+   d12 <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">read.table</span>(<span style="color:#e6db74">&#34;http://127.0.0.1:3000/Testairline/d12&#34;</span>, 
+                     col.names<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;date&#34;</span>, <span style="color:#e6db74">&#34;d12&#34;</span>), skip<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+   ap  <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">ts</span>((d10 <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">merge</span>(d11) <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">merge</span>(d12))[,<span style="color:#ae81ff">-1</span>], start<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">1952</span>,<span style="color:#ae81ff">1</span>), frequency<span style="color:#f92672">=</span><span style="color:#ae81ff">12</span>)
+   <span style="color:#a6e22e">plot</span>(ap[,<span style="color:#e6db74">&#34;d11&#34;</span>] <span style="color:#f92672">*</span> ap[,<span style="color:#e6db74">&#34;d10&#34;</span>], xlab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>, ylab<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#34;</span>, lty<span style="color:#f92672">=</span><span style="color:#ae81ff">2</span>)
+   <span style="color:#a6e22e">lines</span>(ap[,<span style="color:#e6db74">&#34;d11&#34;</span>])
+   <span style="color:#a6e22e">lines</span>(ap[,<span style="color:#e6db74">&#34;d12&#34;</span>], col<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;grey&#34;</span>)
+   <span style="color:#a6e22e">legend</span>(<span style="color:#e6db74">&#34;topleft&#34;</span>, <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;actual&#34;</span>, <span style="color:#e6db74">&#34;SA&#34;</span>, <span style="color:#e6db74">&#34;trend&#34;</span>), 
+          lty<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">2</span>,<span style="color:#ae81ff">1</span>,<span style="color:#ae81ff">1</span>), col<span style="color:#f92672">=</span><span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;black&#34;</span>, <span style="color:#e6db74">&#34;black&#34;</span>, <span style="color:#e6db74">&#34;grey&#34;</span>), box.col<span style="color:#f92672">=</span><span style="color:#66d9ef">NA</span>)
+   <span style="color:#a6e22e">box</span>()
+}
+</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">getandplot</span>()
+</code></pre></div><img src=assets/plot.png class=large>
+<h1 id="summary">Summary</h1>
+<p>We&rsquo;ve touched on a few ideas here.  Without advocating specifically for Node.js, we see that web services provide some useful use cases:</p>
+<ul>
+<li>they can provide an alternative to &lsquo;traditional&rsquo; dissemination methods such as file downloads&ndash;particularly useful for those who only need a subset of the dataset at any one time</li>
+<li>they can be used to wrap existing programs, making them cross platform, and standardising input and output requirements.</li>
+</ul>
+<p>The latter is particularly interesting, and you can imagine some obvious applications&ndash;CSPA, for example.  In fact, I got curious and, for fun, Googled &lsquo;Node.js CSPA&rsquo;, and found the following:</p>
+<p><a href="https://github.com/edwindj/cspa_rest">Designing a REST interface for CSPA command line services</a></p>
+<p>There is a PDF included:</p>
+<p><a href="https://github.com/edwindj/cspa_rest/blob/master/doc/proposal_rest_interface.pdf">Generic REST interface for CSPA services</a></p>
+<p>We repeat the abstract here:</p>
+<blockquote>
+<p>A generic REST interface is proposed which can be used by many of the services in CSPA. Furthermore, it is possible to develop a generic implementation which can be used to wrap the REST interface around an existing service making implementation much more simple. A generic interface used by most of the services would make it easier to implement systems that use the services.</p>
+</blockquote>
+<p>Of course, web services can be written in any number of languages, including C# with ASP.NET, or Scala or Java with the Play framework.  But Node.js has a lot going for it.  It is easy to use, and there is an  astonishing amount of code out there that we can borrow, free of charge.</p>
+<p>Finally, the other interesting thing we saw was MongoDB, a document database.  MongoDB is a NoSQL database capable of storing massive amounts of data in binary JSON (BSON) format with a dynamic schema.  It is fast, flexible, and reliable; and lends itself well to rapid development.</p>
+<p>You could argue that using a NoSQL database like MongoDB makes your applications easier to use for 3rd parties&ndash;they don&rsquo;t have to have a specific RDBMS, create users, create databases, create tables with specific schemas, and so on.</p>
+<p>There are times when NoSQL databases like Redis or MongoDB are just much easier to use than a traditional RDBMS, and there really isn&rsquo;t any good reason not to get on board.  Horses for courses, and all that.  They can be complementary to SQL, and time saved in development could easily offset any increased IT support required (which is a pretty specious assertion anyway).</p>
+
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospark">geospark</a></span>
+        
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/sedona">sedona</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../2021/2021-04-19-a-brief-look-at-apache-sedona/">A Brief Look at Apache Sedona</a></h1>
+            <time class="has-text-grey-light is-size-7">19 April 2021</time>
+        
+            <h1><a href="../../2020/2020-12-05-working-productively-on-windows-using-wsl2-and-docker/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <time class="has-text-grey-light is-size-7">5 December 2020</time>
+        
+            <h1><a href="../../2020/2020-10-31-using-postgis-as-a-spatial-backend-for-r/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
+            <h1><a href="../../2020/2020-10-31-docker-on-windows-with-wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+        
+            <h1><a href="../../2020/2020-06-01-seasonal-adjustment-as-a-service/">Seasonal Adjustment as a Service</a></h1>
+            <time class="has-text-grey-light is-size-7">1 June 2020</time>
+        
+    </div>
+</div>
+    <br>
+                
+
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2021">2021</a> (1)<br>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (4)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2021 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+</body>
+</html>

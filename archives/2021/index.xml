@@ -1,0 +1,24 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>2021 on cmhh</title>
+    <link>/archives/2021/</link>
+    <description>Recent content in 2021 on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 19 Apr 2021 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/archives/2021/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>A Brief Look at Apache Sedona</title>
+      <link>/2021/2021-04-19-a-brief-look-at-apache-sedona/</link>
+      <pubDate>Mon, 19 Apr 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/2021/2021-04-19-a-brief-look-at-apache-sedona/</guid>
+      <description>Overview Apache Sedona, formerly GeoSpark, is a library that let&amp;rsquo;s us make spatial RDDs and DataFrames in Apache Spark, as well as to run spatial queries. Feature classes can get very large, and so being able to run various geoprocessing tasks in a distributed context seems worthwhile. So, in this post, we take a very brief look at Apache Sedona.
+This post is not intended to provide comprehensive coverage of the features provided by Sedona–that would be pretty unrealistic for a short blog post.</description>
+    </item>
+    
+  </channel>
+</rss>
