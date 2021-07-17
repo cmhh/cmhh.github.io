@@ -52,9 +52,9 @@
 <p>A relatively common scenario in enterprise is to provide users a Windows desktop with a relatively small set of tools, and without administrative access.  Depending on the type of work required, this sort of configuration might be perfectly reasonable, but for others it will be productivity-limiting <em>at best</em>.</p>
 <p>Here we discuss the use of Windows Subsystem for Linux 2 (WSL2), along with Docker, as a means of end-user enablement that might offer a reasonable compromise between safety and productivity.  WSL2 allows Windows users to install a largely feature-complete version of Linux within Windows itself, which can be used &lsquo;remotely&rsquo; via Visual Studio Code (vscode) for almost anything.  Normal users will have administrative rights within the Linux installation, but will not have any heightened access over the host OS itself, meaning users are free to experiment with little risk to the host.</p>
 <p>Linux on WSL is a perfectly reasonable sandpit in its own right–we can experiment as suggested, and if we somehow break the install we can simply blow it away and start again.  Even so, we can choose to use the Linux instance only to build Docker images and run Docker containers, ensuring the Linux system remains free of clutter, while providing yet another layer of abstraction.  That is, we run tools via Docker, which runs via Linux on WSL2, rather than installing those tools in Windows.  The target tools are then accessed remotely via SSH or similar, or via some other client interface, such as a web browser or web service.</p>
-<div class="large">
-![](assets/dev.png)
-</div>
+<a href="assets/dev.png" target="_blank">
+<img src="assets/dev.png" class="Large">
+</a>
 <h1 id="prerequisites">Prerequisites</h1>
 <p>The goal is to demonstrate that we can make Windows a productive environment in an enterprise setting, with only a minimal set of tools to bootstrap our efforts.  All that is strictly required is:</p>
 <ul>
@@ -140,13 +140,9 @@
   Port 23
   User root
 </code></pre><p>and we can then use Visual Studio Code to develop in the usual way, but using the running container.  We bring up the command palette (<span class="key">CTRL</span>+<span class="key">SHIFT</span>+<span class="key">P</span>) and select &ldquo;Remote-SSH: Connect to Host&hellip;&rdquo;</p>
-<div class="small">
-![](assets/vscode01.png)
-</div>
+<img src=assets/vscode01.png class=large>
 <p>Then select &ldquo;dockerdev&rdquo;:</p>
-<div class="small">
-![](assets/vscode02.png)
-</div>
+<img src=assets/vscode02.png class=large>
 <p>At this point, a new vscode window will open, connected remotely to the running container:</p>
 <a href="assets/vscode03.png" target="_blank">
 <img src="assets/vscode03.png" class="Large">

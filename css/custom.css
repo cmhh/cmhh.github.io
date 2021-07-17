@@ -174,7 +174,7 @@ div.Large > p > img, img.Large {
 
 .three-col {
   display: inline-block;
-  width: 33%;
+  width: 33%!important;
   vertical-align: top;
 }
 

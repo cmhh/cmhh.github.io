@@ -173,7 +173,7 @@ locations found above:</p>
 route &lt;- jsonlite::fromJSON(url, simplifyVector = FALSE)</code></pre>
 <p>Again, assuming a route was successfully found, <code>route</code> will now contain a list
 including, among other things, time in seconds to traverse the route, distance
-in metres, and the route geomertry stored in
+in metres, and the route geometry stored in
 <a href="https://developers.google.com/maps/documentation/utilities/polylinealgorithm">encoded polyline algorithm format</a>.</p>
 <pre class="r"><code>route$routes[[1]]$duration</code></pre>
 <pre><code>[1] 1752</code></pre>

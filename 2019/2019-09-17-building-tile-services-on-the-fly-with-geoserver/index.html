@@ -116,13 +116,13 @@ docker build <span style="color:#f92672">-</span>t geoserver <span style="color:
 </code></pre></div><p>Running the resulting command at the terminal will result in the creation of an image called, in this case, <code>geoserver</code>.  We can start this via:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker run -d --name geoserver --rm -p 8080:8080 geoserver
 </code></pre></div><p>The container will take a short while to get up and running completely, but when done, simply open a browser at <code>http://localhost:8080/geoserver</code>.  To login, the username is <code>admin</code>, and the password is <code>geoserver</code> (obviously, we&rsquo;d configure this differently in a production setting&hellip; more on that later).  And that&rsquo;s it.</p>
-<p><img src="assets/geoserver001.png" alt="http://localhost:8080/geoserver"></p>
+<img src=assets/geoserver001.png class=large alt="http://localhost:8080/geoserver">
 <h2 id="testing-geoserver">Testing GeoServer</h2>
 <p>GeoServer includes several data sources by default, and we can use these to test out our install.  We&rsquo;re mostly interested in WMS services which we can display on a leaflet map, though GeoServer can display WCS, WFS, WMS, and WMTS.</p>
 <p>Broadly speaking, GeoServer groups sets of <em>layers</em> together in <em>workspaces</em>, where the layers are the features we&rsquo;re intrested in displaying on a map.  And the layers themselves are built up from <em>data stores</em>.  We can inspect workspaces in the main web interface by clicking the Data &gt; Workpaces link:</p>
-<p><img src="assets/workspaces.png" alt="Workspaces"></p>
+<img src=assets/workspaces.png class=large alt="workspaces">
 <p>Any of the listed workspaces can then be accessed as WMS services programmatically via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?</code> (and an XML file describing the service can be accessed via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?request=GetCapabilities</code>).  For example, if we wanted to display layers that are part of the <code>topp</code> workspace, we&rsquo;d use <code>http://localhost:8080/geoserver/topp/wms?</code>.  If we click on Data &gt; Layers in the main web interface we see that there is, for example, a layer in the <code>topp</code> workspace called <code>states</code>:</p>
-<p><img src="assets/layers.png" alt="Layers"></p>
+<img src=assets/layers.png alt="Layers" class=large>
 <p>We can display this in a leaflet map in R by running the following code:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
@@ -137,7 +137,7 @@ docker build <span style="color:#f92672">-</span>t geoserver <span style="color:
     options <span style="color:#f92672">=</span> <span style="color:#a6e22e">WMSTileOptions</span>(format <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;image/png&#34;</span>, transparent <span style="color:#f92672">=</span> <span style="color:#66d9ef">TRUE</span>)
   )
 </code></pre></div><p>which yields the following:</p>
-<p><img src="assets/states.png" alt="states"></p>
+<img src=assets/states.png class=large alt="states">
 <h2 id="an-r-client-library">An R client library</h2>
 <p>Our use case is to create styled tiles services, entirely from within R.  To simplify the discussion, a simple R package is provided which:</p>
 <ul>
@@ -216,11 +216,13 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspac
 
 <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">addTiles</span>(urlTemplate <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png&#34;</span>) <span style="color:#f92672">%&gt;%</span>
-  <span style="color:#a6e22e">addPolygons</span>(data <span style="color:#f92672">=</span> mb2018, 
-              color <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;#000000&#34;</span>, weight <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>, opacity <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>, fillOpacity <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
-              label <span style="color:#f92672">=</span> <span style="color:#f92672">~</span>code)
+  <span style="color:#a6e22e">addPolygons</span>(
+    data <span style="color:#f92672">=</span> mb2018, 
+    color <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;#000000&#34;</span>, weight <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>, opacity <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>, fillOpacity <span style="color:#f92672">=</span> <span style="color:#ae81ff">0</span>,
+    label <span style="color:#f92672">=</span> <span style="color:#f92672">~</span>code
+  )
 </code></pre></div><p>This yields something like the following:</p>
-<p><img src="assets/leaflet001.png" alt="meshblocks"></p>
+<img src=assets/leaflet001.png class=large alt="meshblocks">
 <p>Saved as a stand-alone HTML file, this weighs in at over 15MB, and can be sluggish when rendering.  In actuality, the features are oversimplified here, so that when zoomed in the shapes have lost far too much detail.  But if we&rsquo;d displayed them at full resolution, our HTML file would be over 100MB!</p>
 <p>To make meshblocks available as a service, we first add a datastore.  We can add this in R as follows:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createDatastore</span>(mb2018, <span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;mb2018&#34;</span>)
@@ -253,8 +255,8 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createLayer</s
     options <span style="color:#f92672">=</span> <span style="color:#a6e22e">layersControlOptions</span>(collapsed <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>)
   )
 </code></pre></div><p>Visually:</p>
-<p><img src="assets/leaflet003.png" alt="mb2018_with_labels"></p>
-<p><img src="assets/leaflet004.png" alt="mb2018_with_labels"></p>
+<img src=assets/leaflet003.png class=large alt="mb2018_with_labels">
+<img src=assets/leaflet004.png class=large alt="mb2018_with_labels">
 <p>Better yet, saved as a stand-alone HTML file, this map is less than 500KB (though the various tiles still need to be transferred, so one can still burn through a bit of data just navigating around).</p>
 <h2 id="example---population-by-statistical-area-2">Example - population by statistical area 2</h2>
 <p>Consider the following R code:</p>
@@ -279,7 +281,7 @@ pal <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">colorNu
               label <span style="color:#f92672">=</span> <span style="color:#f92672">~</span><span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s - %s&#34;</span>, label, value)) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">addLegend</span>(position <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;bottomright&#34;</span>, pal <span style="color:#f92672">=</span> pal, values <span style="color:#f92672">=</span> mapdata<span style="color:#f92672">$</span>value)
 </code></pre></div><p>This yields an interactive map as follows:</p>
-<p><img src="assets/leaflet002.png" alt="population by SA2"></p>
+<img src=assets/leaflet002.png class=large alt="population by SA2">
 <p>The resulting HTML file weighs in at 3.2MB–not enormous by any stretch, but still probably not something you want users to be fetching repeatedly over a mobile connection, for example.  But this map just shows data for 2018, yet we have data for the years 1996, 2001, and 2006-2018–that&rsquo;s 15 years all up.  What if we want to make all this available on one map?  In that case, the resulting stand-alone HTML file weighs in at over 40MB.  (Of course, a hosted app could serve up a year based on user selection, but 3MB or so would still be transferred each time the year was switched).</p>
 <p>Let us instead see if we can create a workspace in GeoServer which contains a layer for each year.  As a WMS, the layers will cease to be interactive (so no hovering tooltips), but we could at least render a label whenever the user zooms in close enough, so let&rsquo;s do that too.</p>
 <p>First, we create a version of the SA2 feature class that has population counts:</p>
@@ -334,8 +336,8 @@ m <span style="color:#f92672">%&gt;%</span>
   ) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">showGroup</span>(<span style="color:#a6e22e">as.character</span>(<span style="color:#a6e22e">tail</span>(years, <span style="color:#ae81ff">1</span>)))
 </code></pre></div><p>which yields:</p>
-<p><img src="assets/leaflet05.png" alt="sa22018_with_counts"></p>
-<p><img src="assets/leaflet06.png" alt="sa22018_with_counts"></p>
+<img src=assets/leaflet005.png class=large alt="sa22018_with_counts">
+<img src=assets/leaflet006.png class=large alt="sa22018_with_counts">
 <!--
 ## Extension&ndash;adding PostGIS to our Docker image
 

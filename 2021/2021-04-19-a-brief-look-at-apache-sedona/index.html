@@ -70,8 +70,7 @@
 <div class="three-col ttle">R</div>
 <div class="three-col ttle">Sedona</div>
 <div class="three-col">
-```sql
-SELECT
+<pre><code class="language-sql hljs">SELECT
   regc2021_v, 
   ST_Multi(ST_Union(geom)) as geom
 FROM 
@@ -80,25 +79,26 @@ GROUP BY
   regc2021_v
 ORDER BY
   regc2021_v
-<pre><code>&lt;/div&gt;
-&lt;div class=&quot;three-col&quot;&gt;
-```r
-rc &lt;- mbhg %&gt;%
-  group_by(REGC2021_V) %&gt;%
-  summarise(n = n())
-  
-  
-  
-  
-  
-  
-  
-  
-  
-</code></pre></div>
+&nbsp;  
+&nbsp;  
+&nbsp;  </code></pre>
+</div>
 <div class="three-col">
-```scala
-val rc = spark.sql("""
+<pre><code class="language-r hljs">rc <- mbhg %>%
+  group_by(REGC2021_V) %>%
+  summarise(n = n())
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  
+&nbsp;  </code></pre>
+</div>
+<div class="three-col">
+<pre><code class="language-scala hljs">val rc = spark.sql("""
   SELECT 
     REGC2021_V, 
     ST_Union_Aggr(geometry) 
@@ -109,8 +109,7 @@ val rc = spark.sql("""
     REGC2021_V 
   ORDER BY
     REGC2021_V
-""")
-```
+""")</code></pre>
 </div>
 <div class="three-col">121 seconds</div>
 <div class="three-col">124 seconds</div>
@@ -274,8 +273,7 @@ ggplotly(p)
 <div class="three-col ttle">R</div>
 <div class="three-col ttle">Sedona</div>
 <div class="three-col">
-```sql
-SELECT 
+<pre><code class="language-sql hljs">SELECT 
   addr.address_id, 
   addr.full_add_1,  
   mb.mb2021_v1_, 
@@ -285,26 +283,27 @@ FROM
   statsnz.meshblock2021 mb 
 WHERE 
   st_intersects(addr.geom, mb.geom)
-<pre><code>&lt;/div&gt;
-&lt;div class=&quot;three-col&quot;&gt;
-```r
-sf::st_intersection(
+&nbsp;
+&nbsp;
+</code></pre>
+</div>
+<div class="three-col">
+<pre><code class="language-scala r">sf::st_intersection(
   select(
     addr, ADDRESS_ID, FULL_ADD_1
   ), 
   select(mbhg, MB2021_V1_)
 ) 
-
-
-
-
-
-
-
-</code></pre></div>
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+&nbsp;
+</code></pre>
+</div>
 <div class="three-col">
-```scala
-val rc = spark.sql("""
+<pre><code class="language-scala hljs">val rc = spark.sql("""
   SELECT 
     REGC2021_V, 
     ST_Union_Aggr(geometry) 
@@ -316,7 +315,7 @@ val rc = spark.sql("""
   ORDER BY
     REGC2021_V
 """)
-```
+</code></pre>
 </div>
 <div class="three-col">193 seconds</div>
 <div class="three-col">3194 seconds</div>
