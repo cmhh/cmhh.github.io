@@ -186,3 +186,15 @@ div.Large > p > img, img.Large {
   font-weight: bold;
   text-align: center;
 }
+
+.REPL div {
+  margin-bottom: 1px!important;
+}
+
+.REPL div:nth-child(odd) > pre > code {
+  border-left: 5px solid green;
+}
+
+.REPL div:nth-child(even) > pre > code {
+  border-left: 5px solid red;
+}
