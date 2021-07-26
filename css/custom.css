@@ -198,3 +198,9 @@ div.Large > p > img, img.Large {
 .REPL div:nth-child(even) > pre > code {
   border-left: 5px solid red;
 }
+
+video {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
