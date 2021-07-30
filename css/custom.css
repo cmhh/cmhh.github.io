@@ -204,3 +204,32 @@ video {
   margin-left: auto;
   margin-right: auto;
 }
+
+/* for block of numbers */
+.hljs-ln-numbers {
+    text-align: right;
+    color: #CCC;
+    border: none!important;
+    border-right: 1px solid #CCC!important;
+    vertical-align: top;
+    padding: 1px!important;
+    padding-right: 5px!important;
+
+    /* your custom style here */
+}
+
+/* for block of code */
+.hljs-ln-code {
+    border: none!important;
+    padding: 1px!important;
+    padding-left: 5px!important;
+}
+
+.highlight pre {
+  background-color: inherit;
+}
+
+.highlight pre > code {
+  line-height: 1.5;
+  background-color: inherit;
+}
