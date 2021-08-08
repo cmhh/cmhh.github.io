@@ -5,10 +5,19 @@
     <description>Recent content in 2021 on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 30 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 08 Aug 2021 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/archives/2021/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Online Learning with Akka</title>
+      <link>/2021/2021-08-08-online-learning-with-akka/</link>
+      <pubDate>Sun, 08 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/2021/2021-08-08-online-learning-with-akka/</guid>
+      <description>Overview In a previous post, we looked at how we could consume messages in a Kafka topic, and use those messages for online training of a classifier. In this post, we look at how Akka could be used to solve the same problem, in broadly the same way. Akka is an implementation of the actor model, and is particularly well suited for building event-driven, reactive systems since the actors involved communicate exclusively by sending and reacting to messages.</description>
+    </item>
     
     <item>
       <title>Online Learning with Apache Kafka</title>

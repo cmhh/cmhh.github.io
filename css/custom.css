@@ -199,6 +199,14 @@ div.Large > p > img, img.Large {
   border-left: 5px solid red;
 }
 
+.REPL div:last-child > pre {
+  margin-bottom: 12px;
+}
+
+div.content > div.highlight {
+  margin-bottom: 12px;
+}
+
 video {
   display: block;
   margin-left: auto;
@@ -214,11 +222,8 @@ video {
     vertical-align: top;
     padding: 1px!important;
     padding-right: 5px!important;
-
-    /* your custom style here */
 }
 
-/* for block of code */
 .hljs-ln-code {
     border: none!important;
     padding: 1px!important;
