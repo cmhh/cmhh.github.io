@@ -58,7 +58,7 @@
 <h1 id="implementation">Implementation</h1>
 <p>The complete application can be found on GitHub at <a href="https://github.com/cmhh/akkatrain">cmhh/akkatrain</a>, and the <code>README</code> includes enough information to get up and running. Note that the repository includes the <a href="http://yann.lecun.com/exdb/mnist/">MNIST database</a> since the data is only 12MB all up, and the original source urges users to &lsquo;Please refrain from accessing these files from automated scripts with high frequency. Make copies!&rsquo;. Either way, in this section we discuss the most important bits in more detail.</p>
 <h2 id="serialisation--deserialisation">Serialisation / Deserialisation</h2>
-<p>Akka is designed to be scalable, and our actor system can be spread across multiple JVM instances, on disparate servers. For actors to communicate with each other outside a single JVM instance, we would need to serialise our messages.  Custom serialisers are easy enough to make–we simply create a class which mixes in <code>akka.serialization.Serializer</code>, and then we add entries in the <code>akka.actor.serializers</code> and <code>akka.actor.serialization-bindings</code> section of our configuration (see <a href="https://doc.akka.io/docs/akka/current/serialization.html">Serialization</a>) to make use of them.  However, in this example we limit ourselves to the same JVM instances, and so we do not need to worry.</p>
+<p>Akka is designed to be scalable, and our actor system can be spread across multiple JVM instances, on disparate servers. For actors to communicate with each other outside a single JVM instance, we would need to serialise our messages.  Custom serialisers are easy enough to make–we simply create a class which mixes in <code>akka.serialization.Serializer</code>, and then we add entries in the <code>akka.actor.serializers</code> and <code>akka.actor.serialization-bindings</code> section of our configuration (see <a href="https://doc.akka.io/docs/akka/current/serialization.html">Serialization</a>) to make use of them.  However, in this example we limit ourselves to a single JVM instance, and so we do not need to worry.</p>
 <h2 id="model-our-messages">Model Our Messages</h2>
 <p>In order to send labelled images, we&rsquo;ll re-use the <code>MnistRecord</code> type from the <a href="../2021-07-30-online-learning-with-apache-kafka">Kafka implementation</a>, so, please excuse the duplication&hellip;</p>
 <p>The MNIST database consists of handwritten images of 28x28 pixels, each assigned a label from 0 to 9. The image data is easily read from the provided files as an array of bytes in row-major order, so we define a simple case class as follows (the class has a number of methods, but we omit the details here):</p>
@@ -124,7 +124,7 @@
 <span style="color:#f92672">}</span>
 </code></pre></div><p>Our consumer is a little more complicated, but is still relatively simple.  It can receive messages as follows:</p>
 <ul>
-<li><code>Image</code> - when received, it will update it&rsquo;s private classifier</li>
+<li><code>Image</code> - when received, it will update its private classifier</li>
 <li><code>SendAccuracy</code> - when received, it will send an <code>Accuracy</code> object to the sender</li>
 <li><code>SendClassifier</code> - when received, it will send a <code>Classifier</code> object to the sender</li>
 </ul>
@@ -225,6 +225,9 @@ system<span style="color:#f92672">.</span>terminate<span style="color:#f92672">(
 </code></pre></div><div class="large">
 <a href=assets/akkatrain01.webp target="_blank"><img src=assets/akkatrain01.webp></a>
 </div>
+<h2 id="summary">Summary</h2>
+<p>In this post we demonstrated the basic usage of Kafka&rsquo;s typed actors.  The specific use-case for our actor system was to react to new messages in real-time, using them to update a classifier.  There are a number of extensions that we could consider to make this more interesting, of course&ndash;we could develop web interfaces for interacting with out actors, and we could look other parts of the Akka ecosystem such as Akka streams (though the goal here was specifically to use the actor model).</p>
+
             </div>
         </div>
     </div>
