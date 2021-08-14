@@ -243,7 +243,14 @@ db-anon-role = &#34;webuser&#34;
 <p>Each table appears as its own end-point, but PostgREST also allows us to perform joins based on foreign key constraints, and this applies to views and materialized views.  We can emulate our reference query, then, by GETting:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">curl -s \
   http://localhost:3000/series_info?series_code=eq.HLFQ.SAA1AZ&amp;data.n=lte.4&amp;select=*,data(period,value) | jq
-</code></pre></div><p>The query consistently takes 4 milliseconds, which is <em>ludicrously</em> fast, and the payload is 1.07KB.  The output looks as follows:</p>
+</code></pre></div><p>We&rsquo;re querying the <code>series_info</code> table, and joining it with <code>data</code>, so we select <code>series_info</code> as our end-point, and the query parameters are as follows:</p>
+<ul>
+<li><code>series_code=eq.HLFQ.SAA1AZ</code></li>
+<li><code>data.n=lte.4</code></li>
+<li><code>select=*,data(period,value)</code></li>
+</ul>
+<p>The first two are obvious, filtering rows where the <code>series_code.series_code</code> column is equal to <code>HLFQ.SAA1AZ</code>, and <code>data.n</code> is less than or equal to 4.  The last is where we specificy which columns we select, and where we join with <code>table</code> (which PostgREST calls <a href="https://postgrest.org/en/stable/api.html#resource-embedding">resource embedding</a>).  We select all columns from <code>series_info</code> by specifying <code>*</code>, and <code>period</code> and <code>value</code> from <code>data</code> by including <code>data(period,value)</code> in the select list.  The general form is <code>relation(&lt;columns&gt;)</code>, where <code>relation</code> is the table name or name of a foreign key constraint, and we can nest such embeddings if we need to join a number of tables.</p>
+<p>The query consistently takes 4 milliseconds, which is <em>ludicrously</em> fast, and the payload is 1.07KB.  The output looks as follows:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
   {
     <span style="color:#f92672">&#34;subject_code&#34;</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>,
