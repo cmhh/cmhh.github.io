@@ -240,16 +240,23 @@ db-anon-role = &#34;webuser&#34;
 <div class=large>
 <a href=assets/swagger.png target="_blank"><img src=assets/swagger.png></a>
 </div>
-<p>Each table appears as its own end-point, but PostgREST also allows us to perform joins based on foreign key constraints, and this applies to views and materialized views.  We can emulate our reference query, then, by POSTing:</p>
+<p>Each table appears as its own end-point, but PostgREST also allows us to perform joins based on foreign key constraints, and this applies to views and materialized views.  We can emulate our reference query, then, by GETting:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">curl -s \
-  http://localhost:3000/series?series_code=eq.HLFQ.SAA1AZ&amp;data.n=lte.4&amp;select=*,data(period,value) | jq
-</code></pre></div><p>The query consistently takes 4 milliseconds, which is <em>ludicrously</em> fast, and the payload is 831B.  The output is looks as follows:</p>
+  http://localhost:3000/series_info?series_code=eq.HLFQ.SAA1AZ&amp;data.n=lte.4&amp;select=*,data(period,value) | jq
+</code></pre></div><p>The query consistently takes 4 milliseconds, which is <em>ludicrously</em> fast, and the payload is 1.07KB.  The output looks as follows:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
   {
     <span style="color:#f92672">&#34;subject_code&#34;</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>,
     <span style="color:#f92672">&#34;family_code&#34;</span>: <span style="color:#e6db74">&#34;SA&#34;</span>,
     <span style="color:#f92672">&#34;family_nbr&#34;</span>: <span style="color:#ae81ff">7</span>,
     <span style="color:#f92672">&#34;series_code&#34;</span>: <span style="color:#e6db74">&#34;HLFQ.SAA1AZ&#34;</span>,
+    <span style="color:#f92672">&#34;subject_title&#34;</span>: <span style="color:#e6db74">&#34;Household Labour Force Survey - HLF&#34;</span>,
+    <span style="color:#f92672">&#34;family_title&#34;</span>: <span style="color:#e6db74">&#34;Labour Force Status by Sex by Age Group&#34;</span>,
+    <span style="color:#f92672">&#34;title_1&#34;</span>: <span style="color:#e6db74">&#34;Persons Employed, Unemployed, Not in Labour Force (for current quarter)&#34;</span>,
+    <span style="color:#f92672">&#34;title_2&#34;</span>: <span style="color:#e6db74">&#34;Sex&#34;</span>,
+    <span style="color:#f92672">&#34;title_3&#34;</span>: <span style="color:#e6db74">&#34;Age Group&#34;</span>,
+    <span style="color:#f92672">&#34;title_4&#34;</span>: <span style="color:#66d9ef">null</span>,
+    <span style="color:#f92672">&#34;title_5&#34;</span>: <span style="color:#66d9ef">null</span>,
     <span style="color:#f92672">&#34;series_interval_nbr&#34;</span>: <span style="color:#ae81ff">3</span>,
     <span style="color:#f92672">&#34;mnth_offset_nbr&#34;</span>: <span style="color:#ae81ff">3</span>,
     <span style="color:#f92672">&#34;magnitude_nbr&#34;</span>: <span style="color:#ae81ff">3</span>,
@@ -284,7 +291,7 @@ db-anon-role = &#34;webuser&#34;
     ]
   }
 ]
-</code></pre></div><p>Note that we&rsquo;ve cheated a <em>little</em> here.  We&rsquo;ve made use of a materialized view, and that view, and rather than use PostgreSQL to figure out the last 4 rows in the selected group, we use ascending and descending ranks that were added to the <code>data</code> table ahead of time.  PostgREST does include limit and offset functionality, but I don&rsquo;t <em>think</em> users have access to window functions directly, for example.</p>
+</code></pre></div><p>Note that we&rsquo;ve cheated a <em>little</em> here–rather than use PostgreSQL to figure out the last 4 rows in the selected group, we use ascending and descending ranks that were added to the <code>data</code> table ahead of time.  PostgREST does include limit and offset functionality, but I don&rsquo;t <em>think</em> users have access to window functions directly, for example.</p>
 <h1 id="summary">Summary</h1>
 <p>In this very brief post we saw that both PostGraphile and PostgREST make it relatively easy to expose an existing database over the web, and both appear to have very good performance.  PostGraphile is written with node.js, while PostgREST is a compiled Haskell program, and so the fact that PostgREST is fast in particular should not be surprising.  While we really only demonstrated simple select functionality, both libraries support inserts and upserts, while PostgREST even supports remote execution of stored procedures.  Which one you use would likely come down to personal preference–I&rsquo;m largely unfamiliar with GraphQL, for example, and so find PostgREST somewhat more intuitive, and I also like the query parameter style.</p>
 <h1 id="appendix---installing-dependencies">Appendix - Installing Dependencies</h1>
@@ -312,7 +319,11 @@ $ curl -s <span style="color:#ae81ff">\
         <h1 class="title is-5">Tags</h1>
         <div class="tags">
         
+            <span class="tag"><a href="../../tags/akka">akka</a></span>
+        
             <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
         
             <span class="tag"><a href="../../tags/docker">docker</a></span>
         
@@ -322,13 +333,19 @@ $ curl -s <span style="color:#ae81ff">\
         
             <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
         
+            <span class="tag"><a href="../../tags/kafka">kafka</a></span>
+        
             <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
         
             <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
             <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
+            <span class="tag"><a href="../../tags/postgraphile">postgraphile</a></span>
+        
             <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/postgrest">postgrest</a></span>
         
             <span class="tag"><a href="../../tags/qgis">qgis</a></span>
         

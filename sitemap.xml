@@ -23,13 +23,48 @@
   </url>
   
   <url>
+    <loc>/tags/postgraphile/</loc>
+    <lastmod>2021-08-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/postgresql/</loc>
+    <lastmod>2021-08-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/postgrest/</loc>
+    <lastmod>2021-08-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/post/</loc>
     <lastmod>2021-08-14T00:00:00+00:00</lastmod>
   </url>
   
   <url>
+    <loc>/tags/</loc>
+    <lastmod>2021-08-14T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/akka/</loc>
+    <lastmod>2021-08-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/deeplearning4j/</loc>
+    <lastmod>2021-08-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2021/2021-08-08-online-learning-with-akka/</loc>
     <lastmod>2021-08-08T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/kafka/</loc>
+    <lastmod>2021-07-30T00:00:00+00:00</lastmod>
   </url>
   
   <url>
@@ -63,11 +98,6 @@
   </url>
   
   <url>
-    <loc>/tags/</loc>
-    <lastmod>2021-04-19T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/archives/2020/</loc>
     <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url>
@@ -84,11 +114,6 @@
   
   <url>
     <loc>/2020/2020-10-31-docker-on-windows-with-wsl2/</loc>
-    <lastmod>2020-10-31T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/postgresql/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
   </url>
   
