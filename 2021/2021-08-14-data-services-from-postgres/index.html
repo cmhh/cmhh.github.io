@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Data Services from Existing PostgreSQL Databases</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
+</head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Data Services from Existing PostgreSQL Databases
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <h1 id="overview">Overview</h1>
+<p>A while back I made a small data service which took time series data I scraped from the web, and used it to make a data service.  I used <a href="https://www.playframework.com/">Play Framework</a> for the API itself, and <a href="https://www.postgresql.org/">PostgreSQL</a> as the back-end.  The service wasn&rsquo;t terribly complicated to put together, and I do think that building bespoke services as the need arises, rather than aiming for some sort of generic framework, can be useful.  Still, there are, or must be, generic solutions that would be good enough?  And maybe you already have the back-end database just sitting there and you just want to make the data available with as little effort as possible&hellip;</p>
+<p>I did a little Googling, and came up with two pretty cool looking options.  <a href="https://www.graphile.org/">PostGraphile</a> is a GraphQL wrapper for PostgreSQL, and has over 10k stars on <a href="https://github.com/graphile/postgraphile">GitHub</a>!, where the claim is:</p>
+<blockquote>
+<p>Execute one command (or mount one Node.js middleware) and get an instant high-performance GraphQL API for your PostgreSQL database!</p>
+</blockquote>
+<p><a href="https://postgrest.org/en/stable/">PostgREST</a> is a REST wrapper for PostgreSQL, and has over 17k stars on <a href="https://github.com/PostgREST/postgrest">GitHub</a>!, and claims:</p>
+<blockquote>
+<p>PostgREST serves a fully RESTful API from any existing PostgreSQL database. It provides a cleaner, more standards-compliant, faster API than you are likely to write from scratch.</p>
+</blockquote>
+<p>So, in this post, we&rsquo;ll look at the back-end for the <a href="https://github.com/cmhh/snzts">aforementioned time series service</a>, and see just how easy it is to use both PostGraphile and PostgREST, and how easily they can replicate the functionality of the existing service.</p>
+<p><strong>Note</strong> that there are quite a few commercial options, covering frameworks such as OData, and enterprise users <em>might</em> prefer to go that route.  That doesn&rsquo;t really make this post any less meaningful, of course, since a commercial offering must be even <em>easier</em>, or why would anybody use it?  Right?  RIGHT?!</p>
+<h1 id="the-database-schema">The Database Schema</h1>
+<p>The database we wish to expose is a simple set of nested tables, with schema as follows:</p>
+<div class=large>
+<a href=assets/schema01.png target="_blank"><img src=assets/schema01.png></a>
+</div>
+<p>In addition, we have summarised the left-most 3 tables in a single materialized view called <code>series_info</code>, and with this included we have:</p>
+<div class=large>
+<a href=assets/schema02.png target="_blank"><img src=assets/schema02.png></a>
+</div>
+<h1 id="our-reference-query">Our Reference Query</h1>
+<p>The reference API has a few different end-points, but let&rsquo;s limit ourselves to the following request:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">http://localhost:9000/snzts/v1/series?format=json&amp;seriesCode=HLFQ.SAA1AZ&amp;tail=4
+</code></pre></div><p>This query consistently takes around 15 milliseconds, and the payload is 1.1KB.  The output looks as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+  {
+    <span style="color:#f92672">&#34;subject_code&#34;</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>,
+    <span style="color:#f92672">&#34;subject_title&#34;</span>: <span style="color:#e6db74">&#34;Household Labour Force Survey - HLF&#34;</span>,
+    <span style="color:#f92672">&#34;family_code&#34;</span>: <span style="color:#e6db74">&#34;SA&#34;</span>,
+    <span style="color:#f92672">&#34;family_nbr&#34;</span>: <span style="color:#ae81ff">7</span>,
+    <span style="color:#f92672">&#34;family_title&#34;</span>: <span style="color:#e6db74">&#34;Labour Force Status by Sex by Age Group&#34;</span>,
+    <span style="color:#f92672">&#34;series_code&#34;</span>: <span style="color:#e6db74">&#34;HLFQ.SAA1AZ&#34;</span>,
+    <span style="color:#f92672">&#34;interval&#34;</span>: <span style="color:#ae81ff">3</span>,
+    <span style="color:#f92672">&#34;magnitude&#34;</span>: <span style="color:#ae81ff">3</span>,
+    <span style="color:#f92672">&#34;offset&#34;</span>: <span style="color:#ae81ff">3</span>,
+    <span style="color:#f92672">&#34;units&#34;</span>: <span style="color:#e6db74">&#34;NUMBER&#34;</span>,
+    <span style="color:#f92672">&#34;variables&#34;</span>: [
+      <span style="color:#e6db74">&#34;Persons Employed, Unemployed, Not in Labour Force (for current quarter)&#34;</span>,
+      <span style="color:#e6db74">&#34;Sex&#34;</span>,
+      <span style="color:#e6db74">&#34;Age Group&#34;</span>
+    ],
+    <span style="color:#f92672">&#34;outcomes&#34;</span>: [
+      <span style="color:#e6db74">&#34;Persons Employed in Labour Force&#34;</span>,
+      <span style="color:#e6db74">&#34;Male&#34;</span>,
+      <span style="color:#e6db74">&#34;Total All Ages&#34;</span>
+    ],
+    <span style="color:#f92672">&#34;period&#34;</span>: [
+      <span style="color:#e6db74">&#34;2020.09&#34;</span>,
+      <span style="color:#e6db74">&#34;2020.12&#34;</span>,
+      <span style="color:#e6db74">&#34;2021.03&#34;</span>,
+      <span style="color:#e6db74">&#34;2021.06&#34;</span>
+    ],
+    <span style="color:#f92672">&#34;value&#34;</span>: [
+      <span style="color:#ae81ff">1439.2</span>,
+      <span style="color:#ae81ff">1458.4</span>,
+      <span style="color:#ae81ff">1460.7</span>,
+      <span style="color:#ae81ff">1466.8</span>
+    ],
+    <span style="color:#f92672">&#34;status&#34;</span>: [
+      <span style="color:#e6db74">&#34;F&#34;</span>,
+      <span style="color:#e6db74">&#34;F&#34;</span>,
+      <span style="color:#e6db74">&#34;F&#34;</span>,
+      <span style="color:#e6db74">&#34;F&#34;</span>
+    ]
+  }
+]
+</code></pre></div><h1 id="postgraphile">PostGraphile</h1>
+<p>Creating a GraphQL endpoint from our pre-existing database is comically easy–we simply run:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">postgraphile <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -c <span style="color:#e6db74">&#34;postgres://webuser:webuser@localhost:5432/snzts&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --enhance-graphiql
+</code></pre></div><p>When running, PostGraphile provides us with two endpoints, one of which is non-interactive, and one which is interactive:</p>
+<ul>
+<li><code>http://localhost:5000/graphql</code></li>
+<li><code>http://localhost:5000/graphiql</code></li>
+</ul>
+<p>The interactive version is extremely useful, providing much assistance in crafting queries, particularly for the uninitiated:</p>
+<div class=large>
+<a href=assets/graphiql.png target="_blank"><img src=assets/graphiql.png></a>
+</div>
+<p>At the most basic level, each table has its own associated query which will generally be the table name prefixed with <code>all</code>, and converted to lower camelCase.  And PostGraphile even seems to pluralise table names if they&rsquo;re in the singular.  For example, the <code>subject</code> table would be extracted via <code>allSubjects</code>.  Individual column names are also converted to lower camelCase.  For example, the column <code>subject_code</code> in table <code>subject</code> is represented as the node <code>subjectCode</code>.  PostGraphile then relies heavily on relations within the database.  For example, the <code>subject</code> and <code>family</code> tables share a foreign key relation in <code>subject_code</code>, and so we find embedded nodes are available as <code>familiesBySubjectCode</code>–again, converted to lower camelCase and pluralized.</p>
+<p>Laid out prettily, we can get the data we want via the following GraphQL query:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-graphql" data-lang="graphql">{
+  allSubjects(condition: {<span style="color:#a6e22e">subjectCode</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>}) {
+    <span style="color:#a6e22e">nodes</span> {
+      subjectCode
+      titleText
+      familiesBySubjectCode(condition: {<span style="color:#a6e22e">familyCode</span>: <span style="color:#e6db74">&#34;SA&#34;</span>, <span style="color:#a6e22e">familyNbr</span>: <span style="color:#a6e22e">7</span>}) {
+        nodes {
+          familyCode
+          familyNbr
+          titleText
+          title1
+          title2
+          title3
+          seriesByFamilyCodeAndFamilyNbr(condition: {<span style="color:#a6e22e">seriesCode</span>: <span style="color:#e6db74">&#34;HLFQ.SAA1AZ&#34;</span>}) {
+            <span style="color:#a6e22e">nodes</span> {
+              seriesIntervalNbr
+              mnthOffsetNbr
+              magnitudeNbr
+              unitText
+              description1
+              description2
+              description3
+              dataBySeriesCode(orderBy: <span style="color:#a6e22e">PERIOD_ASC</span>, last: <span style="color:#a6e22e">4</span>) {
+                nodes {
+                  period
+                  value
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre></div><p>To call this via cURL:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;query&#34;:&#34;{allSubjects(condition:{subjectCode:\&#34;HLF\&#34;}){nodes{subjectCode titleText familiesBySubjectCode(condition:{familyCode:\&#34;SA\&#34;,familyNbr:7}){nodes {familyCode familyNbr titleText title1 title2 title3 seriesByFamilyCodeAndFamilyNbr(condition:{seriesCode:\&#34;HLFQ.SAA1AZ\&#34;}){nodes{seriesIntervalNbr mnthOffsetNbr magnitudeNbr unitText description1 description2 description3 dataBySeriesCode(orderBy:PERIOD_ASC,last:4){nodes{period value}}}}}}}}}&#34;}&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  http://localhost:5000/graphql | jq
+</code></pre></div><p>The query consistently takes around 7 milliseconds, which is <em>very</em> fast, and the payload is 925B.  The output looks as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#f92672">&#34;data&#34;</span>: {
+    <span style="color:#f92672">&#34;allSubjects&#34;</span>: {
+      <span style="color:#f92672">&#34;nodes&#34;</span>: [
+        {
+          <span style="color:#f92672">&#34;subjectCode&#34;</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>,
+          <span style="color:#f92672">&#34;titleText&#34;</span>: <span style="color:#e6db74">&#34;Household Labour Force Survey - HLF&#34;</span>,
+          <span style="color:#f92672">&#34;familiesBySubjectCode&#34;</span>: {
+            <span style="color:#f92672">&#34;nodes&#34;</span>: [
+              {
+                <span style="color:#f92672">&#34;familyCode&#34;</span>: <span style="color:#e6db74">&#34;SA&#34;</span>,
+                <span style="color:#f92672">&#34;familyNbr&#34;</span>: <span style="color:#ae81ff">7</span>,
+                <span style="color:#f92672">&#34;titleText&#34;</span>: <span style="color:#e6db74">&#34;Labour Force Status by Sex by Age Group&#34;</span>,
+                <span style="color:#f92672">&#34;title1&#34;</span>: <span style="color:#e6db74">&#34;Persons Employed, Unemployed, Not in Labour Force (for current quarter)&#34;</span>,
+                <span style="color:#f92672">&#34;title2&#34;</span>: <span style="color:#e6db74">&#34;Sex&#34;</span>,
+                <span style="color:#f92672">&#34;title3&#34;</span>: <span style="color:#e6db74">&#34;Age Group&#34;</span>,
+                <span style="color:#f92672">&#34;seriesByFamilyCodeAndFamilyNbr&#34;</span>: {
+                  <span style="color:#f92672">&#34;nodes&#34;</span>: [
+                    {
+                      <span style="color:#f92672">&#34;seriesIntervalNbr&#34;</span>: <span style="color:#ae81ff">3</span>,
+                      <span style="color:#f92672">&#34;mnthOffsetNbr&#34;</span>: <span style="color:#ae81ff">3</span>,
+                      <span style="color:#f92672">&#34;magnitudeNbr&#34;</span>: <span style="color:#ae81ff">3</span>,
+                      <span style="color:#f92672">&#34;unitText&#34;</span>: <span style="color:#e6db74">&#34;NUMBER&#34;</span>,
+                      <span style="color:#f92672">&#34;description1&#34;</span>: <span style="color:#e6db74">&#34;Persons Employed in Labour Force&#34;</span>,
+                      <span style="color:#f92672">&#34;description2&#34;</span>: <span style="color:#e6db74">&#34;Male&#34;</span>,
+                      <span style="color:#f92672">&#34;description3&#34;</span>: <span style="color:#e6db74">&#34;Total All Ages&#34;</span>,
+                      <span style="color:#f92672">&#34;dataBySeriesCode&#34;</span>: {
+                        <span style="color:#f92672">&#34;nodes&#34;</span>: [
+                          {
+                            <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2020.09&#34;</span>,
+                            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1439.2</span>
+                          },
+                          {
+                            <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2020.12&#34;</span>,
+                            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1458.4</span>
+                          },
+                          {
+                            <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2021.03&#34;</span>,
+                            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1460.7</span>
+                          },
+                          {
+                            <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2021.06&#34;</span>,
+                            <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1466.8</span>
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
+</code></pre></div><h1 id="postgrest">PostgREST</h1>
+<p>As for PostGraphile, getting our PostgREST endpoint up and running is pretty easy.  First, we create a small configuration file, <code>snzts.config</code>, with the following content:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">db-uri = &#34;postgres://webuser:webuser@localhost:5432/snzts&#34;
+db-schema = &#34;public&#34;
+db-anon-role = &#34;webuser&#34;
+</code></pre></div><p>We then simply run:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./postgrest snzts.config
+</code></pre></div><p>PostgREST is OpenAPI-compliant, and if we visit <code>http://localhost:3000</code> we will be greeted with a complete summary of the service&rsquo;s capabilities.  More usefully, it is relatively easy create documentation using <code>swagger-ui</code>:</p>
+<div class=large>
+<a href=assets/swagger.png target="_blank"><img src=assets/swagger.png></a>
+</div>
+<p>Each table appears as its own end-point, but PostgREST also allows us to perform joins based on foreign key constraints, and this applies to views and materialized views.  We can emulate our reference query, then, by POSTing:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">curl -s \
+  http://localhost:3000/series?series_code=eq.HLFQ.SAA1AZ&amp;data.n=lte.4&amp;select=*,data(period,value) | jq
+</code></pre></div><p>The query consistently takes 4 milliseconds, which is <em>ludicrously</em> fast, and the payload is 831B.  The output is looks as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+  {
+    <span style="color:#f92672">&#34;subject_code&#34;</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>,
+    <span style="color:#f92672">&#34;family_code&#34;</span>: <span style="color:#e6db74">&#34;SA&#34;</span>,
+    <span style="color:#f92672">&#34;family_nbr&#34;</span>: <span style="color:#ae81ff">7</span>,
+    <span style="color:#f92672">&#34;series_code&#34;</span>: <span style="color:#e6db74">&#34;HLFQ.SAA1AZ&#34;</span>,
+    <span style="color:#f92672">&#34;series_interval_nbr&#34;</span>: <span style="color:#ae81ff">3</span>,
+    <span style="color:#f92672">&#34;mnth_offset_nbr&#34;</span>: <span style="color:#ae81ff">3</span>,
+    <span style="color:#f92672">&#34;magnitude_nbr&#34;</span>: <span style="color:#ae81ff">3</span>,
+    <span style="color:#f92672">&#34;unit_text&#34;</span>: <span style="color:#e6db74">&#34;NUMBER&#34;</span>,
+    <span style="color:#f92672">&#34;code_1&#34;</span>: <span style="color:#e6db74">&#34;A&#34;</span>,
+    <span style="color:#f92672">&#34;code_2&#34;</span>: <span style="color:#e6db74">&#34;1&#34;</span>,
+    <span style="color:#f92672">&#34;code_3&#34;</span>: <span style="color:#e6db74">&#34;AZ&#34;</span>,
+    <span style="color:#f92672">&#34;code_4&#34;</span>: <span style="color:#66d9ef">null</span>,
+    <span style="color:#f92672">&#34;code_5&#34;</span>: <span style="color:#66d9ef">null</span>,
+    <span style="color:#f92672">&#34;description_1&#34;</span>: <span style="color:#e6db74">&#34;Persons Employed in Labour Force&#34;</span>,
+    <span style="color:#f92672">&#34;description_2&#34;</span>: <span style="color:#e6db74">&#34;Male&#34;</span>,
+    <span style="color:#f92672">&#34;description_3&#34;</span>: <span style="color:#e6db74">&#34;Total All Ages&#34;</span>,
+    <span style="color:#f92672">&#34;description_4&#34;</span>: <span style="color:#66d9ef">null</span>,
+    <span style="color:#f92672">&#34;description_5&#34;</span>: <span style="color:#66d9ef">null</span>,
+    <span style="color:#f92672">&#34;data&#34;</span>: [
+      {
+        <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2020.09&#34;</span>,
+        <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1439.2</span>
+      },
+      {
+        <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2020.12&#34;</span>,
+        <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1458.4</span>
+      },
+      {
+        <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2021.03&#34;</span>,
+        <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1460.7</span>
+      },
+      {
+        <span style="color:#f92672">&#34;period&#34;</span>: <span style="color:#e6db74">&#34;2021.06&#34;</span>,
+        <span style="color:#f92672">&#34;value&#34;</span>: <span style="color:#ae81ff">1466.8</span>
+      }
+    ]
+  }
+]
+</code></pre></div><p>Note that we&rsquo;ve cheated a <em>little</em> here.  We&rsquo;ve made use of a materialized view, and that view, and rather than use PostgreSQL to figure out the last 4 rows in the selected group, we use ascending and descending ranks that were added to the <code>data</code> table ahead of time.  PostgREST does include limit and offset functionality, but I don&rsquo;t <em>think</em> users have access to window functions directly, for example.</p>
+<h1 id="summary">Summary</h1>
+<p>In this very brief post we saw that both PostGraphile and PostgREST make it relatively easy to expose an existing database over the web, and both appear to have very good performance.  PostGraphile is written with node.js, while PostgREST is a compiled Haskell problem, and so the fact that PostgREST is fast in particular should not be surprising.  While we really only demonstrated simple select functionality, both libraries support inserts and upserts, while PostgREST even supports remote execution of stored procedures.  Which one you use would likely come down to personal preference–I&rsquo;m largely unfamiliar with GraphQL, for example, and so find PostgREST somewhat more intuitive, and I also like the query parameter style.</p>
+<h1 id="appendix---installing-dependencies">Appendix - Installing Dependencies</h1>
+<h2 id="postgraphile-1">PostGraphile</h2>
+<p>To use PostGraphile, one must first have Node.js installed.  At the time of writing, the current LTS version of Node.js is 14.17.5, and installing is as simple as downloading and unpacking a binary archive.  Something like</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mkdir -p <span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span>/local/node
+$ curl -s <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  https://nodejs.org/dist/v14.17.5/node-v14.17.5-linux-x64.tar.xz | <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  tar xJvf - --strip-components<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> -C <span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span>/local/node <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>$ echo <span style="color:#e6db74">&#34;export PATH=\$PATH:</span><span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span><span style="color:#e6db74">/local/node/bin&#34;</span> &gt;&gt; ~/.bashrc
+</code></pre></div><p>One can then install PostGraphile by running:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">npm install -g postgraphile
+</code></pre></div><h2 id="postgrest-1">PostgREST</h2>
+<p>Installing PostgREST simply required downloading and unpacking the following file:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">https://github.com/PostgREST/postgrest/releases/download/v8.0.0/postgrest-v8.0.0-linux-x64-static.tar.xz
+</code></pre></div><p>This contains a single binary named <code>postgrest</code>.  Note that the program depends on the PostgreSQL API, which can be installed on Debian-like systems by running:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install libpq-dev
+</code></pre></div>
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospark">geospark</a></span>
+        
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/sedona">sedona</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../2021/2021-08-14-data-services-from-postgres/">Data Services from Existing PostgreSQL Databases</a></h1>
+            <time class="has-text-grey-light is-size-7">14 August 2021</time>
+        
+            <h1><a href="../../2021/2021-08-08-online-learning-with-akka/">Online Learning with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">8 August 2021</time>
+        
+            <h1><a href="../../2021/2021-07-30-online-learning-with-apache-kafka/">Online Learning with Apache Kafka</a></h1>
+            <time class="has-text-grey-light is-size-7">30 July 2021</time>
+        
+            <h1><a href="../../2021/2021-04-19-a-brief-look-at-apache-sedona/">A Brief Look at Apache Sedona</a></h1>
+            <time class="has-text-grey-light is-size-7">19 April 2021</time>
+        
+            <h1><a href="../../2020/2020-12-05-working-productively-on-windows-using-wsl2-and-docker/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
+            <time class="has-text-grey-light is-size-7">5 December 2020</time>
+        
+    </div>
+</div>
+    <br>
+                
+
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2021">2021</a> (4)<br>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (4)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2021 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+</body>
+</html>
