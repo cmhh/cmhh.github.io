@@ -71,9 +71,9 @@
 </div>
 <h1 id="our-reference-query">Our Reference Query</h1>
 <p>The reference API has a few different end-points, but let&rsquo;s limit ourselves to the following request:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">http://localhost:9000/snzts/v1/series?format=json&amp;seriesCode=HLFQ.SAA1AZ&amp;tail=4
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">http://localhost:9000/snzts/v1/series?format=json&amp;seriesCode=HLFQ.SAA1AZ&amp;tail=4
 </code></pre></div><p>This query consistently takes around 15 milliseconds, and the payload is 1.1KB.  The output looks as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
   {
     <span style="color:#f92672">&#34;subject_code&#34;</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>,
     <span style="color:#f92672">&#34;subject_title&#34;</span>: <span style="color:#e6db74">&#34;Household Labour Force Survey - HLF&#34;</span>,
@@ -117,7 +117,7 @@
 ]
 </code></pre></div><h1 id="postgraphile">PostGraphile</h1>
 <p>Creating a GraphQL endpoint from our pre-existing database is comically easy–we simply run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">postgraphile <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">postgraphile <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -c <span style="color:#e6db74">&#34;postgres://webuser:webuser@localhost:5432/snzts&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --enhance-graphiql
 </code></pre></div><p>When running, PostGraphile provides us with two endpoints, one of which is non-interactive, and one which is interactive:</p>
@@ -131,7 +131,7 @@
 </div>
 <p>At the most basic level, each table has its own associated query which will generally be the table name prefixed with <code>all</code>, and converted to lower camelCase.  And PostGraphile even seems to pluralise table names if they&rsquo;re in the singular.  For example, the <code>subject</code> table would be extracted via <code>allSubjects</code>.  Individual column names are also converted to lower camelCase.  For example, the column <code>subject_code</code> in table <code>subject</code> is represented as the node <code>subjectCode</code>.  PostGraphile then relies heavily on relations within the database.  For example, the <code>subject</code> and <code>family</code> tables share a foreign key relation in <code>subject_code</code>, and so we find embedded nodes are available as <code>familiesBySubjectCode</code>–again, converted to lower camelCase and pluralized.</p>
 <p>Laid out prettily, we can get the data we want via the following GraphQL query:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-graphql" data-lang="graphql">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-graphql" data-lang="graphql">{
   allSubjects(condition: {<span style="color:#a6e22e">subjectCode</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>}) {
     <span style="color:#a6e22e">nodes</span> {
       subjectCode
@@ -167,12 +167,12 @@
   }
 }
 </code></pre></div><p>To call this via cURL:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;query&#34;:&#34;{allSubjects(condition:{subjectCode:\&#34;HLF\&#34;}){nodes{subjectCode titleText familiesBySubjectCode(condition:{familyCode:\&#34;SA\&#34;,familyNbr:7}){nodes {familyCode familyNbr titleText title1 title2 title3 seriesByFamilyCodeAndFamilyNbr(condition:{seriesCode:\&#34;HLFQ.SAA1AZ\&#34;}){nodes{seriesIntervalNbr mnthOffsetNbr magnitudeNbr unitText description1 description2 description3 dataBySeriesCode(orderBy:PERIOD_ASC,last:4){nodes{period value}}}}}}}}}&#34;}&#39;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  http://localhost:5000/graphql | jq
 </code></pre></div><p>The query consistently takes around 7 milliseconds, which is <em>very</em> fast, and the payload is 925B.  The output looks as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
   <span style="color:#f92672">&#34;data&#34;</span>: {
     <span style="color:#f92672">&#34;allSubjects&#34;</span>: {
       <span style="color:#f92672">&#34;nodes&#34;</span>: [
@@ -231,17 +231,17 @@
 }
 </code></pre></div><h1 id="postgrest">PostgREST</h1>
 <p>As for PostGraphile, getting our PostgREST endpoint up and running is pretty easy.  First, we create a small configuration file, <code>snzts.config</code>, with the following content:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">db-uri = &#34;postgres://webuser:webuser@localhost:5432/snzts&#34;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">db-uri = &#34;postgres://webuser:webuser@localhost:5432/snzts&#34;
 db-schema = &#34;public&#34;
 db-anon-role = &#34;webuser&#34;
 </code></pre></div><p>We then simply run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./postgrest snzts.config
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">./postgrest snzts.config
 </code></pre></div><p>PostgREST is OpenAPI-compliant, and if we visit <code>http://localhost:3000</code> we will be greeted with a complete summary of the service&rsquo;s capabilities.  More usefully, it is relatively easy to create documentation using <code>swagger-ui</code>:</p>
 <div class=large>
 <a href=assets/swagger.png target="_blank"><img src=assets/swagger.png></a>
 </div>
 <p>Each table appears as its own end-point, but PostgREST also allows us to perform joins based on foreign key constraints, and this applies to views and materialized views.  We can emulate our reference query, then, by GETting:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">curl -s \
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">curl -s \
   http://localhost:3000/series_info?series_code=eq.HLFQ.SAA1AZ&amp;data.n=lte.4&amp;select=*,data(period,value) | jq
 </code></pre></div><p>We&rsquo;re querying the <code>series_info</code> table, and joining it with <code>data</code>, so we select <code>series_info</code> as our end-point, and the query parameters are as follows:</p>
 <ul>
@@ -251,7 +251,7 @@ db-anon-role = &#34;webuser&#34;
 </ul>
 <p>The first two are obvious, filtering rows where the <code>series_code.series_code</code> column is equal to <code>HLFQ.SAA1AZ</code>, and <code>data.n</code> is less than or equal to 4.  The last is where we specificy which columns we select, and where we join the <code>data</code> table (which PostgREST calls <a href="https://postgrest.org/en/stable/api.html#resource-embedding">resource embedding</a>).  We select all columns from <code>series_info</code> by specifying <code>*</code>, and <code>period</code> and <code>value</code> from <code>data</code> by including <code>data(period,value)</code> in the select list.  The general form is <code>relation(&lt;columns&gt;)</code>, where <code>relation</code> is the table name or name of a foreign key constraint, and we can nest such embeddings if we need to join a number of tables.</p>
 <p>The query consistently takes 4 milliseconds, which is <em>ludicrously</em> fast, and the payload is 1.07KB.  The output looks as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
   {
     <span style="color:#f92672">&#34;subject_code&#34;</span>: <span style="color:#e6db74">&#34;HLF&#34;</span>,
     <span style="color:#f92672">&#34;family_code&#34;</span>: <span style="color:#e6db74">&#34;SA&#34;</span>,
@@ -304,18 +304,18 @@ db-anon-role = &#34;webuser&#34;
 <h1 id="appendix---installing-dependencies">Appendix - Installing Dependencies</h1>
 <h2 id="postgraphile-1">PostGraphile</h2>
 <p>To use PostGraphile, one must first have Node.js installed.  At the time of writing, the current LTS version of Node.js is 14.17.5, and installing is as simple as downloading and unpacking a binary archive.  Something like</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mkdir -p <span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span>/local/node
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ mkdir -p <span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span>/local/node
 $ curl -s <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  https://nodejs.org/dist/v14.17.5/node-v14.17.5-linux-x64.tar.xz | <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  tar xJvf - --strip-components<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> -C <span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span>/local/node <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>$ echo <span style="color:#e6db74">&#34;export PATH=\$PATH:</span><span style="color:#e6db74">${</span>HOME<span style="color:#e6db74">}</span><span style="color:#e6db74">/local/node/bin&#34;</span> &gt;&gt; ~/.bashrc
 </code></pre></div><p>One can then install PostGraphile by running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">npm install -g postgraphile
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">npm install -g postgraphile
 </code></pre></div><h2 id="postgrest-1">PostgREST</h2>
 <p>Installing PostgREST simply required downloading and unpacking the following file:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">https://github.com/PostgREST/postgrest/releases/download/v8.0.0/postgrest-v8.0.0-linux-x64-static.tar.xz
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">https://github.com/PostgREST/postgrest/releases/download/v8.0.0/postgrest-v8.0.0-linux-x64-static.tar.xz
 </code></pre></div><p>This contains a single binary named <code>postgrest</code>.  Note that the program depends on the PostgreSQL API, which can be installed on Debian-like systems by running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install libpq-dev
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install libpq-dev
 </code></pre></div>
             </div>
         </div>

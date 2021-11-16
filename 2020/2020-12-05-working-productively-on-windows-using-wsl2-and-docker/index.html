@@ -69,15 +69,15 @@
 <h1 id="docker-basics">Docker Basics</h1>
 <p>To create a Docker image, we just need a file called <code>Dockerfile</code> containing a complete set of instructions for the build.  That is, a container is (or can be) completely reproducible given only the <code>Dockerfile</code>, and so it is often sufficient to manage just this in a version control system.</p>
 <p>We&rsquo;ll see <code>Dockerfile</code> examples in the following sections, but given such a file, all we need to do to actually create a runnable image called <code>foo</code> is to run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t foo &lt;path to Dockerfile&gt;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t foo &lt;path to Dockerfile&gt;
 </code></pre></div><p>Once created, we can then run instances of the image by running something like the following:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name mycontainer foo 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name mycontainer foo 
 </code></pre></div><p>Of course, this is the simplest possible setup, and things can certainly ramp up a bit.  We can copy files from local folders into the image, parameterise the build by using build arguments, add environment variables at runtime, create ad hoc networks for collections of containers, create volumes or mount local folders for persisting data, and more.</p>
 <h1 id="containers-as-generic-development-environments">Containers as Generic Development Environments</h1>
 <p>Docker containers can be used as isolated development environments.  In an enterprise setting, it is common to block Windows executable files that have not been certified in some way.  However, we can write code, compile it, and run the resulting binaries inside containers, rather than on the host operating system.   Even if we copy the resulting binaries to the host, and the binaries aren&rsquo;t blocked as such, they might require a runtime that isn&rsquo;t present, or they might otherwise not be binary compatible.</p>
 <p>Security aside, the approach also proves useful for other reasons.  Namely, it can just be easier to manage a myriad of different build environments, all on a single host.  We can develop standard images for various different use cases–a container for Java development, or maybe even different containers for different versions of Java or even different build tools (Maven or Gradle, for example), a container for Node.js development, and so on.</p>
 <p>Consider the following Dockerfile:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive
 
@@ -123,9 +123,9 @@
 <li>installs OpenSSH server so the container can be accessed remotely</li>
 </ul>
 <p>To build the container from the <a href="docker/development">development</a> directory:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t development .
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t development .
 </code></pre></div><p>and to run an instance:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name development <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name development <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v $PWD/.ivy2:/root/.ivy2 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v $PWD/.cache:/root/.cache <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v $PWD/.npm:/root/.npm <span style="color:#ae81ff">\
@@ -135,7 +135,7 @@
 </span><span style="color:#ae81ff"></span>  -p 23:22 -p 9001:9001 -p 5001:5001 -p 3001:3001 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  development
 </code></pre></div><p>In this case, we copy our keys to the container <em>at runtime</em> so that we can connect without a password via a standard SSH client.  In particular, we add the following to our SSH config:</p>
-<pre><code>Host devdocker
+<pre tabindex="0"><code>Host devdocker
   HostName localhost
   Port 23
   User root
@@ -153,7 +153,7 @@
 </a>
 <h1 id="deployment-via-containers">Deployment via Containers</h1>
 <p>Applications are routinely deployed using containers.  In this case, we run a simple <a href="https://github.com/cmhh/seasadj">seasonal adjustment service</a>.  The <code>Dockerfile</code> is as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND noninteractive<span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> SHELL /bin/bash<span style="color:#960050;background-color:#1e0010">
@@ -179,11 +179,11 @@
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-cp&#34;</span>, <span style="color:#e6db74">&#34;/seasadj.jar&#34;</span>, <span style="color:#e6db74">&#34;org.cmhh.seasadj.Service&#34;</span>]<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>In this example, we simply create a basic instance with a Java runtime, and download an <a href="https://github.com/cmhh/seasadj/releases/download/0.1.0-SNAPSHOT/seasadj.jar">artefact</a> from GitHub to serve as our entrypoint.  Note that the service itself also requires <a href="https://www.census.gov/srd/www/x13as/">X13-ARIMA-SEATS</a> be present, so we download the source and compile it as part of the image build.</p>
 <p>As usual, the container is built as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker built -t seasadj .
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker built -t seasadj .
 </code></pre></div><p>and run as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -td --rm --name seasadj -p 9001:9001 seasadj
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -td --rm --name seasadj -p 9001:9001 seasadj
 </code></pre></div><p>The service is stateless.  It accepts one or more input specifications as a JSON array, and returns seasonally adjusted data in the same format.  For example, to adjust the following JSON input:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
   <span style="color:#f92672">&#34;ap&#34;</span>: {
     <span style="color:#f92672">&#34;series&#34;</span>: {
       <span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;Air Passengers&#34;</span>,
@@ -201,7 +201,7 @@
   }
 }
 </code></pre></div><p>we could use CURL as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -X POST <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -d @airpassengers.min.json <span style="color:#ae81ff">\
@@ -215,7 +215,7 @@
 <h1 id="databases-via-containers">Databases via Containers</h1>
 <p>Fully functional versions of popular databases are often available via official Docker images, both relational and NoSQL alike.  For development purposes, containerised databases will generally suffice, and can be run in a completely local context.</p>
 <p>Consider the following <code>Dockerfile</code>, a modified version of <a href="https://github.com/robyvandamme/adventureworks-docker">adventureworks-docker</a>, which provides a containerised version of Microsoft SQL Server with the popular AdventureWorks database pre-loaded:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mcr.microsoft.com/mssql/server</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mcr.microsoft.com/mssql/server</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /setup</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
@@ -223,9 +223,9 @@
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> /bin/bash ./entrypoint.sh<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>This is very simple, though does depend on a large SQL script, <code>setup-db.sql</code>.  To build:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t adventureworks .
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t adventureworks .
 </code></pre></div><p>To run an instance:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --name adventureworks <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -e <span style="color:#e6db74">&#39;ACCEPT_EULA=Y&#39;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -e <span style="color:#e6db74">&#39;MSSQL_SA_PASSWORD=password-1234&#39;</span> <span style="color:#ae81ff">\
@@ -239,7 +239,7 @@
 <h1 id="analytics-via-containers">Analytics via Containers</h1>
 <p>Containers can be used to house any manner of analytical environment, from R with RStudio, to JupyterLab with a variety of kernels, and even to a fully-functional, if not highly performing, Big Data stack.</p>
 <p>Consider the following <code>Dockerfile</code>, which, when built, provides a running instance of RStudio Server:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">ARG</span> ubuntu_version<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>.04<span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">ARG</span> ubuntu_version<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>.04<span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:$ubuntu_version</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
@@ -294,9 +294,9 @@
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> service rstudio-server start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  tail -f /dev/null<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>The <code>Dockerfile</code> accepts build arguments, so images containing different versions of R, for example, can be created from the same set of instructions.  For example:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t rstudio:4.0.3 --build-arg r_version<span style="color:#f92672">=</span>4.0.3 .
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t rstudio:4.0.3 --build-arg r_version<span style="color:#f92672">=</span>4.0.3 .
 </code></pre></div><p>To run a container with the image:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --name rstudio <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -p 8787:8787 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v <span style="color:#e6db74">${</span>PWD<span style="color:#e6db74">}</span>/.local:/home/guest/.local <span style="color:#ae81ff">\
@@ -308,7 +308,7 @@
 <h1 id="using-a-registry">Using a Registry</h1>
 <p>Consider the analytics example above, consisting of a containerised R environment.  Such an image might well be of value to an entire group of analysts, so rather than provide a <code>Dockerfile</code> that each person can use to build their own image, we could build the image once and then push it to a central registry for anybody to use.</p>
 <p>We use Docker compose to create a very simple example using a local registry and a <a href="https://github.com/Joxit/docker-registry-ui">basic web-based UI</a>.  Consider the following, which we save as <code>docker-compose.yml</code>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;3.8&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;3.8&#34;</span>
 <span style="color:#f92672">services</span>:
   <span style="color:#f92672">registry</span>:
     <span style="color:#f92672">image</span>: <span style="color:#ae81ff">registry:2</span>
@@ -332,9 +332,9 @@
 <span style="color:#f92672">networks</span>:
   <span style="color:#f92672">registrynet</span>:
 </code></pre></div><p>This describes the coordination of two containers as a single registry setup, and can be run as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker-compose up -d
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker-compose up -d
 </code></pre></div><p>The R image build earlier can be tagged and pushed to the registry as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker tag rstudio:4.0.3 localhost:8080/rstudio:4.0.3
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker tag rstudio:4.0.3 localhost:8080/rstudio:4.0.3
 docker push localhost:8080/rstudio:4.0.3
 </code></pre></div><p>The UI itself will be available in our web browser at <code>localhost:8080</code>:</p>
 <a href="assets/registryui.png" target="_blank">

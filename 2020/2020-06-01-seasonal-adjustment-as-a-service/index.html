@@ -52,7 +52,7 @@
 <p><a href="https://www.census.gov/srd/www/x13as/" target="_blank">X13-ARIMA-SEATS</a> is a widely used seasonal adjustment program developed by the <a href="https://www.census.gov/" target="_blank">United States Census Bureau</a>.  It&rsquo;s a command-line tool, and I&rsquo;ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, a useful proposition.</p>
 <h1 id="a-simple-example">A Simple Example&hellip;</h1>
 <p>The X13 binary ships with a relatively simple example using the famous Box and Jenkins air passengers data.  That is, a simple specification is provided in a file called <code>testairline.spc</code>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">series{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">series{
   title=&#34;International Airline Passengers Data from Box and Jenkins&#34;
   start=1949.01
   data=(
@@ -87,9 +87,9 @@ automdl{
 outlier{ }
 x11{}
 </code></pre></div><p>One could adjust this at the command line by running something like (there are a number of ways the program can be invoked):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">x13ashtml testairline -g g
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">x13ashtml testairline -g g
 </code></pre></div><p>Adding the <code>g</code> flag with value <code>g</code> tells X13 we wish to save output to subdirectory <code>g</code>, and we will end up with a number of text files matching the pattern <code>g/testairline.*</code>.  For example, a range of diagnostics will be written as key-value pairs in a file called <code>g/testairline.udg</code>, the first few lines of which would look similar to:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">date: Jun  1, 2020  
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">date: Jun  1, 2020  
 time: 14.19.08 
 version: 1.1
 build: 39
@@ -103,7 +103,7 @@ constant:     0.0000000000E+00
 transform: Automatic selection
 ...
 </code></pre></div><p>The seasonally adjusted and trend series would be saved as <code>g/testairline.d11</code> and <code>g/tsairline.d12</code>, respectively, and the first few rows of the D11 table would look as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">date    testairline.d11
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">date    testairline.d11
 ------  -----------------------
 195201  +0.192925972176234E+03
 195202  +0.198588812698691E+03
@@ -116,7 +116,7 @@ transform: Automatic selection
 ...
 </code></pre></div><h1 id="as-a-service">&hellip;as a Service</h1>
 <p>I created a <a href="https://github.com/cmhh/seasadj">basic library</a> which can be used to run X13 programmatically on the JVM (the library is written in Scala), and also as a web service (the web service itself is written using Akka HTTP).  The above test specification would be converted to JSON in somewhat obvious fashion as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
   <span style="color:#f92672">&#34;airpassengers&#34;</span>:{
     <span style="color:#f92672">&#34;series&#34;</span>:{
       <span style="color:#f92672">&#34;title&#34;</span>:<span style="color:#e6db74">&#34;International Airline Passengers Data from Box and Jenkins&#34;</span>,
@@ -156,7 +156,7 @@ transform: Automatic selection
   }
 }
 </code></pre></div><p>If this was saved as <code>testairline.json</code>, and a service instance was running at <code>localhost:9001</code>, then the adjustment could be run via curl, say, as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -X POST <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -d @testairline.json <span style="color:#ae81ff">\
@@ -301,7 +301,7 @@ let app = new Vue({
 });
 </script>
 <p>For those interested, the full source of this &lsquo;application&rsquo; is as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://unpkg.com/axios/dist/axios.min.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://unpkg.com/axios/dist/axios.min.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
 &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue@2.6.11&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
 &lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://code.highcharts.com/highcharts.src.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
 

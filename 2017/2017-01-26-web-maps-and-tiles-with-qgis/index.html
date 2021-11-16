@@ -71,7 +71,7 @@ as a standard tile service.</p>
 adapted for use on a Windows platform.</p>
 <h2 id="qgis--qgis-server">QGIS + QGIS Server</h2>
 <p>To install, simply run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install qgis qgis-server
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install qgis qgis-server
 </code></pre></div><p>The version of QGIS available will likely be an older, LTS version.  If a
 newer version is desired, simply follow the instructions provided on the QGIS
 website.  In the case of Ubuntu / Debian Linux:</p>
@@ -83,10 +83,10 @@ illustration here we use <a href="https://www.nginx.com/">NGINX</a> and FastCGI.
 Windows users.  Windows users might find it easy to use IIS and
 <a href="https://www.iis.net/downloads/microsoft/fastcgi-for-iis">FastCGI for IIS</a>.</p>
 <p>Regardless, to install both NGINX and fastcgi:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install nginx fcgiwrap
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install nginx fcgiwrap
 </code></pre></div><p>To enable CGI, modify the NGINX default config (probably something like
 <code>/etc/nginx/sites-available/default</code>) so it looks as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">...
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">...
 
 server {
 
@@ -105,15 +105,15 @@ server {
 
 ...
 </code></pre></div><p>When done, test the config and restart NGINX if all is well:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo /etc/init.d/nginx configtest <span style="color:#f92672">&amp;&amp;</span> sudo /etc/init.d/nginx reload
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo /etc/init.d/nginx configtest <span style="color:#f92672">&amp;&amp;</span> sudo /etc/init.d/nginx reload
 </code></pre></div><p>To conduct a quick test, we can make a little CGI script.  On my machine,
 I created a file called <code>/usr/lib/cgi-bin/hello.cgi</code> with the following content:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/python</span>
-<span style="color:#66d9ef">print</span> <span style="color:#e6db74">&#34;Content-type: text/html</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span>
-<span style="color:#66d9ef">print</span> <span style="color:#e6db74">&#34;&lt;html&gt;&lt;head&gt;&lt;title&gt;Hello, World!&lt;/title&gt;&lt;/head&gt;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
-<span style="color:#66d9ef">print</span> <span style="color:#e6db74">&#34;&lt;body&gt;&lt;h1&gt;Hello, World!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-python" data-lang="python"><span style="color:#75715e">#!/usr/bin/python</span>
+print <span style="color:#e6db74">&#34;Content-type: text/html</span><span style="color:#ae81ff">\n\n</span><span style="color:#e6db74">&#34;</span>
+print <span style="color:#e6db74">&#34;&lt;html&gt;&lt;head&gt;&lt;title&gt;Hello, World!&lt;/title&gt;&lt;/head&gt;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
+print <span style="color:#e6db74">&#34;&lt;body&gt;&lt;h1&gt;Hello, World!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;</span><span style="color:#ae81ff">\n</span><span style="color:#e6db74">&#34;</span>
 </code></pre></div><p>The file needs to be made readable and executable, so:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo chmod go+rx /usr/lib/cgi-bin/hello.cgi
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo chmod go+rx /usr/lib/cgi-bin/hello.cgi
 </code></pre></div><p>Then, browsing to <code>http://localhost/test/hello.cgi</code> will yield something like:</p>
 <img src=assets/hello.png class=large>
 <h1 id="publish-qgis-maps-via-wms">Publish QGIS Maps via WMS</h1>
@@ -162,18 +162,18 @@ the &lsquo;Save paths&rsquo; option in the project properties is set to &lsquo;r
 configured to run CGI scripts from (of course, modify this as you see fit if you
 have decided, for safety reasons or otherwise, to serve CGI content from a
 different location):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo cp -R ~/Maps/2013 /usr/lib/cgi-bin/
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo cp -R ~/Maps/2013 /usr/lib/cgi-bin/
 sudo chmod -R go+rx /usr/lib/cgi-bin/2013
 </code></pre></div><p>If all is well, you should get a response at the following URI:</p>
 <p><code>http://localhost/cgi-bin/2013/qgis_mapserv.fcgi?service=wms&amp;request=getcapabilities</code></p>
 <p>The result should be an XML file describing the service.  It is, of course,
 possible to get images directly from the service given the right set of
 parameters.  For example:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">https://localhost/cgi-bin/2013/qgis_mapserv.fcgi?&amp;SERVICE=WMS&amp;REQUEST=GetMap&amp;VERSION=1.1.1&amp;LAYERS=REGC2013&amp;STYLES=&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;HEIGHT=256&amp;WIDTH=256&amp;SRS=EPSG%3A2193&amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">https://localhost/cgi-bin/2013/qgis_mapserv.fcgi?&amp;SERVICE=WMS&amp;REQUEST=GetMap&amp;VERSION=1.1.1&amp;LAYERS=REGC2013&amp;STYLES=&amp;FORMAT=image%2Fpng&amp;TRANSPARENT=true&amp;HEIGHT=256&amp;WIDTH=256&amp;SRS=EPSG%3A2193&amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260
 </code></pre></div><p>yields the following thumbnail:</p>
 <img src=assets/qgis_mapserv.01.png class=large>
 <p>As a further example, we use R to create a leaflet map containing each layer:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
 uri <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;https://localhost/cgi-bin/2013/qgis_mapserv.fcgi?&#34;</span>
 
@@ -225,18 +225,18 @@ features under the &lsquo;WCS&rsquo; heading rather than &lsquo;WFS&rsquo;.</p>
 <img src=assets/qgis.nitrogen.03.png class=large>
 <p>As before, we copy the project to the web server root directory, and alter
 permissions to make it readable (and executable):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo cp -R ~/Maps/nitrogen /usr/lib/cgi-bin/
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo cp -R ~/Maps/nitrogen /usr/lib/cgi-bin/
 sudo chmod -R go+rx /usr/lib/cgi-bin/nitrogen
 </code></pre></div><p>Again, if the service is functioning correctly, there should be at the following
 URL:</p>
 <p><code>http://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?service=wms&amp;request=getcapabilities</code></p>
 <p>And, again, it should bepossible to get images directly from the service given
 the right set of parameters.  For example:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">https://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?&amp;SERVICE=WMS&amp;REQUEST=GetMap&amp;VERSION=1.1.1&amp;LAYERS=nitrogen&amp;STYLES=&amp;FORMAT=image%2Fpng&amp;HEIGHT=256&amp;WIDTH=256&amp;SRS=EPSG%3A2193&amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">https://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?&amp;SERVICE=WMS&amp;REQUEST=GetMap&amp;VERSION=1.1.1&amp;LAYERS=nitrogen&amp;STYLES=&amp;FORMAT=image%2Fpng&amp;HEIGHT=256&amp;WIDTH=256&amp;SRS=EPSG%3A2193&amp;BBOX=1089971.21440,4747987.36420,2470042.12700,6194308.49260
 </code></pre></div><p>yields the following thumbnail:</p>
 <img src=assets/qgis_mapserv.02.png class=large>
 <p>As a further example, we use R to create a leaflet map containing each layer:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
 uri <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;https://localhost/cgi-bin/nitrogen/qgis_mapserv.fcgi?&#34;</span>
 
@@ -268,13 +268,13 @@ raw inputs be saved&ndash;in this case totalling only 40 or so megabytes.</p>
 <p>Regardless, we can copy the tiles somewhere on the webserver path, and then
 treat them as a tile service.  In this case, I moved the tiles to
 <code>/var/www/html/tilecache/nitrogen</code> as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo mkdir -p /var/www/html/tilecache
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo mkdir -p /var/www/html/tilecache
 sudo mv ~/Maps/tilecache/nitrogen /var/www/html/tilecache/
 sudo chmod -R go+rx /var/www/html/tilecache
 </code></pre></div><p>The &lsquo;service&rsquo; should then be reachable at:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">http://localhost/tilecache/nitrogen/{z}/{x}/{y}.png
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">http://localhost/tilecache/nitrogen/{z}/{x}/{y}.png
 </code></pre></div><p>For example, we can make a leaflet chart in R as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
 <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">fitBounds</span>(<span style="color:#ae81ff">167</span>, <span style="color:#ae81ff">-48</span>, <span style="color:#ae81ff">179</span>, <span style="color:#ae81ff">-34</span>) <span style="color:#f92672">%&gt;%</span>

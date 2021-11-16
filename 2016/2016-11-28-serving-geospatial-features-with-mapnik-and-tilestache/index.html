@@ -90,15 +90,15 @@ and is also freely available.</p>
 <h2 id="mapnik--tilestache">Mapnik &amp; TileStache</h2>
 <p>Both Mapnik and TileStache are in the standard repositories, so installing is as
 simple as:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install libmapnik libmapnik-dev mapnik-utils python-mapnik tilestache
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install libmapnik libmapnik-dev mapnik-utils python-mapnik tilestache
 </code></pre></div><p>TileStache also required the Python imaging library.  To install this:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo pip install -U Pillow
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo pip install -U Pillow
 </code></pre></div><h3 id="testing-the-installation">Testing the installation</h3>
 <p>For development purposes TileStache can be started via the <code>tilestache-server</code>
 command, which causes TileStache to run on port 8080 by default.</p>
 <p>When starting, <code>tilestache-server</code> looks for a file called <code>tilestache.cfg</code>, so
 we create one as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
   <span style="color:#f92672">&#34;layers&#34;</span>: 
   {
     <span style="color:#f92672">&#34;osm&#34;</span>:
@@ -108,7 +108,7 @@ we create one as follows:</p>
   }
 }
 </code></pre></div><p>To start TileStache, run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">tilestache-server -c &lt;path to config&gt;/tilestache.cfg
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">tilestache-server -c &lt;path to config&gt;/tilestache.cfg
 </code></pre></div><p>which will then make the server available at
 <a href="http://localhost:8080">http://localhost:8080</a>:</p>
 <img src=assets/tiles.png class=large alt="http://localhost:8080">
@@ -125,22 +125,22 @@ WSGI.</p>
 <a href="https://www.nginx.com/">NGINX</a> to reverse proxy.</p>
 <h3 id="uwsgi">uWSGI</h3>
 <p>One of the easier ways to install uWSGI is to use pip:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install python-pip
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install python-pip
 sudo pip install -U uwsgi
 </code></pre></div><p>Now, create a file called <code>/etc/tilestache/tilestache-uwsgi.ini</code> as follows
 (note we have decided to use port 9090 rather than the default of 8080):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">[uwsgi]
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">[uwsgi]
 http-socket = :9090
 eval = import TileStache; application = TileStache.WSGITileServer(&#34;/etc/tilestache/tilestache.cfg&#34;)
 </code></pre></div><p>Given this file, TileStache can then be started so that it is available at
 <code>http://localhost:9090</code> via:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">uwsgi --ini /etc/tilestache/tilestache-uwsgi.ini
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">uwsgi --ini /etc/tilestache/tilestache-uwsgi.ini
 </code></pre></div><h3 id="starting-uwsgi-automatically-on-boot">Starting uWSGI automatically on boot</h3>
 <p>We might also want to set things up so that the service starts automatically
 when the system is booted.  Debian uses System V-style init.  I&rsquo;m not all that
 experienced with this, but I got things working by creating
 <code>/etc/init.d/tilestache</code> as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/sh
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash"><span style="color:#75715e">#!/bin/sh
 </span><span style="color:#75715e"></span>
 <span style="color:#75715e">### BEGIN INIT INFO</span>
 <span style="color:#75715e"># Provides:          tilestache</span>
@@ -196,10 +196,10 @@ PIDFILE<span style="color:#f92672">=</span>$RUN_DIR/tilestache.pid
 
 exit <span style="color:#ae81ff">0</span>
 </code></pre></div><p>and running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo update-rc.d tilestache defaults
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo update-rc.d tilestache defaults
 </code></pre></div><p>For those unfamiliar with Linux, this also means the service can be stopped and
 restarted at will with commands like:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo service tilestache start
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo service tilestache start
 sudo service tilestache stop
 sudo servcee tilestache restart
 </code></pre></div><p>Ubuntu, and possily other Linux distributions, now uses upstart rather than
@@ -214,10 +214,10 @@ just create <code>ini</code> files like <code>tilestache-uwsgi.ini</code> above.
 some appeal.</p>
 <h3 id="nginx">NGINX</h3>
 <p>If you don&rsquo;t have NGINX, it can be installed as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install nginx
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install nginx
 </code></pre></div><p>To give the service a nice endpoint, and potentially make it available
 externally, we add the following to <code>/etc/nginx/sites-available/default</code>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">server{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">server{
 
   ...
   
@@ -231,7 +231,7 @@ externally, we add the following to <code>/etc/nginx/sites-available/default</co
 }
 </code></pre></div><p>Apparently NGINX and uWSGI work together.  I couldn&rsquo;t quite figure this out, but
 it is, apparently, possible to do something like:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">server{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">server{
 
   ...
   
@@ -244,7 +244,7 @@ it is, apparently, possible to do something like:</p>
 
 }
 </code></pre></div><p>To test the config and restart NGINX, issue:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo service nginx configtest <span style="color:#f92672">&amp;&amp;</span> sudo service nginx reload
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo service nginx configtest <span style="color:#f92672">&amp;&amp;</span> sudo service nginx reload
 </code></pre></div><p>At this point, the service would now be availabe on a standard port at
 <code>http://localhost/tiles/</code> or <code>http://&lt;domain name&gt;/tiles/</code> if the server is
 available externally.</p>
@@ -264,7 +264,7 @@ but not free&ndash;enterprises and professionals might want to consider it).  Th
 said, the project has been forked, and active development is continuing.  We
 choose a fork called <a href="https://github.com/florianf/tileoven">TileOven</a>.  To
 install it:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cd ~/Downloads
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cd ~/Downloads
 git clone https://github.com/florianf/tileoven.git
 cd tileoven
 npm install
@@ -272,9 +272,9 @@ cd
 sudo mv ~/Downloads/tileoven /usr/local/
 </code></pre></div><p>Of course, this means one must also have both git and node.js.  To install
 git:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install git
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install git
 </code></pre></div><p>To install a newer version of node than is in the repositories, run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cd ~/Downloads
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">cd ~/Downloads
 wget https://nodejs.org/dist/v6.9.1/node-v6.9.1-linux-x64.tar.xz
 tar -xvf node-v6.9.1-linux-x64.tar.xz
 sudo mv node-v6.9.1-linux-x64 /usr/local/node
@@ -282,7 +282,7 @@ echo <span style="color:#e6db74">&#34;export PATH=</span>$PATH<span style="color
 source ~/.bashrc
 </code></pre></div><h3 id="testing-the-installation-1">Testing the installation</h3>
 <p>To run TileOven, issue:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">/usr/local/tileoven/index.js
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">/usr/local/tileoven/index.js
 </code></pre></div><p>Then browse to <code>http://localhost:9090</code> in a web browser and you&rsquo;ll see something
 like:</p>
 <img src=assets/tileoven.png class=large alt="TileMill (local)">
@@ -297,7 +297,7 @@ far from secure.</p>
 20009, and the tile server runs on port 20008; so we just need to forward these
 two ports to get access.  On a system with a proper SSH client such as Linux,
 we can do something like:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ssh hostname -l username -L 20009:localhost:20009 20008:localhost:20008
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ssh hostname -l username -L 20009:localhost:20009 20008:localhost:20008
 </code></pre></div><p>Then we would simply point our browser at <code>http://localhost:20009</code> to get
 access.  From a security perspective, this isn&rsquo;t necessarily an ideal option
 either, however.  On my machine, I created a user called <code>gisuser</code> and added
@@ -337,11 +337,11 @@ capabilities.  We will describe how to install these products, as well as
 populate tables from shapefiles and rasters.</p>
 <h3 id="install-postgresql-and-postgis">Install PostgreSQL and PostGIS</h3>
 <p>To install PostgreSQL and PostGIS, simply run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install postgresql postgis odbc-postgresql
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install postgresql postgis odbc-postgresql
 </code></pre></div><p>The last package, <code>odbc-postgresql</code>, is not strictly necessary, but it will
 often be useful to access Postgres via ODBC, and this package provides the
 necessary driver.  If you would also like a JDBC driver, you can do:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install libpostgresql-jdbc-java
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo apt-get install libpostgresql-jdbc-java
 </code></pre></div><h3 id="create-a-spatially-enabled-database">Create a spatially-enabled database</h3>
 <p>We create a single database called <code>gis</code>, and we grant read access to a user
 called <code>gisuser</code> with the creative password <code>password</code>.  It makes sense to
@@ -351,22 +351,22 @@ geographies (meshblock, Area Unit, Territorial Authority, and Regional
 Council) as multipolygons.  Similarly, we cteate a schema called <code>raster</code> in
 which we will place all raster data.</p>
 <p>To gain access to an interactive SQL shell as root:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo -u postgres psql
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo -u postgres psql
 </code></pre></div><p>And to create the database, run the following:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> gis;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">DATABASE</span> gis;
 <span style="color:#960050;background-color:#1e0010">\</span><span style="color:#66d9ef">c</span> gis
 <span style="color:#66d9ef">CREATE</span> EXTENSION postgis;
 <span style="color:#66d9ef">CREATE</span> EXTENSION postgis_topology;
 <span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">SCHEMA</span> geography;
 </code></pre></div><p>We can confirm the spatial extensions are present as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo -u postgres psql -U postgres -d gis -c <span style="color:#e6db74">&#34;SELECT postgis_version()&#34;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo -u postgres psql -U postgres -d gis -c <span style="color:#e6db74">&#34;SELECT postgis_version()&#34;</span>
 </code></pre></div><p>which should return something like:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">            postgis_version            
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">            postgis_version            
 ---------------------------------------
  2.1 USE_GEOS=1 USE_PROJ=1 USE_STATS=1
 (1 row)
 </code></pre></div><p>Finally, we give access to the data to user <code>gisuser</code> as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">USER</span> gisuser <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">ENCRYPTED</span> PASSWORD <span style="color:#e6db74">&#39;password&#39;</span>;
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">CREATE</span> <span style="color:#66d9ef">USER</span> gisuser <span style="color:#66d9ef">WITH</span> <span style="color:#66d9ef">ENCRYPTED</span> PASSWORD <span style="color:#e6db74">&#39;password&#39;</span>;
 <span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">CONNECT</span> <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">DATABASE</span> gis <span style="color:#66d9ef">TO</span> gisuser;
 <span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">USAGE</span> <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">SCHEMA</span> geography <span style="color:#66d9ef">TO</span> gisuser;
 <span style="color:#66d9ef">GRANT</span> <span style="color:#66d9ef">USAGE</span> <span style="color:#66d9ef">ON</span> <span style="color:#66d9ef">SCHEMA</span> raster <span style="color:#66d9ef">TO</span> gisuser;
@@ -378,15 +378,15 @@ PostGIS here, and will instead just reference the GeoTIFF files directly.</p>
 <h3 id="populate-the-database">Populate the database</h3>
 <p>It is then relatively easy to load data into the database.  To load the
 shapefile <code>&lt;path&gt;/MB2013.*</code> into the database, for example:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">shp2pgsql -I -s <span style="color:#ae81ff">2193</span> &lt;path&gt;/REGC2013.shp geography.REGC2013 | <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">shp2pgsql -I -s <span style="color:#ae81ff">2193</span> &lt;path&gt;/REGC2013.shp geography.REGC2013 | <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>   sudo -u postgres psql -U postgres -d gis
 </code></pre></div><p>And that&rsquo;s it!  Again, we can conduct some simple checks.  For example, the
 average area of a meshblock can be calculated by appealing to the <code>ST_Area</code>
 function as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">psql -U gisuser -d gis <span style="color:#ae81ff">\ </span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">psql -U gisuser -d gis <span style="color:#ae81ff">\ </span>
    -c <span style="color:#e6db74">&#34;SELECT sum(ST_Area(geom)) / sum(1) as ave_area FROM geography.MB2013&#34;</span>
 </code></pre></div><p>which, after being prompted for a password, returns:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">     ave_area     
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">     ave_area     
 ------------------
  5829825.22609488
 (1 row)
@@ -424,7 +424,7 @@ which you can safely delete&ndash;click the layers control
 in the following screenshot, before clicking the &lsquo;Save &amp; Style&rsquo; button:</p>
 <img src=assets/river02.png class=large alt="river - add layer">
 <p>Now edit the <code>style.mss</code> tab so it contains:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">Map {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">Map {
   background-color: transparent;
 }
 
@@ -445,7 +445,7 @@ panning and zooming) looks as follows:</p>
 by clicking the Export button and selecting &lsquo;Mapnik XML&rsquo;.  Save the file as
 <code>/etc/tilestache/river.xml</code>.  Then, edit <code>/etc/tilestache/tilestache.cfg</code> to
 include a <code>river</code> layer as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">{
   &#34;cache&#34;:
   {
     &#34;name&#34;: &#34;Disk&#34;,
@@ -468,7 +468,7 @@ include a <code>river</code> layer as follows:</p>
 <code>&lt;base&gt;/river/{z}/{x}/{y}.png</code>.  As described above, I set TileStache to be
 accessible via <code>http://localhost/tiles</code>.  The leaflet package in R provieds us
 with a convenient way of testing things are working:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
 <span style="color:#a6e22e">leaflet</span>(width<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;100%&#34;</span>, height<span style="color:#f92672">=</span><span style="color:#ae81ff">500</span>) <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">addTiles</span>() <span style="color:#f92672">%&gt;%</span> 
   <span style="color:#a6e22e">fitBounds</span>(<span style="color:#ae81ff">166.70047</span>, <span style="color:#ae81ff">-34.45676</span>, <span style="color:#ae81ff">178.52966</span>, <span style="color:#ae81ff">-47.06345</span>) <span style="color:#f92672">%&gt;%</span>
@@ -486,7 +486,7 @@ though it would be just as easy to add them via shapefiles.  They are all
 entered the same way, so we show the setup for just the one, MB2013, as follows:</p>
 <img src=assets/composite01.png class=large>
 <p>After all 4 layers are added, edit <code>style.mss</code> so it contains the following:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">Map {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">Map {
   background-color: transparent;
   maximum-extent: &#34;-19691655, -5989537, 19879128, -4081645&#34;;
 }
@@ -592,7 +592,7 @@ entered the same way, so we show the setup for just the one, MB2013, as follows:
 }
 </code></pre></div><p>As before, ws export to Mapnik XML and save as <code>/etc/tilestache/composite.xml</code>,
 and edit <code>/etc/tilestache/tilestache.cfg</code> to inculde the new layer:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">{
   &#34;cache&#34;:
   {
     &#34;name&#34;: &#34;Disk&#34;,
@@ -615,7 +615,7 @@ and edit <code>/etc/tilestache/tilestache.cfg</code> to inculde the new layer:</
 council areas (REGC2013) when zoomed out, and will change to display more
 detailed classifications as we zoom in.  Again, it is easy to view the map in
 R:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
 <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">addTiles</span>() <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">fitBounds</span>(<span style="color:#ae81ff">166.70047</span>, <span style="color:#ae81ff">-34.45676</span>, <span style="color:#ae81ff">178.52966</span>, <span style="color:#ae81ff">-47.06345</span>) <span style="color:#f92672">%&gt;%</span>
@@ -629,7 +629,7 @@ R:</p>
 <code>Nitrogen_Leaching_20150903.tif</code> as follows:</p>
 <img src=assets/nleach01.png class=large>
 <p>Then edit <code>style.mss</code> as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">Map {
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">Map {
   background-color: transparent;
 }
 
@@ -646,7 +646,7 @@ R:</p>
 }
 </code></pre></div><p>Export to Mapnik XML and save as <code>/etc/tilestache/nleach.xml</code>.  Then add the
 layer to <code>/etch/tilestache/tilestache.cfg</code>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">{
   &#34;cache&#34;:
   {
     &#34;name&#34;: &#34;Disk&#34;,
@@ -667,7 +667,7 @@ layer to <code>/etch/tilestache/tilestache.cfg</code>:</p>
   }
 }
 </code></pre></div><p>Again, we can visualise the result in R:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
 <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span> <span style="color:#a6e22e">addTiles</span>() <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">fitBounds</span>(<span style="color:#ae81ff">166.70047</span>, <span style="color:#ae81ff">-34.45676</span>, <span style="color:#ae81ff">178.52966</span>, <span style="color:#ae81ff">-47.06345</span>) <span style="color:#f92672">%&gt;%</span>

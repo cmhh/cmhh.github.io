@@ -65,7 +65,7 @@ Your browser does not support the video tag.
 <h1 id="a-comment-on-spatial-formats">A comment on spatial formats</h1>
 <p>In this overview we work exclusively with GeoPackages.  Of course shapefile is somewhat ubiquitous–it&rsquo;s readily available, and most GIS tools can work with it easily.  But shapefile is a proprietary format with a lot of very real drawbacks.  GeoPackage, on the other hand, is an open format built on SQLite which has few, if any, of the same drawbacks, and is widely supported in mainstream GIS tools.</p>
 <p>Converting shapefile to GeoPackage is relatively easy if you have access to <a href="https://gdal.org/">GDAL</a>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ ogr2ogr -f GPKG output.gpkg input.shp
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ ogr2ogr -f GPKG output.gpkg input.shp
 </code></pre></div><h2 id="source-data">Source data</h2>
 <p>Throughout this document, we use spatial features sourced from
 <a href="https://datafinder.stats.govt.nz">Stats NZ geographic data service</a>.  Specifically:</p>
@@ -83,9 +83,9 @@ Your browser does not support the video tag.
 </ul>
 <h2 id="installation">Installation</h2>
 <p>To install the R package used throughout this document, simply run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">devtools<span style="color:#f92672">::</span><span style="color:#a6e22e">install_github</span>(<span style="color:#e6db74">&#34;cmhh/geoserveR&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">devtools<span style="color:#f92672">::</span><span style="color:#a6e22e">install_github</span>(<span style="color:#e6db74">&#34;cmhh/geoserveR&#34;</span>)
 </code></pre></div><p>The R package requires a running instance of GeoServer to be useful.  We can get GeoServer up and running easily using Docker.  There is <a href="https://wiki.osgeo.org/wiki/DockerImages">no shortage of existing images online</a>, but we&rsquo;ll build our own.  We do this because it&rsquo;s pretty straight forward, and because it&rsquo;s instructive.  The R package contains a Dockerfile in <code>docker/Dockerfile</code> as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:18.04</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:18.04</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND noninteractive<span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
@@ -111,10 +111,10 @@ Your browser does not support the video tag.
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> [<span style="color:#e6db74">&#34;sh&#34;</span>, <span style="color:#e6db74">&#34;/usr/local/geoserver/bin/startup.sh&#34;</span>]<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>The R package can be used to generate the command required to build the image since the location of <code>Dockerfile</code> will vary depending on the user&rsquo;s setup.  For example:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#f92672">&gt;</span> geoserveR<span style="color:#f92672">::</span><span style="color:#a6e22e">docker_build</span>(tag <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;geoserver&#39;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#f92672">&gt;</span> geoserveR<span style="color:#f92672">::</span><span style="color:#a6e22e">docker_build</span>(tag <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;geoserver&#39;</span>)
 docker build <span style="color:#f92672">-</span>t geoserver <span style="color:#e6db74">&#34;/home/cmhh/R/x86_64-pc-linux-gnu-library/3.5/geoserveR/docker&#34;</span>
 </code></pre></div><p>Running the resulting command at the terminal will result in the creation of an image called, in this case, <code>geoserver</code>.  We can start this via:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker run -d --name geoserver --rm -p 8080:8080 geoserver
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker run -d --name geoserver --rm -p 8080:8080 geoserver
 </code></pre></div><p>The container will take a short while to get up and running completely, but when done, simply open a browser at <code>http://localhost:8080/geoserver</code>.  To login, the username is <code>admin</code>, and the password is <code>geoserver</code> (obviously, we&rsquo;d configure this differently in a production setting&hellip; more on that later).  And that&rsquo;s it.</p>
 <img src=assets/geoserver001.png class=large alt="http://localhost:8080/geoserver">
 <h2 id="testing-geoserver">Testing GeoServer</h2>
@@ -124,7 +124,7 @@ docker build <span style="color:#f92672">-</span>t geoserver <span style="color:
 <p>Any of the listed workspaces can then be accessed as WMS services programmatically via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?</code> (and an XML file describing the service can be accessed via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?request=GetCapabilities</code>).  For example, if we wanted to display layers that are part of the <code>topp</code> workspace, we&rsquo;d use <code>http://localhost:8080/geoserver/topp/wms?</code>.  If we click on Data &gt; Layers in the main web interface we see that there is, for example, a layer in the <code>topp</code> workspace called <code>states</code>:</p>
 <img src=assets/layers.png alt="Layers" class=large>
 <p>We can display this in a leaflet map in R by running the following code:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(leaflet)
 
 <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">addTiles</span>(
@@ -147,9 +147,9 @@ docker build <span style="color:#f92672">-</span>t geoserver <span style="color:
 <li>includes utilities that simplify working with the GeoServer interface.</li>
 </ul>
 <p>We won&rsquo;t go into the details here, but rather just describe the relevant usage as it arises.  Where possible, though, we will also consider the plain HTTP calls.  But by way of example, the following lists the layers available in the <code>topp</code> workspace.  First, using the REST API (via <code>curl</code>):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -u admin:geoserver -X GET <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -s -u admin:geoserver -X GET <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>    http://localhost:8080/geoserver/rest/workspaces/topp/layers | jq <span style="color:#e6db74">&#39;.&#39;</span>
-</code></pre></div><div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
   <span style="color:#f92672">&#34;layers&#34;</span>: {
     <span style="color:#f92672">&#34;layer&#34;</span>: [
       {
@@ -176,7 +176,7 @@ docker build <span style="color:#f92672">-</span>t geoserver <span style="color:
   }
 }
 </code></pre></div><p>and then using the provided R package:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">library</span>(geoserveR)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">library</span>(geoserveR)
 <span style="color:#f92672">&gt;</span> gs <span style="color:#f92672">&lt;-</span> GeoServer<span style="color:#f92672">$</span><span style="color:#a6e22e">new</span>()
 <span style="color:#f92672">&gt;</span> topp_layers <span style="color:#f92672">&lt;-</span> gs<span style="color:#f92672">$</span><span style="color:#a6e22e">getLayers</span>(<span style="color:#e6db74">&#34;topp&#34;</span>)
 <span style="color:#f92672">&gt;</span> <span style="color:#a6e22e">str</span>(topp_layers)
@@ -205,13 +205,13 @@ List of <span style="color:#ae81ff">5</span>
 <li>add a <em>layer</em> to the workspace which references the data store and style</li>
 </ul>
 <p>We&rsquo;ll put all our examples in a single workspace named <code>statsnz</code>.  We can create this in R as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geserveR)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geserveR)
 
 gs <span style="color:#f92672">&lt;-</span> GeoServer<span style="color:#f92672">$</span><span style="color:#a6e22e">new</span>()
 gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspace</span>(<span style="color:#e6db74">&#34;statsnz&#34;</span>)
 </code></pre></div><h2 id="example---meshblock-with-labels">Example - meshblock with labels</h2>
 <p>Meshblocks are the building blocks of most other official geographies held by Stats NZ.  There are approximately 50,000 of them and collectively they are quite large–the GeoPackage used here was 91MB, though we simplified this considerably using <a href="https://mapshaper.org/">mapshaper</a> to make things practical.  To display them in R on a leaflet map:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geoserveR)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geoserveR)
 <span style="color:#a6e22e">library</span>(leaflet)
 
 <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
@@ -225,9 +225,9 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspac
 <img src=assets/leaflet001.png class=large alt="meshblocks">
 <p>Saved as a stand-alone HTML file, this weighs in at over 15MB, and can be sluggish when rendering.  In actuality, the features are oversimplified here, so that when zoomed in the shapes have lost far too much detail.  But if we&rsquo;d displayed them at full resolution, our HTML file would be over 100MB!</p>
 <p>To make meshblocks available as a service, we first add a datastore.  We can add this in R as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createDatastore</span>(mb2018, <span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;mb2018&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createDatastore</span>(mb2018, <span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;mb2018&#34;</span>)
 </code></pre></div><p>Internally, this creates a copy of the <code>mb2018</code> feature class as a GeoPackage, and then uploads it to the server via the <code>datastores</code> endpoint.  We then make a layer in R as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">style <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">import_template</span>(
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">style <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">import_template</span>(
   <span style="color:#e6db74">&#34;outline_with_label&#34;</span>,
   name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mb2018_with_labels&#34;</span>, strokeColor <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;#000000&#34;</span>, strokeWidth <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>,
   maxScale <span style="color:#f92672">=</span> <span style="color:#ae81ff">600000</span>, geometryName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;geom&#34;</span>, labelName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;code&#34;</span>,
@@ -239,7 +239,7 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspac
 gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createLayer</span>(<span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;mb2018&#34;</span>, <span style="color:#e6db74">&#34;mb2018_with_labels&#34;</span>, style)
 </code></pre></div><p>Internally, we create a <em>feature type</em>, which is initially unconfigured.  We then create a new style, and then we apply the style to the created layer.  The variable <code>style</code> contains styling information in styled layer descriptor (SLD) format.  The approach here isn&rsquo;t terribly refined, but it is practical.  The <code>import_template</code> function is used to import bundled templates, and replace placeholders with parameter values.</p>
 <p>Either way, having done all this, we can now access meshblocks as a WMS via <code>http://localhost:8080/statsnz/wms?</code> as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">fitBounds</span>(lng1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">164.45</span>, lng2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">179.35</span>, lat1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">-48.52</span>, lat2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">-33.22</span>) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">addTiles</span>(
     urlTemplate <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png&#34;</span>
@@ -260,7 +260,7 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createLayer</s
 <p>Better yet, saved as a stand-alone HTML file, this map is less than 500KB (though the various tiles still need to be transferred, so one can still burn through a bit of data just navigating around).</p>
 <h2 id="example---population-by-statistical-area-2">Example - population by statistical area 2</h2>
 <p>Consider the following R code:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geoserveR)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geoserveR)
 <span style="color:#a6e22e">library</span>(leaflet)
 <span style="color:#a6e22e">library</span>(sf)
 <span style="color:#a6e22e">library</span>(dplyr)
@@ -285,7 +285,7 @@ pal <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">colorNu
 <p>The resulting HTML file weighs in at 3.2MB–not enormous by any stretch, but still probably not something you want users to be fetching repeatedly over a mobile connection, for example.  But this map just shows data for 2018, yet we have data for the years 1996, 2001, and 2006-2018–that&rsquo;s 15 years all up.  What if we want to make all this available on one map?  In that case, the resulting stand-alone HTML file weighs in at over 40MB.  (Of course, a hosted app could serve up a year based on user selection, but 3MB or so would still be transferred each time the year was switched).</p>
 <p>Let us instead see if we can create a workspace in GeoServer which contains a layer for each year.  As a WMS, the layers will cease to be interactive (so no hovering tooltips), but we could at least render a label whenever the user zooms in close enough, so let&rsquo;s do that too.</p>
 <p>First, we create a version of the SA2 feature class that has population counts:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(dplyr)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(dplyr)
 <span style="color:#a6e22e">library</span>(reshape2)
 
 counts <span style="color:#f92672">&lt;-</span> popdata <span style="color:#f92672">%&gt;%</span>
@@ -299,7 +299,7 @@ counts_wide <span style="color:#f92672">&lt;-</span> counts <span style="color:#
 sa22018_with_counts <span style="color:#f92672">&lt;-</span> sa22018 <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">inner_join</span>(counts_wide, by <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;code&#34;</span>)
 </code></pre></div><p>Then, we create a data store using the feature class created, and add a new layer for each of the columns:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">gs <span style="color:#f92672">&lt;-</span> GeoServer<span style="color:#f92672">$</span><span style="color:#a6e22e">new</span>()
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">gs <span style="color:#f92672">&lt;-</span> GeoServer<span style="color:#f92672">$</span><span style="color:#a6e22e">new</span>()
 
 gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createDatastore</span>(sa22018_with_counts, <span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;sa22018_with_counts&#34;</span>)
 
@@ -312,7 +312,7 @@ years <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">c</sp
   gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createLayer</span>(<span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;sa22018_with_counts&#34;</span>, name, style) 
 }
 </code></pre></div><p>And that&rsquo;s it—we now have a bunch of new layers called <code>sa22018_1996</code>, and so on.  There&rsquo;s a little bit going on under the hood, of course, but either way we can now use the resulting WMS layers as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">m <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">m <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">leaflet</span>() <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">fitBounds</span>(lng1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">164.45</span>, lng2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">179.35</span>, lat1 <span style="color:#f92672">=</span> <span style="color:#ae81ff">-48.52</span>, lat2 <span style="color:#f92672">=</span> <span style="color:#ae81ff">-33.22</span>) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">addTiles</span>(
     urlTemplate <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png&#34;</span>
@@ -347,12 +347,12 @@ Throughout the demo we just used shapefiles.  Shapefiles are useful in the sense
 <p>For the sake of brevity, the examples above mostly focused on R calls using the provided R client library.  For the sake of completeness, and for those who might want to do something similar without R, we include the equivalent functionality using direct API calls.</p>
 <h3 id="creating-a-workspace">Creating a workspace</h3>
 <p>To make the <code>statsnz</code> workspace, we ran:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geserveR)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(geserveR)
 
 gs <span style="color:#f92672">&lt;-</span> GeoServer<span style="color:#f92672">$</span><span style="color:#a6e22e">new</span>()
 gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspace</span>(<span style="color:#e6db74">&#34;statsnz&#34;</span>)
 </code></pre></div><p>To do this direclty, we use the <code>workspaces</code> endpoint:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -u admin:geoserver <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;workspace&#34;:{&#34;name&#34;:&#34;statsnz&#34;}}&#39;</span> <span style="color:#ae81ff">\
@@ -360,12 +360,12 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspac
 </span><span style="color:#ae81ff"></span>  http://localhost:8080/geoserver/rest/workspaces
 </code></pre></div><h3 id="creating-a-datastore">Creating a datastore</h3>
 <p>To add the meshblock feature set as a datastore, we ran the following in R:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createDatastore</span>(mb2018, <span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;mb2018&#34;</span>, <span style="color:#e6db74">&#34;mb2018.gpkg&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createDatastore</span>(mb2018, <span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;mb2018&#34;</span>, <span style="color:#e6db74">&#34;mb2018.gpkg&#34;</span>)
 </code></pre></div><p>Internally, this results in <code>mb2018</code> first being saved as a temporary GeoPackage, before being uploaded via the <code>datastores</code> endpoint.  If we wanted to do this manually, we&rsquo;d first create the GeoPackage in R:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">fname <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">tempfile</span>(fileext <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.gpkg&#34;</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">fname <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">tempfile</span>(fileext <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;.gpkg&#34;</span>)
 <span style="color:#a6e22e">st_write</span>(regc2018, fname, <span style="color:#e6db74">&#34;mb2018&#34;</span>)
 </code></pre></div><p>and then we&rsquo;d <code>PUT</code> via the <code>datastores</code> endpoint as follows (assuming <code>fname</code> has the value <code>file4b82655cefdd.gpkg</code>):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -u admin:geoserver <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Accept: application/json, text/xml, application/xml, */*&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/octet-stream&#34;</span> <span style="color:#ae81ff">\
@@ -374,7 +374,7 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspac
 </span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;http://localhost:8080/geoserver/rest/workspaces/statsnz/datastores/regc2018/file.gpkg?configure=none&amp;update=overwrite&amp;charset=UTF-8&amp;filename=mb2018.gpkg&#34;</span>
 </code></pre></div><h3 id="creating-a-layer">Creating a layer</h3>
 <p>To create a meshblock layer with a simple outline and text label, we ran the following in R:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">style <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">import_template</span>(
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">style <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">import_template</span>(
   <span style="color:#e6db74">&#34;outline_with_label&#34;</span>,
   name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;mb2018_with_labels&#34;</span>, strokeColor <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;#000000&#34;</span>, strokeWidth <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>,
   maxScale <span style="color:#f92672">=</span> <span style="color:#ae81ff">600000</span>, geometryName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;geom&#34;</span>, labelName <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;code&#34;</span>,
@@ -385,7 +385,7 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createWorkspac
 
 gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createLayer</span>(<span style="color:#e6db74">&#34;statsnz&#34;</span>, <span style="color:#e6db74">&#34;mb2018&#34;</span>, <span style="color:#e6db74">&#34;mb2018_with_labels&#34;</span>, style)
 </code></pre></div><p>Assuming we have saved the content of the variable <code>style</code> in a file called <code>style.sld</code>, we could create the style on the server as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -u admin:geoserver <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Accept: application/json, text/xml, application/xml, */*&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/vnd.ogc.sld+xml&#34;</span> <span style="color:#ae81ff">\
@@ -393,14 +393,14 @@ gs<span style="color:#f92672">$</span><span style="color:#a6e22e">createLayer</s
 </span><span style="color:#ae81ff"></span>  -X POST <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;http://localhost:8080/geoserver/rest/workspaces/statsnz/styles?name=mb2018_with_label&#34;</span>
 </code></pre></div><p>We&rsquo;d create the feature type as:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -u admin:geoserver <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;featureType&#34;:{&#34;name&#34;:&#34;mb2018_with_labels&#34;, &#34;nativeName&#34;:&#34;mb2018&#34;}}&#39;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -X POST <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;http://localhost:8080/geoserver/rest/workspaces/statsnz/datastores/mb2018/featuretypes&#34;</span>
 </code></pre></div><p>and we&rsquo;d add the style to the layer as:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -u admin:geoserver <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -d <span style="color:#e6db74">&#39;{&#34;layer&#34;:{&#34;defaultStyle&#34;:{&#34;name&#34;:&#34;statsnz:labelledpolygon&#34;}}}&#39;</span> <span style="color:#ae81ff">\

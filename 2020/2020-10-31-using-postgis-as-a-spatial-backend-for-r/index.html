@@ -94,24 +94,24 @@ gis_osm_waterways_free_1   | line    |
 </ul>
 <h2 id="vector-data">Vector data</h2>
 <p>We can load vector data to PostGIS using the <code>ogr2ogr</code> program provided by <code>gdal</code>.  For example, in the following we load a GeoPackage called <code>meshblock-2020-generalised.gpkg</code> to <code>statsnz.meshblock2020</code>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ogr2ogr <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ogr2ogr <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -f PostgreSQL PG:<span style="color:#e6db74">&#34;dbname=&#39;gis&#39; user=&#39;gisuser&#39; password=&#39;gisuser&#39;&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  meshblock-2020-generalised.gpkg <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -nln statsnz.meshblock2020
 </code></pre></div><p>In this case the geodatabase has a single layer, so we don&rsquo;t need to specify it explicitly.  And note that on occasion it might be necessary to specify the type explicitly, for example by adding <code>-nlt MULTIPOLYGON</code>.</p>
 <p>We can also load vector data using the <code>shp2pgsql</code> utility that is provided with PostGIS.  It only works for shapefiles, however.  So, to load the data this way we&rsquo;d first convert it to a shapefile as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ogr2ogr <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ogr2ogr <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -f <span style="color:#e6db74">&#39;ESRI Shapefile&#39;</span> mb2020.shp <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  meshblock-2020-generalised.gpkg
 </code></pre></div><p>and then use <code>shp2pgsql</code> to load it to a PostGIS table:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">shp2pgsql -s <span style="color:#ae81ff">2193</span> mb2020.shp statsnz.meshblock2020 | psql -d gis
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">shp2pgsql -s <span style="color:#ae81ff">2193</span> mb2020.shp statsnz.meshblock2020 | psql -d gis
 </code></pre></div><p>Note that <code>shp2pgsql</code> actually just creates a large SQL script, and that is executed in the same way as any other.  <code>ogr2ogr</code> can also be used to create a SQL script which can be loaded directly to our database:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ogr2ogr -f PGDUMP mb2020.sql <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ogr2ogr -f PGDUMP mb2020.sql <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  meshblock-2020-generalised.gpkg <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -nln statsnz.meshblock2020
 </code></pre></div><p>Actually, this approach should be preferred since transferring to shapefile as an intermediate step will cause attribute names to be truncated / normalised, and if the GeoPackage contains indexes, comments, and so forth, they will be retained.</p>
 <p>Finally, one could load the data via R itself, though it probably isn&rsquo;t the best approach in general.  Still, to load the same GeoPackage:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(sf)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(sf)
 
 conn <span style="color:#f92672">&lt;-</span> RPostgreSQL<span style="color:#f92672">::</span><span style="color:#a6e22e">dbConnect</span>(
   <span style="color:#e6db74">&#34;PostgreSQL&#34;</span>, host <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;localhost&#34;</span>, port <span style="color:#f92672">=</span> <span style="color:#ae81ff">5432</span>,
@@ -124,12 +124,12 @@ DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbDisconnect
 </code></pre></div><h2 id="raster-data">Raster data</h2>
 <p>GDAL only offers read-only support for PostGIS currently (I think), so there are two options for loading rasters: using the <code>raster2pgsql</code> command-line tool provided by PostGIS, or using the <code>rpostgis::pgWriteRast</code> function in R.</p>
 <p>One advantage of the <code>raster2pgsql</code> approach is that we can wildcard a large number of input files.  For example, for this blog, the <a href="https://data.linz.govt.nz/layer/95524-wellington-010m-urban-aerial-photos-2017/">Wellington aerial imagery</a> was downloaded as an archive containing 1667 jpeg files.  These can be loaded as <code>linz.wellington-010m-urban-aerial-2017</code> as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">raster2pgsql <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">raster2pgsql <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -I -C -e -Y -F -s <span style="color:#ae81ff">2193</span> -t 100x100 -l 2,4 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  *.jpg linz.wellington_010m_2017 | psql -U gisuser -d gis
 </code></pre></div><p>There are some interesting options here.  Using <code>-e</code> means each file will be run as an independent query, rather than all running as a single transaction.  Using <code>-l 2,4</code> means that lower resolution (1/2 and 1/4) versions of the raster will be added to new tables called <code>o_2_wellington_010m_2017</code> and <code>o_4_wellington_010m_2017</code>, respectively.  See <a href="https://postgis.net/docs/using_raster_dataman.html">Raster Data Management, Queries, and Applications</a>.</p>
 <p>Loading the data via R is possible, though not as straightforward.  In this case, while not recommended, we could do something like:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(rpostgis)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(rpostgis)
 
 conn <span style="color:#f92672">&lt;-</span> RPostgreSQL<span style="color:#f92672">::</span><span style="color:#a6e22e">dbConnect</span>(
   <span style="color:#e6db74">&#34;PostgreSQL&#34;</span>, host <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;localhost&#34;</span>, port <span style="color:#f92672">=</span> <span style="color:#ae81ff">5432</span>,
@@ -163,14 +163,14 @@ DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbDisconnect
 <li>simplify with 1 metre tolerance.</li>
 </ul>
 <p>To do this in R, we might do the following:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(sf)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(sf)
 
 landuse_nztm_1m <span style="color:#f92672">&lt;-</span> 
   <span style="color:#a6e22e">st_read</span>(<span style="color:#e6db74">&#34;gis_osm_landuse_a_free_1.shp&#34;</span>) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">st_transform</span>(<span style="color:#ae81ff">2193</span>) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">st_simplify</span>(preserveTopology <span style="color:#f92672">=</span> <span style="color:#66d9ef">TRUE</span>, dTolerance <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>)
 </code></pre></div><p>Peak memory use during this operation was approximately 2.5GB, and the operation took 63 seconds.  This same task can be conducted from R, but leaning heavily on PostGIS, by pulling the results of a SQL query as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">conn <span style="color:#f92672">&lt;-</span> RPostgreSQL<span style="color:#f92672">::</span><span style="color:#a6e22e">dbConnect</span>(
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">conn <span style="color:#f92672">&lt;-</span> RPostgreSQL<span style="color:#f92672">::</span><span style="color:#a6e22e">dbConnect</span>(
   <span style="color:#e6db74">&#34;PostgreSQL&#34;</span>, host <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;localhost&#34;</span>, port <span style="color:#f92672">=</span> <span style="color:#ae81ff">5432</span>,
   dbname <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;gis&#34;</span>, user <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;gisuser&#34;</span>, password <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;gisuser&#34;</span>
 )
@@ -193,14 +193,14 @@ Maybe do building outlines for a single SA2 or something?
 -->
 <h2 id="dissolving-features">Dissolving features</h2>
 <p>A feature class can be dissolved by some categorical attribute using the <code>sf</code> package simply by performing a grouped aggregate, in this case with <code>dplyr</code>:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(dplyr)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(dplyr)
 
 mb_dissolved_sf <span style="color:#f92672">&lt;-</span> 
   <span style="color:#a6e22e">st_read</span>(<span style="color:#e6db74">&#34;meshblock-2020-generalised.gpkg&#34;</span>) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">group_by</span>(LANDWATER_NAME) <span style="color:#f92672">%&gt;%</span>
   <span style="color:#a6e22e">summarise</span>(n <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span>())
 </code></pre></div><p>Peak memory use for this was about 530MB, and total execution time was 65.1 seconds.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">mb_dissolved <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">st_read</span>(
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">mb_dissolved <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">st_read</span>(
   conn, 
   query <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;
 </span><span style="color:#e6db74">    SELECT
@@ -213,7 +213,7 @@ mb_dissolved_sf <span style="color:#f92672">&lt;-</span>
 )
 </code></pre></div><p>Peak memory use for this was about 480MB, and total execution time was 67.9 seconds.  Importantly, peak memory usage for R itself was much smaller at 132.3MB.</p>
 <p>The result either way can be plotted using the <code>geom_sf</code> geometry for <code>ggplot2</code>.  Before dissolving we have:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(ggplot2)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(ggplot2)
 
 <span style="color:#a6e22e">ggplot</span>() <span style="color:#f92672">+</span> 
   <span style="color:#a6e22e">geom_sf</span>(
@@ -225,7 +225,7 @@ mb_dissolved_sf <span style="color:#f92672">&lt;-</span>
 <a href=assets/mb.png target="_blank"><img src=assets/mb.png></a>
 </div>
 <p>After dissolving we have:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>() <span style="color:#f92672">+</span> 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">ggplot</span>() <span style="color:#f92672">+</span> 
   <span style="color:#a6e22e">geom_sf</span>(
     data <span style="color:#f92672">=</span> mb_dissolved_sf, 
     <span style="color:#a6e22e">aes</span>(fill <span style="color:#f92672">=</span> LANDWATER_NAME), linetype <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;blank&#34;</span>
@@ -240,7 +240,7 @@ mb_dissolved_sf <span style="color:#f92672">&lt;-</span>
 <img src="assets/wgtnaerial01lo.jpeg" class="large">
 </a>
 <p>In principle, these can be imported into R using the raster package.  For example, to create a raster from the first 2 JPEG files:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">f <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">dir</span>(<span style="color:#e6db74">&#34;/home/cmhh/Downloads/shp/linz&#34;</span>, full.names <span style="color:#f92672">=</span> <span style="color:#66d9ef">TRUE</span>)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">f <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">dir</span>(<span style="color:#e6db74">&#34;/home/cmhh/Downloads/shp/linz&#34;</span>, full.names <span style="color:#f92672">=</span> <span style="color:#66d9ef">TRUE</span>)
 f <span style="color:#f92672">&lt;-</span> f<span style="color:#a6e22e">[grepl</span>(<span style="color:#e6db74">&#34;^.+(.jpg)$&#34;</span>, f)]
 r <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">merge</span>(<span style="color:#a6e22e">brick</span>(f[1]), <span style="color:#a6e22e">brick</span>(f[2]))
 </code></pre></div><p>which yields:</p>
@@ -252,7 +252,7 @@ r <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">merge</sp
 <img src="assets/wgtnaerial03lo.jpeg" class="large">
 </a>
 <p>Assume that we just wish to use a single meshblock, 2122700, to mask the raster.  This can be done in R using the <code>gdalUtils::gdalwarp</code> function (which is just a wrapper for the <code>gdalwarp</code> command-line tool) as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(gdalUtils)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(gdalUtils)
 
 <span style="color:#a6e22e">gdalwarp</span>(
   srcfile <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;
@@ -302,7 +302,7 @@ Your browser does not support the video tag.
 </blockquote>
 <h2 id="installing-postgresql-and-postgis">&lsquo;Installing&rsquo; PostgreSQL and PostGIS</h2>
 <p>There are Docker images available which contain both PostgreSQL and PostGIS, though it is instructive to create one.  First, create a file called <code>Dockerfile</code> with the following content:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive
 <span style="color:#66d9ef">ENV</span> SHELL<span style="color:#f92672">=</span>/bin/bash<span style="color:#960050;background-color:#1e0010">
@@ -338,21 +338,21 @@ Your browser does not support the video tag.
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> service postgresql start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  tail -f /dev/null  <span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>To build the image, change into the directory containing <code>Dockerfile</code> and run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t postgis .
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t postgis .
 </code></pre></div><p>If we wish to persist our database, we can create a volume as so:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker volume create pgdata
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker volume create pgdata
 </code></pre></div><p>Then, to run an instance with the volume mounted, as well as a folder containing all the required source features (if desired):</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -d --rm --name postgis <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -p 5432:5432 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v /path/to/downloaded/data:/data <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v pgdata:/var/lib/postgresql/13/main <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  postgis
 </code></pre></div><p>To gain terminal access to the running container, run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker exec -it postgis bash
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker exec -it postgis bash
 </code></pre></div><h2 id="installing-r-and-required-spatial-dependencies">&lsquo;Installing&rsquo; R and required spatial dependencies</h2>
 <p>To create a Linux container with R and RStudio Server, create a file called <code>Dockerfile</code> with content as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ARG</span> rstudio_version<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>.3.1093<span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive
@@ -393,9 +393,9 @@ Your browser does not support the video tag.
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> service rstudio-server start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  tail -f /dev/null<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>To build this container, simply change into the directory containing <code>Dockerfile</code> and run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t rstudio .
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t rstudio .
 </code></pre></div><p>The image can be started by running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name rstudio -p 8787:8787 rstudio
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name rstudio -p 8787:8787 rstudio
 </code></pre></div><p>When done, RStudio will be available via a web browser at <code>http://localhost:8787</code>.</p>
 <p><img src="assets/rdocker.png" alt=""></p>
 

@@ -62,23 +62,23 @@
 <p>Finally, Visual Studio Code (vscode) is an extensible text editor developed by Microsoft.  In particular, Microsoft have developed an extension that enables one to use a locally installed version of vscode as an IDE for WSL2.</p>
 <h2 id="enable-openssh-client">Enable OpenSSH client</h2>
 <p>To confirm OpenSSH is available for install, open PowerShell as administrator and run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">Get-WindowsCapability</span> <span style="color:#a6e22e">-Online</span> <span style="color:#a6e22e">|</span> <span style="color:#a6e22e">?</span> <span style="color:#a6e22e">Name</span> <span style="color:#a6e22e">-like</span> <span style="color:#a6e22e">&#39;OpenSSH*&#39;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">Get-WindowsCapability</span> <span style="color:#a6e22e">-Online</span> <span style="color:#a6e22e">|</span> <span style="color:#a6e22e">?</span> <span style="color:#a6e22e">Name</span> <span style="color:#a6e22e">-like</span> <span style="color:#a6e22e">&#39;OpenSSH*&#39;</span>
 </code></pre></div><p>If OpenSSH is available, you&rsquo;ll see something like:</p>
-<pre><code>Name  : OpenSSH.Client~~~~0.0.1.0
+<pre tabindex="0"><code>Name  : OpenSSH.Client~~~~0.0.1.0
 State : Installed
 
 Name  : OpenSSH.Server~~~~0.0.1.0
 State : NotPresent
 </code></pre><p>To enable OpenSSH, run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">Add-WindowsCapability</span> <span style="color:#a6e22e">-Online</span> <span style="color:#a6e22e">-Name</span> <span style="color:#a6e22e">OpenSSH.Client~~~~0.0.1.0</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">Add-WindowsCapability</span> <span style="color:#a6e22e">-Online</span> <span style="color:#a6e22e">-Name</span> <span style="color:#a6e22e">OpenSSH.Client~~~~0.0.1.0</span>
 </code></pre></div><h2 id="enable-wsl2">Enable WSL2</h2>
 <p>To enable WSL2, open PowerShell as administrator and run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">dism.exe</span> /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">dism.exe</span> /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 &gt; <span style="color:#a6e22e">dism.exe</span> /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 </code></pre></div><p>You will need to restart Windows at this point.  After rebooting, download and run the following installer:</p>
 <p><a href="https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi">WSL2 Linux Kernel</a></p>
 <p>Then, open PowerShell as administrator and run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">wsl</span> <span style="color:#a6e22e">--set-default-version</span> <span style="color:#ae81ff">2</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">wsl</span> <span style="color:#a6e22e">--set-default-version</span> <span style="color:#ae81ff">2</span>
 </code></pre></div><p><a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">https://docs.microsoft.com/en-us/windows/wsl/install-win10</a></p>
 <h2 id="install-ubuntu-2004-sans-windows-store">Install Ubuntu 20.04 (sans Windows Store)</h2>
 <p>Installing a Linux distribution is easily done via the Windows Store.  However, in an enterprise environment where Store access is limited, or where one simply does not wish to use the Store, one can still download distributions directly, as listed:</p>
@@ -86,17 +86,17 @@ State : NotPresent
 <p>In our case, we download Ubuntu 20.04, which is the current LTS version of Ubuntu:</p>
 <p><a href="https://aka.ms/wslubuntu2004">Ubuntu 20.04</a></p>
 <p>We&rsquo;ll install Ubuntu in <code>C:\Program Files\Linux</code>, though perhaps users might rather place it somewhere in their own user directory.  To create this folder, and then download the above file from PowerShell run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">mkdir</span> <span style="color:#a6e22e">&#39;c:\Program</span> <span style="color:#a6e22e">Files\Linux&#39;</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">mkdir</span> <span style="color:#a6e22e">&#39;c:\Program</span> <span style="color:#a6e22e">Files\Linux&#39;</span>
 &gt; <span style="color:#a6e22e">cd</span> <span style="color:#a6e22e">&#39;c:\Program</span> <span style="color:#a6e22e">Files\Linux&#39;</span>
 &gt; <span style="color:#a6e22e">curl.exe</span> <span style="color:#a6e22e">-L</span> <span style="color:#a6e22e">-o</span> <span style="color:#a6e22e">ubuntu-2004.appx</span> <span style="color:#a6e22e">https:</span><span style="color:#960050;background-color:#1e0010">/</span>/aka.ms/wslubuntu2004
 </code></pre></div><p>It seems an <code>appx</code> file is just a zip archive, so rename the file and unzip it from PowerShell by running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">Rename-Item</span> <span style="color:#a6e22e">.\ubuntu-2004.appx</span> <span style="color:#a6e22e">.\ubuntu-2004.zip</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">Rename-Item</span> <span style="color:#a6e22e">.\ubuntu-2004.appx</span> <span style="color:#a6e22e">.\ubuntu-2004.zip</span>
 &gt; <span style="color:#a6e22e">Expand-Archive</span> <span style="color:#a6e22e">.\ubuntu-2004.zip</span> <span style="color:#a6e22e">.\ubuntu2004</span>
 </code></pre></div><p>To start Ubuntu, run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">.\ubuntu2004\ubuntu2004.exe</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">.\ubuntu2004\ubuntu2004.exe</span>
 </code></pre></div><p>The first time Ubuntu is run you will be prompted to add a username and password.  It doesn&rsquo;t really matter what you choose, but either way you&rsquo;ll see something like the following:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">.\ubuntu2004\ubuntu2004.exe</span>
-</code></pre></div><pre><code>Installing, this may take a few minutes...
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">.\ubuntu2004\ubuntu2004.exe</span>
+</code></pre></div><pre tabindex="0"><code>Installing, this may take a few minutes...
 Please create a default UNIX user account. The username does not need to match your Windows username.
 For more information visit: https://aka.ms/wslusers
 Enter new UNIX username: cxhansen
@@ -132,20 +132,20 @@ This message is shown once once a day. To disable it please create the
 /home/cxhansen/.hushlogin file.
 cxhansen@DESKTOP-FA4F6IC:~$
 </code></pre><p>If Ubuntu is the only distribution installed, or it is the default distribution, simply running <code>wsl</code> from PowerShell will be enough to start it.  The available distributions can be listed by running <code>wsl -d</code>.  In this case, with only Ubuntu 20.04 installed so far, the output is as follows:</p>
-<pre><code>Windows Subsystem for Linux Distributions:
+<pre tabindex="0"><code>Windows Subsystem for Linux Distributions:
 Ubuntu-20.04 (Default)
 </code></pre><p>If more distributions were available, Ubuntu 20.04 could be started by running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">wsl</span> <span style="color:#a6e22e">-d</span> <span style="color:#a6e22e">Ubuntu-20.04</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">wsl</span> <span style="color:#a6e22e">-d</span> <span style="color:#a6e22e">Ubuntu-20.04</span>
 </code></pre></div><p>and Ubuntu 20.04 can be set as the default by running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">wsl</span> <span style="color:#a6e22e">-s</span> <span style="color:#a6e22e">Ubuntu-20.04</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-ps" data-lang="ps">&gt; <span style="color:#a6e22e">wsl</span> <span style="color:#a6e22e">-s</span> <span style="color:#a6e22e">Ubuntu-20.04</span>
 </code></pre></div><h2 id="install-docker-on-ubuntu-2004">Install Docker on Ubuntu 20.04</h2>
 <p>Docker is available in the standard Ubuntu repositories, but it can be useful to use the official repositories instead.  Docker has some prerequisites, which can be installed as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo apt update
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo apt update
 $ sudo apt -y install <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>    apt-transport-https ca-certificates curl gnupg-agent <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>    software-properties-common
 </code></pre></div><p>Then add the Docker repositories, and install Docker:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
 $ sudo apt-key fingerprint 0EBFCD88
 $ sudo add-apt-repository <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>   <span style="color:#e6db74">&#34;deb [arch=amd64] https://download.docker.com/linux/ubuntu \
@@ -156,15 +156,15 @@ $ sudo DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive <span s
 </span><span style="color:#ae81ff"></span>    apt -y install <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>    docker-ce docker-ce-cli containerd.io
 </code></pre></div><p>In order to run Docker without using <code>sudo</code>, relevant users can be added to the Docker group:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ usermod -aG docker &lt;user&gt; 
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ usermod -aG docker &lt;user&gt; 
 </code></pre></div><p>The Docker daemon will not start automatically as for a standard Ubuntu installation, but it can be started manually by running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo service docker start
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo service docker start
 </code></pre></div><p>To confirm it is running:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo service docker status
-</code></pre></div><pre><code> * Docker is running
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo service docker status
+</code></pre></div><pre tabindex="0"><code> * Docker is running
 </code></pre><p>And to confirm it works:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker run hello-world
-</code></pre></div><pre><code>Hello from Docker!
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker run hello-world
+</code></pre></div><pre tabindex="0"><code>Hello from Docker!
 This message shows that your installation appears to be working correctly.
 
 To generate this message, Docker took the following steps:
@@ -186,12 +186,12 @@ For more examples and ideas, visit:
  https://docs.docker.com/get-started/
 </code></pre><h2 id="install-docker-compose-on-ubuntu-2004">Install Docker Compose on Ubuntu 20.04</h2>
 <p>Docker Compose is a utility that allows one to coordinate the use of several containers, that is, to effectively treat several containers as a single runnable unit.  To install:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo curl -L <span style="color:#ae81ff">\ </span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ sudo curl -L <span style="color:#ae81ff">\ </span>
     <span style="color:#e6db74">&#34;https://github.com/docker/compose/releases/download/1.26.2/docker-compose-</span><span style="color:#66d9ef">$(</span>uname -s<span style="color:#66d9ef">)</span><span style="color:#e6db74">-</span><span style="color:#66d9ef">$(</span>uname -m<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>    -o /usr/local/bin/docker-compose
 $ chmod +x /usr/local/bin/docker-compose
 $ docker-compose --version
-</code></pre></div><pre><code>docker-compose version 1.26.2, build eefe0d31
+</code></pre></div><pre tabindex="0"><code>docker-compose version 1.26.2, build eefe0d31
 </code></pre><h2 id="install-visual-studio-code">Install Visual Studio Code</h2>
 <p>Installing vscode is straightforward–simply run the installer found <a href="https://code.visualstudio.com/download">at the vscode website</a>.  When running vscode for the first time, one might see the following prompt:</p>
 <div class=small>
@@ -205,9 +205,9 @@ $ docker-compose --version
 <h2 id="install-vcxsrv">Install VcXsrv</h2>
 <p>To install VcXsrv, simply download and run the installer from  <a href="https://sourceforge.net/projects/vcxsrv/files/latest/download">the VcXsrv download page</a>.</p>
 <p>Note that VcXsrv works best with WSL2 if it is started with certain switches.  Specifically, one should ensure the target is as follows (adapt as required if VcXsrv was installed in a different folder):</p>
-<pre><code>&quot;C:\Program Files\VcXsrv\vcxsrv.exe&quot; :0 -ac -terminate -lesspointer -multiwindow -clipboard -wgl
+<pre tabindex="0"><code>&quot;C:\Program Files\VcXsrv\vcxsrv.exe&quot; :0 -ac -terminate -lesspointer -multiwindow -clipboard -wgl
 </code></pre><p>From inside the running Linux instance, one should also set the <code>DISPLAY</code> environment variable as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ export DISPLAY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>awk <span style="color:#e6db74">&#39;/nameserver / {print $2; exit}&#39;</span> /etc/resolv.conf 2&gt; /dev/null<span style="color:#66d9ef">)</span>:0
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ export DISPLAY<span style="color:#f92672">=</span><span style="color:#66d9ef">$(</span>awk <span style="color:#e6db74">&#39;/nameserver / {print $2; exit}&#39;</span> /etc/resolv.conf 2&gt; /dev/null<span style="color:#66d9ef">)</span>:0
 </code></pre></div><p>It should then be possible to run graphical applications using the host display:</p>
 <p><img src="assets/vscode04.png" alt=""></p>
 <h2 id="complete-linux-desktop">Complete Linux Desktop</h2>
@@ -221,7 +221,7 @@ $ docker-compose --version
 <p>Personally, I use Docker to keep form cluttering the host OS in general.  That is, I like to keep the host relatively pristine, and often use tools like databases or data science environments within the context of a container.  In an enterprise environment, the benefit of this approach in keeping the amount of support required down should be relatively obvious.</p>
 <h1 id="miscellaneous">Miscellaneous</h1>
 <p>It seems it is possible for the time in WSL to be out of sync with the system clock, and this can cause some issues.  For example, Debian packages will sometimes fail to download.  To fix this, run the following from the WSL terminal:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo hwclock --hctosys
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">sudo hwclock --hctosys
 </code></pre></div><h1 id="example---run-a-local-rstudio-server-instance">Example - Run a local RStudio Server Instance</h1>
 <p>Rather than install R directly, we instead run R via Docker.  In practice, we might have a standard R container that roughly replicates the existing server environment, and which ensures a consistent, but local, experience for anybody who cares to use it.  As a demonstration, we build a container called <code>rstudio</code>.  The demo is not yet a complete enterprise solution, but it is certainly usable, and it demonstrates the following:</p>
 <ul>
@@ -232,7 +232,7 @@ $ docker-compose --version
 <li>a number of host dependencies, such as libgdal-dev.</li>
 </ul>
 <p>The complete <code>Dockerfile</code> is as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">ARG</span> ubuntu_version<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>.04<span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">ARG</span> ubuntu_version<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>.04<span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:$ubuntu_version</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
@@ -290,27 +290,27 @@ $ docker-compose --version
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> service rstudio-server start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  tail -f /dev/null<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>This Dockerfile can be built differently depending on build arguments.  For example, we could build a version with Ubuntu 18.04 and R 3.6.3 as follows:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -t rstudio:ubuntu18.04-3.6.3 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --build-arg ubuntu_version<span style="color:#f92672">=</span>18.04 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --build-arg r_version<span style="color:#f92672">=</span>3.6.3 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --build-arg cores<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  .
 </code></pre></div><p>(The cores argument dictates how many cores are used when compiling R from source.)  To run this image with a persistent renv cache and R workspace, we could then run:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name rstudio <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name rstudio <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -p 8787:8787 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v /home/cxhansen/renvcache:/home/guest/.local/share/renv <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v /home/cxhansen/Projects:/home/guest/My-Local-Workspace <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  rstudio:ubuntu18.04-3.6.3
 </code></pre></div><p>But we could just as easily build an image instead using Ubuntu 20.04, say, and R 4.0.2:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -t rstudio:ubuntu20.04-4.0.2 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --build-arg ubuntu_version<span style="color:#f92672">=</span>20.04 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --build-arg r_version<span style="color:#f92672">=</span>4.0.2 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  --build-arg cores<span style="color:#f92672">=</span><span style="color:#ae81ff">8</span> <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  .
 </code></pre></div><p>and then run that, perhaps simultaneously, on a different local port:</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name rstudio <span style="color:#ae81ff">\
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name rstudio <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -p 8788:8787 <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v /home/cxhansen/renvcache:/home/guest/.local/share/renv <span style="color:#ae81ff">\
 </span><span style="color:#ae81ff"></span>  -v /home/cxhansen/Projects:/home/guest/My-Local-Workspace <span style="color:#ae81ff">\
