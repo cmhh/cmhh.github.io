@@ -115,6 +115,16 @@ table {
   overflow-x: scroll;
 }
 
+.narrowtab > table {
+  width: auto!important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.narrowtab > table > thead > tr > th {
+  text-align: center!important;
+}
+
 .small {
   display: block;
   margin-left: auto;
@@ -123,6 +133,36 @@ table {
 }
 
 div.small > p > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 4px;
+  padding-bottom: 20px;
+}
+
+.med {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 65%;
+}
+
+div.med > p > img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 4px;
+  padding-bottom: 20px;
+}
+
+.medlarge {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 75%;
+}
+
+div.medlarge > p > img {
   display: block;
   margin-left: auto;
   margin-right: auto;
