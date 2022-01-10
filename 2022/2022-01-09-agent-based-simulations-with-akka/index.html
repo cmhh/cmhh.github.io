@@ -49,7 +49,7 @@
         <div class="tile is-child box">
             <div class="content">
                 <h1 id="overview">Overview</h1>
-<p>In this post we describe a relatively simple agent-based simulation.  The simulation itself is a rough approximation of a household survey, consistig of a large collection of dwellings, in turn surveyed in a strictly face-to-face setting by one of a number of independent filed collectors.</p>
+<p>In this post we describe a relatively simple agent-based simulation.  The simulation itself is a rough approximation of a household survey, consisting of a large collection of dwellings, in turn surveyed in a strictly face-to-face setting by one of a number of independent filed collectors.</p>
 <p>We describe the simulation in terms of the <em>actor model</em>, though we do so in a way that is largely agnostic with respect to programming language or actor framework.  Still, a concrete implementation is useful for illustration, and <a href="https://github.com/cmhh/collectionsim">one is provided here</a>.  This is implemented using <a href="https://akka.io/">Akka</a>, an implementation of the <a href="https://en.wikipedia.org/wiki/Actor_model">actor model</a> on the JVM, and so some jargon specific to Akka will appear here and there.  Nevertheless, it should be easy enough to implement something similar in other frameworks</p>
 <h1 id="the-actor-model">The Actor Model</h1>
 <p>From <a href="https://en.wikipedia.org/wiki/Actor_model">Wikipedia</a>:</p>
@@ -68,7 +68,7 @@
 <h1 id="actors">Actors</h1>
 <p>We will first describe the various actors at a high level, and then move on to a description of the message protocol and the various sub-processes.</p>
 <h2 id="coordinator"><code>Coordinator</code></h2>
-<p>There is a single coordinator, an instance of <code>Coordinator</code>, which is our entry-point for the actor system itself.  On start-up, the coordinator spawns 6 area coordinators, and its sole responsibility after setup is to listen for messages from outside the system, and pass them to the appropriate area coordinator.  The internal state of the coordinator is just a list of the area coordinators spawned.</p>
+<p>There is a single coordinator, an instance of <code>Coordinator</code>, which is our entry-point for the actor system itself.  On start-up, the coordinator spawns 6 area coordinators, and its sole responsibility after set-up is to listen for messages from outside the system, and pass them to the appropriate area coordinator.  The internal state of the coordinator is just a list of the area coordinators spawned.</p>
 <h2 id="areacoordinator"><code>AreaCoordinator</code></h2>
 <p>The simulation as configured contains 6 area coordinators, which are instances of <code>AreaCoordinator</code>, and which divide New Zealand up as follows:</p>
 <a href="assets/collection_areas.png" target="_blank">
@@ -255,7 +255,7 @@
 <a href="assets/dwelling.png" target="_blank">
 <img src="assets/dwelling.png" class="Large">
 </a>
-<p>The rule for deciding which specific field collector will be sent a particular dwellin is currently very simple, and works as follows:</p>
+<p>The rule for deciding which specific field collector will be sent a particular dwelling is currently very simple, and works as follows:</p>
 <ul>
 <li>filter the list of collectors to the set with less than <code>$n$</code> cases already assigned</li>
 <li>assign the dwelling to the closest (according to a routing service) remaining collector.</li>
@@ -447,7 +447,7 @@ DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbDisconnect
 </code></pre></div><p>That is, for one particular instance, the total distance travelled by all collectors was roughly 1.5 times greater for <a href="https://github.com/cmhh/collectionsim/raw/main/data/sample1_02.csv.gz">sample1_02.csv.gz</a> than <a href="https://github.com/cmhh/collectionsim/raw/main/data/sample1_01.csv.gz">sample1_01.csv.gz</a>.</p>
 <p>In addition to this, we can create interactive tools using the simulated data.  For example, the following is a screen grab of a simple <a href="https://shiny.rstudio.com/">Shiny</a> application which can be used to look at daily work for each collector by day:</p>
 <p><img src="assets/trips1.webp" alt=""></p>
-<p>The following screengrab is the same application, but configured to use a routing service to get the paths for trips, rather than drawing simple straight lines:</p>
+<p>The following screen-grab is the same application, but configured to use a routing service to get the paths for trips, rather than drawing simple straight lines:</p>
 <p><img src="assets/trips2.webp" alt=""></p>
 
             </div>
