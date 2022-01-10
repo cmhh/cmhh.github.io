@@ -1,0 +1,24 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>akka-actor on cmhh</title>
+    <link>/tags/akka-actor/</link>
+    <description>Recent content in akka-actor on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 09 Jan 2022 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/akka-actor/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Agent Based Simulations with Akka</title>
+      <link>/2022/2022-01-09-agent-based-simulations-with-akka/</link>
+      <pubDate>Sun, 09 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-01-09-agent-based-simulations-with-akka/</guid>
+      <description>Overview In this post we describe a relatively simple agent-based simulation. The simulation itself is a rough approximation of a household survey, consistig of a large collection of dwellings, in turn surveyed in a strictly face-to-face setting by one of a number of independent filed collectors.
+We describe the simulation in terms of the actor model, though we do so in a way that is largely agnostic with respect to programming language or actor framework.</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -5,10 +5,37 @@
     <description>Recent content in Tags on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 14 Aug 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 09 Jan 2022 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Akka</title>
+      <link>/tags/akka/</link>
+      <pubDate>Sun, 09 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/akka/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>akka-actor</title>
+      <link>/tags/akka-actor/</link>
+      <pubDate>Sun, 09 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/akka-actor/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>scala</title>
+      <link>/tags/scala/</link>
+      <pubDate>Sun, 09 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/scala/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>PostGraphile</title>
@@ -34,15 +61,6 @@
       <pubDate>Sat, 14 Aug 2021 00:00:00 +0000</pubDate>
       
       <guid>/tags/postgrest/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>Akka</title>
-      <link>/tags/akka/</link>
-      <pubDate>Sun, 08 Aug 2021 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/akka/</guid>
       <description></description>
     </item>
     
@@ -205,42 +223,6 @@
       <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
       
       <guid>/tags/wmts/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>geospatial</title>
-      <link>/tags/geospatial/</link>
-      <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/geospatial/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>OSRM</title>
-      <link>/tags/osrm/</link>
-      <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/osrm/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>R packages</title>
-      <link>/tags/r-packages/</link>
-      <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/r-packages/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>shiny</title>
-      <link>/tags/shiny/</link>
-      <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/shiny/</guid>
       <description></description>
     </item>
     

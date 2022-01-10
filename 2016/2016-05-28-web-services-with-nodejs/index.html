@@ -248,7 +248,7 @@ Percentage of the requests served within a certain time (ms)
 <p><strong><code>server.js</code></strong></p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-javascript" data-lang="javascript"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">express</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">require</span>(<span style="color:#e6db74">&#39;express&#39;</span>);
 <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
-<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#66d9ef">static</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/public&#39;</span>)).<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
+<span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#66d9ef">static</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/public&#39;</span>)).<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
 </code></pre></div><p>The service will serve any file found in the <code>public</code> folder, and will return an error for any file that does not exist.</p>
 <img src=assets/0301.png class=large alt="found">
 <img src=assets/0302.png class=large alt="not found">
@@ -259,7 +259,7 @@ Percentage of the requests served within a certain time (ms)
 <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">express</span>();
 
 <span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">compression</span>())
-   .<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#66d9ef">static</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/public&#39;</span>))
+   .<span style="color:#a6e22e">use</span>(<span style="color:#a6e22e">express</span>.<span style="color:#66d9ef">static</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/public&#39;</span>))
    .<span style="color:#a6e22e">listen</span>(<span style="color:#ae81ff">3000</span>);
 </code></pre></div><h1 id="practical-examples">Practical Examples</h1>
 <p>Let us now ramp things up a little and work through a couple of (somewhat) realistic and practical examples.  I thought of two that I thought would be fun:</p>
@@ -586,16 +586,16 @@ x11{
    <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">busboy</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#39;file&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">fieldname</span>, <span style="color:#a6e22e">file</span>, <span style="color:#a6e22e">filename</span>){
       <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">fstream</span>;
       <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">basename</span>(<span style="color:#a6e22e">filename</span>, <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">extname</span>(<span style="color:#a6e22e">filename</span>));
-      <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">mkdir</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span>  <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>){
+      <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">mkdir</span>(<span style="color:#a6e22e">__dirname</span>  <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>){
          <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
-            <span style="color:#a6e22e">fstream</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">createWriteStream</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/work/&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">filename</span>);
+            <span style="color:#a6e22e">fstream</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">createWriteStream</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;/work/&#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">filename</span>);
             <span style="color:#a6e22e">file</span>.<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">fstream</span>);
             <span style="color:#a6e22e">fstream</span>.<span style="color:#a6e22e">on</span>(<span style="color:#e6db74">&#39;close&#39;</span>, <span style="color:#66d9ef">function</span>(){
-               <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">cmd</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;cd &#39;</span> <span style="color:#f92672">+</span> <span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39; &amp;&amp; x13as &#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>;
+               <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">cmd</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;cd &#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39; &amp;&amp; x13as &#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>;
                <span style="color:#a6e22e">exec</span>(<span style="color:#a6e22e">cmd</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">error</span>, <span style="color:#a6e22e">stdout</span>, <span style="color:#a6e22e">stderr</span>) {
                   <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">error</span>){
                      <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
-                     <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readdir</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">files</span>){
+                     <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">readdir</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">basename</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">files</span>){
                         <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
                            <span style="color:#a6e22e">files</span>.<span style="color:#a6e22e">forEach</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">file</span>){
                               <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">thisext</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">path</span>.<span style="color:#a6e22e">extname</span>(<span style="color:#a6e22e">file</span>);
@@ -625,9 +625,9 @@ x11{
 <span style="color:#a6e22e">app</span>.<span style="color:#66d9ef">delete</span>(<span style="color:#e6db74">&#39;/:series&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
    <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCcode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">series</span>;
-   <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">stat</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">stat</span>){
+   <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">stat</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">stat</span>){
       <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
-         <span style="color:#a6e22e">rimraf</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>){
+         <span style="color:#a6e22e">rimraf</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>){
             <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
                <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">204</span>;
                <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">end</span>();
@@ -648,11 +648,11 @@ x11{
 <span style="color:#a6e22e">app</span>.<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#39;/:series/:output&#39;</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">request</span>, <span style="color:#a6e22e">response</span>){
    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">series</span>;
    <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">output</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">request</span>.<span style="color:#a6e22e">params</span>.<span style="color:#a6e22e">output</span>;
-   <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">stat</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">output</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">stat</span>){
+   <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">stat</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">output</span>, <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">err</span>, <span style="color:#a6e22e">stat</span>){
       <span style="color:#66d9ef">if</span> (<span style="color:#f92672">!</span><span style="color:#a6e22e">err</span>){
          <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">200</span>;
          <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#34;Content-Type&#34;</span>, <span style="color:#e6db74">&#34;text/html&#34;</span>);
-         <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">createReadStream</span>(<span style="color:#ae81ff">__</span><span style="color:#a6e22e">dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">output</span>).<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">response</span>);
+         <span style="color:#a6e22e">fs</span>.<span style="color:#a6e22e">createReadStream</span>(<span style="color:#a6e22e">__dirname</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/work/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;/&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">series</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#39;.&#39;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">output</span>).<span style="color:#a6e22e">pipe</span>(<span style="color:#a6e22e">response</span>);
       }
       <span style="color:#66d9ef">else</span>{
          <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">statusCode</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">404</span>;
@@ -715,6 +715,8 @@ x11{
         
             <span class="tag"><a href="../../tags/akka">akka</a></span>
         
+            <span class="tag"><a href="../../tags/akka-actor">akka-actor</a></span>
+        
             <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
         
             <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
@@ -725,13 +727,9 @@ x11{
         
             <span class="tag"><a href="../../tags/geospark">geospark</a></span>
         
-            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
-        
             <span class="tag"><a href="../../tags/kafka">kafka</a></span>
         
             <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
-        
-            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
             <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
@@ -745,13 +743,11 @@ x11{
         
             <span class="tag"><a href="../../tags/r">r</a></span>
         
-            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+            <span class="tag"><a href="../../tags/scala">scala</a></span>
         
             <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
         
             <span class="tag"><a href="../../tags/sedona">sedona</a></span>
-        
-            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
         
             <span class="tag"><a href="../../tags/spark">spark</a></span>
         
@@ -774,6 +770,9 @@ x11{
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
+            <h1><a href="../../2022/2022-01-09-agent-based-simulations-with-akka/">Agent Based Simulations with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">9 January 2022</time>
+        
             <h1><a href="../../2021/2021-08-14-data-services-from-postgres/">Data Services from Existing PostgreSQL Databases</a></h1>
             <time class="has-text-grey-light is-size-7">14 August 2021</time>
         
@@ -785,9 +784,6 @@ x11{
         
             <h1><a href="../../2021/2021-04-19-a-brief-look-at-apache-sedona/">A Brief Look at Apache Sedona</a></h1>
             <time class="has-text-grey-light is-size-7">19 April 2021</time>
-        
-            <h1><a href="../../2020/2020-12-05-working-productively-on-windows-using-wsl2-and-docker/">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a></h1>
-            <time class="has-text-grey-light is-size-7">5 December 2020</time>
         
     </div>
 </div>
@@ -801,6 +797,8 @@ x11{
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
+            <a href="../../archives/2022">2022</a> (1)<br>
+        
             <a href="../../archives/2021">2021</a> (4)<br>
         
             <a href="../../archives/2020">2020</a> (4)<br>
@@ -809,7 +807,7 @@ x11{
         
             <a href="../../archives/2017">2017</a> (1)<br>
         
-            <a href="../../archives/2016">2016</a> (4)<br>
+            <a href="../../archives/2016">2016</a> (2)<br>
         
     </div>
 </div>
