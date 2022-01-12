@@ -49,7 +49,7 @@
         <div class="tile is-child box">
             <div class="content">
                 <h1 id="overview">Overview</h1>
-<p>In this post we describe a relatively simple agent-based simulation.  The simulation itself is a rough approximation of a household survey, consisting of a large collection of dwellings, in turn surveyed in a strictly face-to-face setting by one of a number of independent filed collectors.</p>
+<p>In this post we describe a relatively simple agent-based simulation.  The simulation itself is a rough approximation of a household survey, consisting of a large collection of dwellings, in turn surveyed in a strictly face-to-face setting by one of a number of independent field collectors.</p>
 <p>We describe the simulation in terms of the <em>actor model</em>, though we do so in a way that is largely agnostic with respect to programming language or actor framework.  Still, a concrete implementation is useful for illustration, and <a href="https://github.com/cmhh/collectionsim">one is provided here</a>.  This is implemented using <a href="https://akka.io/">Akka</a>, an implementation of the <a href="https://en.wikipedia.org/wiki/Actor_model">actor model</a> on the JVM, and so some jargon specific to Akka will appear here and there.  Nevertheless, it should be easy enough to implement something similar in other frameworks</p>
 <h1 id="the-actor-model">The Actor Model</h1>
 <p>From <a href="https://en.wikipedia.org/wiki/Actor_model">Wikipedia</a>:</p>
