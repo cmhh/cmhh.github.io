@@ -16,7 +16,7 @@
       <pubDate>Thu, 20 Jan 2022 00:00:00 +0000</pubDate>
       
       <guid>/2022/2022-01-13-too-much-shiny/</guid>
-      <description>--   Overview From the Shiny website:
+      <description>--  Overview From the Shiny website:
  Shiny is an R package that makes it easy to build interactive web apps straight from R. You can host standalone apps on a webpage or embed them in R Markdown documents or build dashboards. You can also extend your Shiny apps with CSS themes, htmlwidgets, and JavaScript actions.
  Shiny is a wonderful tool, providing a low-entry option for R programmers to develop single-page web applications.</description>
     </item>
