@@ -284,3 +284,36 @@ video {
 p > code, li > code {
   font-size: 16px;
 }
+
+#tabs-with-content .tab-content {
+  padding: 1rem;
+  display: none;
+}
+
+#tabs-with-content .tab-content.is-active {
+  display: block;
+}
+
+div.tabs {
+  margin-bottom: 0!important;
+}
+
+section.tab-content {
+  padding-top: 5px!important;
+  padding-left: 0px!important;
+  padding-right: 0px!important;
+}
+
+.tabs ul {
+  margin-top: 0;
+  margin-left: 0;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.is-active {
+  display: block;
+  margin-bottom: 20px;
+}
