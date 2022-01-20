@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Too Much Shiny?!</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
+</head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Too Much Shiny?!
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <link rel="stylesheet" href="assets/css/vue-slider-component.min.css">
+<script src="assets/js/vue@2.6.14.js"></script>
+<!--<script src="assets/js/vue.js"></script>-->
+<script src='assets/js/plotly-2.8.3.min.js'></script>
+<h1 id="overview">Overview</h1>
+<p>From the <a href="https://shiny.rstudio.com/">Shiny website</a>:</p>
+<blockquote>
+<p>Shiny is an R package that makes it easy to build interactive web apps straight from R. You can host standalone apps on a webpage or embed them in R Markdown documents or build dashboards. You can also extend your Shiny apps with CSS themes, htmlwidgets, and JavaScript actions.</p>
+</blockquote>
+<p>Shiny is a wonderful tool, providing a low-entry option for R programmers to develop single-page web applications.  But, <em>in my opinion</em>, it is over-used, and often pushed a fair bit beyond its ideal use-case.  In this post, we consider where Shiny might be a good option, and where it might not.  And even when Shiny is a good option, there are still some common patterns which might be better served by alternative approaches.</p>
+<h1 id="shiny-in-practice">Shiny in Practice?</h1>
+<p>Fundamentally, Shiny applications run on a remote server, with a persistent communication channel being established between the client and the remote server, typically a WebSocket.  An obvious alternative is to create an application that runs in the client&rsquo;s browser, with no such requirement for a <em>persistent</em> connection to any such server.  The two approaches each have their own strengths and weaknesses, and there are certainly situations where Shiny is a sensible solution.</p>
+<p>Firstly, data might well be too large to be bundled in a client-side application.  A common solution is to bundle data with a Shiny application–clients then make selections which are actioned on the remote computer, and only small slices are sent to the client at any one time.  This works well enough, but has a few drawbacks, the main one being that applications need to be redeployed whenever the underlying data is updated.  An alternative, though, is to create a data service which the application can call.  New data can be deployed, then, without interruption to the published application, and in this case it might also become plausible to deploy the application as a client-side application, with no remote dependencies other than the data service itself.  Of course, we really are only shifting the problem since we still need to host our data service, and to establish a process for updating the underlying data, and this may or may not be easier in practice than bundling data with a Shiny application.</p>
+<p>Another common reason for using Shiny might well be because functionality required by an application already exists in R, and we simply don&rsquo;t have the time or will to re-implement the logic ourselves elsewhere.  The methods being used might also be computationally expensive, and we&rsquo;d rather the computational burden be lumped with us, rather than users of the application.  Just as one possible solution to the data-bundling problem might be to develop a remote data service, there are a number of remote execution options for R in practice.  That is, rather than write a Shiny application to make use of some R function, we make that R function available as a remote procedure call which can be used from a client-side application developed in some other way.  (Actually, one nice thing about remote procedure calls is that they can be utilised by <em>any</em> client that has basic HTTP capabilities such as GET and POST).</p>
+<p>Finally, Shiny might just be used for purely practical or pragmatic reasons.  For developers who are already familiar with R, Shiny is <em>comically</em> easy, and functional applications can be created <em>extremely</em> rapidly, often with relatively little coding effort.  Moreover, in some organisations, options are limited to some approved, possibly very narrow set.  It might well be that there is an existing approved process or pipeline for publishing Shiny applications, and it might simply be easier to leverage the existing process than to gain approval to use something else.  The difficulty of the latter shouldn&rsquo;t be underestimated, and you should count yourself lucky if it isn&rsquo;t a problem for you!  Shiny supports HTML templates, though, and so non-Shiny applications can be published as &lsquo;Shiny&rsquo; applications in a pinch (a hack to be sure, and one that your particular I.T. department might not look very fondly on).</p>
+<p>We will explore all of these scenarios, among others, with illustrative examples.  The general approach will be to take an existing Shiny application, and rewrite it as a client-side application using <a href="https://vuejs.org/">Vue.js</a>.  Where the replacement applications require support in the way of a data service or remote procedure call, we will use <a href="https://www.rplumber.io/">Plumber</a>.  Plumber is a tool that lets us create server-side APIs simply by annotating existing R functions–we could use any number of alternatives, Node, for example, but using Plumber will have the happy secondary benefit of being easy to understand for R users.</p>
+<h1 id="vuejs">Vue.js</h1>
+<p>Vue.js is a progressive JavaScript framework used for creating reactive web applications.  By this we mean that it is possible to adopt Vue incrementally, using as little, or as much, as needed.  To illustrate, here is a complete Vue application, embedded right here in this page:</p>
+<div id="counterapp1">
+<button @click="count--">-</button> 
+<p v-bind:style="counterStyle"> {{ this.count }} </p> 
+<button @click="count++">+</button>
+</div>
+<script>
+const counterApp1 = new Vue({
+  el: "#counterapp1",
+  data: {
+    count: 0,
+    counterStyle: {display: "inline-block", width: "30px", textAlign: "center"}
+  }
+})
+</script>
+<p>The code that produced the application can be pasted into any HTML page, and looks as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;counterapp1&#34;</span>&gt;
+&lt;<span style="color:#f92672">button</span> <span style="color:#960050;background-color:#1e0010">@</span><span style="color:#a6e22e">click</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;count--&#34;</span>&gt;-&lt;/<span style="color:#f92672">button</span>&gt; 
+&lt;<span style="color:#f92672">p</span> <span style="color:#a6e22e">v-bind:style</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;counterStyle&#34;</span>&gt; {{ this.count }} &lt;/<span style="color:#f92672">p</span>&gt; 
+&lt;<span style="color:#f92672">button</span> <span style="color:#960050;background-color:#1e0010">@</span><span style="color:#a6e22e">click</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;count++&#34;</span>&gt;+&lt;/<span style="color:#f92672">button</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+&lt;<span style="color:#f92672">script</span>&gt;
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">counterApp1</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Vue</span>({
+  <span style="color:#a6e22e">el</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;#counterapp1&#34;</span>,
+  <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">count</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>,
+    <span style="color:#a6e22e">counterStyle</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">display</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;inline-block&#34;</span>, <span style="color:#a6e22e">width</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;30px&#34;</span>, <span style="color:#a6e22e">textAlign</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;center&#34;</span>}
+  }
+})
+&lt;/<span style="color:#f92672">script</span>&gt;
+
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+</code></pre></div><p>One particularly powerful feature of Vue is the ability to encapsulate controls and other elements as so-called Vue components.  Components can be shipped as a library and re-used.  For example, in the simple example above we had a simple counter with increment and decrement buttons.  We can make a counter component as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">script</span>&gt;
+<span style="color:#a6e22e">Vue</span>.<span style="color:#a6e22e">component</span>(<span style="color:#e6db74">&#39;vue-counter&#39;</span>, {
+  <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">return</span> {
+      <span style="color:#a6e22e">count</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>,
+      <span style="color:#a6e22e">counterStyle</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">display</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;inline-block&#34;</span>, <span style="color:#a6e22e">width</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;30px&#34;</span>, <span style="color:#a6e22e">textAlign</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;center&#34;</span>}
+    }
+  },
+  <span style="color:#a6e22e">template</span><span style="color:#f92672">:</span> <span style="color:#e6db74">`
+</span><span style="color:#e6db74">  &lt;div&gt;&lt;button @click=&#34;count--&#34;&gt;-&lt;/button&gt; 
+</span><span style="color:#e6db74">  &lt;p v-bind:style=&#34;counterStyle&#34;&gt; {{ this.count }} &lt;/p&gt; 
+</span><span style="color:#e6db74">  &lt;button @click=&#34;count++&#34;&gt;+&lt;/button&gt;&lt;/div&gt;
+</span><span style="color:#e6db74">  `</span>
+});
+&lt;/<span style="color:#f92672">script</span>&gt;
+</code></pre></div><p>We can then reproduce the example application using the controller instead as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;counterapp1&#34;</span>&gt;
+&lt;<span style="color:#f92672">vue-counter</span>&gt;&lt;/<span style="color:#f92672">vue-counter</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+
+&lt;<span style="color:#f92672">script</span>&gt;
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">counterApp1</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Vue</span>({ <span style="color:#a6e22e">el</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;#counterapp1&#34;</span> })
+&lt;/<span style="color:#f92672">script</span>&gt;
+</code></pre></div><p>While a little more work overall than the original example, the effort really pays off if we have the need for several controllers–perhaps in different applications.  For example the following code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;counterapp2&#34;</span>&gt;
+&lt;<span style="color:#f92672">vue-counter</span>&gt;&lt;/<span style="color:#f92672">vue-counter</span>&gt;&#34;&gt;
+&lt;<span style="color:#f92672">vue-counter</span>&gt;&lt;/<span style="color:#f92672">vue-counter</span>&gt;&#34;&gt;
+&lt;<span style="color:#f92672">vue-counter</span>&gt;&lt;/<span style="color:#f92672">vue-counter</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+
+&lt;<span style="color:#f92672">script</span>&gt;
+<span style="color:#66d9ef">const</span> <span style="color:#a6e22e">counterApp2</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Vue</span>({ <span style="color:#a6e22e">el</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;#counterapp2&#34;</span> })
+&lt;/<span style="color:#f92672">script</span>&gt;
+</code></pre></div><p>produces:</p>
+<div id="counterapp2">
+<vue-counter></vue-counter>
+<vue-counter></vue-counter>
+<vue-counter></vue-counter>
+</div>
+<script>
+Vue.component('vue-counter', {
+  data: function() {
+    return {
+      count: 0,
+      counterStyle: {display: "inline-block", width: "30px", textAlign: "center"}
+    }
+  },
+  template: `
+  <div><button @click="count--">-</button> 
+  <p v-bind:style="counterStyle"> {{ this.count }} </p> 
+  <button @click="count++">+</button></div>
+  `
+});
+
+const counterApp2 = new Vue({ el: "#counterapp2" })
+</script>
+<p>We won&rsquo;t make much (any) use of components in this post, but it is an important feature to be aware of.  In the examples in this post, Shiny applications will usually require less user-written code than the equivalent Vue application.  This is because Shiny provides a high-level interface over top of existing JavaScript libraries and CSS frameworks (mostly <a href="https://getbootstrap.com/">Bootstrap</a>), and the same thing is, of course, possible with Vue in practice simply by finding the appropriate component libraries online, or rolling your own if later re-use can justify the effort.</p>
+<h1 id="plumber">Plumber</h1>
+<p>From <a href="https://www.rplumber.io/">the Plumber website</a>:</p>
+<blockquote>
+<p>Plumber allows you to create a web API by merely decorating your existing R source code with roxygen2-like comments.</p>
+</blockquote>
+<p>For example, say we had the following very simple R function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">function</span>(n) <span style="color:#a6e22e">runif</span>(n)
+</code></pre></div><p>We could annotate this function in a script in the following way:</p>
+<div class="tabs-with-content" id="plumber-ex">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>rand.R</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#* Get a sequence of random numbers</span>
+<span style="color:#75715e">#* @param n Size of sequence</span>
+<span style="color:#75715e">#* @get /rand</span>
+<span style="color:#a6e22e">function</span>(n) <span style="color:#a6e22e">runif</span>(n)
+</code></pre></div></section>
+</div>
+</div>
+<p>Given this script, we can then start this as a service simply by running:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(plumber)
+<span style="color:#a6e22e">pr</span>(file <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;rand.R&#34;</span>) <span style="color:#f92672">|&gt;</span> <span style="color:#a6e22e">pr_run</span>(port <span style="color:#f92672">=</span> <span style="color:#ae81ff">3000</span>)
+</code></pre></div><p>We can then GET this in an obvious way:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl -sX GET <span style="color:#e6db74">&#34;http://127.0.0.1:3000/rand?n=10&#34;</span> -H <span style="color:#e6db74">&#34;accept: */*&#34;</span> | jq
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">[
+  <span style="color:#ae81ff">0.1999</span>,
+  <span style="color:#ae81ff">0.651</span>,
+  <span style="color:#ae81ff">0.8456</span>,
+  <span style="color:#ae81ff">0.089</span>,
+  <span style="color:#ae81ff">0.3904</span>,
+  <span style="color:#ae81ff">0.4123</span>,
+  <span style="color:#ae81ff">0.5724</span>,
+  <span style="color:#ae81ff">0.9378</span>,
+  <span style="color:#ae81ff">0.7262</span>,
+  <span style="color:#ae81ff">0.9282</span>
+]
+</code></pre></div><p>As noted, there are many options for deploying services, and Plumber is used here mostly for illustrative purposes.  That said, where we are interested in functionality that exists within R, perhaps even exclusively so, then Plumber provides an easy way to make that functionality available to users of other languages, and to client-side applications in particular.</p>
+<h1 id="a-simple-example-with-bundled-data">A Simple Example with Bundled Data</h1>
+<p>When we run <code>shiny::runExample(&quot;01_hello&quot;, display.mode = &quot;normal&quot;)</code>, we are met with with the following:</p>
+<a href="assets/img/01hello.webp" target="_blank">
+<img src="assets/img/01hello.webp" class="Large"/> </a>
+<p>The source code for the entire app is <em>very</em> simple (slightly modified to read the data from an external file, rather than use a dataset that is bundled with R):</p>
+<div class="tabs-with-content" id="hello-shiny">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>app.R</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(shiny)
+
+faithful <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">readRDS</span>(<span style="color:#e6db74">&#34;data/faithful.rds&#34;</span>)
+
+ui <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">fluidPage</span>(
+  <span style="color:#a6e22e">titlePanel</span>(<span style="color:#e6db74">&#34;Hello Shiny!&#34;</span>),
+  <span style="color:#a6e22e">sidebarLayout</span>(
+    <span style="color:#a6e22e">sidebarPanel</span>(
+      <span style="color:#a6e22e">sliderInput</span>(
+        inputId <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;bins&#34;</span>,
+        label <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Number of bins:&#34;</span>,
+        min <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>, max <span style="color:#f92672">=</span> <span style="color:#ae81ff">50</span>, value <span style="color:#f92672">=</span> <span style="color:#ae81ff">30</span>
+      )
+    ),
+    <span style="color:#a6e22e">mainPanel</span>(
+      <span style="color:#a6e22e">plotOutput</span>(outputId <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;distPlot&#34;</span>)
+    )
+  )
+)
+
+server <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(input, output) {
+  output<span style="color:#f92672">$</span>distPlot <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">renderPlot</span>({
+    x <span style="color:#f92672">&lt;-</span> faithful<span style="color:#f92672">$</span>waiting
+    bins <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">seq</span>(<span style="color:#a6e22e">min</span>(x), <span style="color:#a6e22e">max</span>(x), length.out <span style="color:#f92672">=</span> input<span style="color:#f92672">$</span>bins <span style="color:#f92672">+</span> <span style="color:#ae81ff">1</span>)
+    <span style="color:#a6e22e">hist</span>(
+      x, breaks <span style="color:#f92672">=</span> bins, col <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;#75AADB&#34;</span>, border <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;white&#34;</span>,
+      xlab <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Waiting time to next eruption (in mins)&#34;</span>,
+      main <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Histogram of waiting times&#34;</span>)
+    })
+}
+
+<span style="color:#a6e22e">shinyApp</span>(ui <span style="color:#f92672">=</span> ui, server <span style="color:#f92672">=</span> server)
+</code></pre></div></section>
+</div>
+</div>
+<p>For contrast, here is the complete source for a similar application created with Vue.js:</p>
+<div class="tabs-with-content" id="hello-vue">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>index.html</a></li>
+  <li><a>main.js</a></li>
+  <li><a>faithful.js</a></li>
+  <li><a>styles.css</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">html</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+  &lt;<span style="color:#f92672">title</span>&gt;Hello Vue.js!&lt;/<span style="color:#f92672">title</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css&#34;</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue-slider-component@latest/theme/default.css&#34;</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;./styles.css&#34;</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span>/&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+
+&lt;<span style="color:#f92672">body</span>&gt;
+&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">faithfulapp</span>&gt;
+  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;title&#34;</span>&gt;&lt;<span style="color:#f92672">h1</span>&gt;Hello Vue.js!&lt;/<span style="color:#f92672">h1</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;body&#34;</span>&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;slidercontainer&#34;</span>&gt;
+        &lt;<span style="color:#f92672">vue-slider</span>
+          <span style="color:#a6e22e">v-model</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;bins&#34;</span> <span style="color:#a6e22e">:min</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span> <span style="color:#a6e22e">:max</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;50&#34;</span> <span style="color:#a6e22e">:tooltip</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#39;always&#39;&#34;</span>
+          <span style="color:#a6e22e">:marks</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[1,5,10,15,20,25,30,35,40,45,50]&#34;</span>
+        &gt;&lt;/<span style="color:#f92672">vue-slider</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;plotcontainer&#34;</span>&gt;
+      &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;plot&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+  &lt;/<span style="color:#f92672">div</span>&gt;
+  &lt;<span style="color:#f92672">p</span>&gt;blah&lt;/<span style="color:#f92672">p</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue-slider-component@latest/dist/vue-slider-component.umd.min.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;https://cdn.plot.ly/plotly-2.8.3.min.js&#39;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;./faithful.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;./main.js&#39;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">var</span> <span style="color:#a6e22e">faithfulapp</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Vue</span>({
+  <span style="color:#a6e22e">el</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;#faithfulapp&#39;</span>,
+  <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> <span style="color:#a6e22e">faithful</span>,
+    <span style="color:#a6e22e">layout</span><span style="color:#f92672">:</span> {
+      <span style="color:#a6e22e">title</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;histogram of waiting times&#34;</span>,
+      <span style="color:#a6e22e">xaxis</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">title</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">text</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;waiting time to next eruption (in mins)&#34;</span>}},
+      <span style="color:#a6e22e">yaxis</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">title</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">text</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;Frequency&#34;</span>}}},
+    <span style="color:#a6e22e">config</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">responsive</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span> },
+    <span style="color:#a6e22e">bins</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">30</span>
+  },
+  <span style="color:#a6e22e">computed</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">series</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">return</span> [{
+        <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">data</span>,
+        <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;histogram&#39;</span>,
+        <span style="color:#a6e22e">nbinsx</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">bins</span>
+      }];
+    }
+  },
+  <span style="color:#a6e22e">watch</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">series</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">updatePlot</span>()
+    }
+  },
+  <span style="color:#a6e22e">mounted</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">updatePlot</span>()
+  },
+  <span style="color:#a6e22e">methods</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">updatePlot</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#a6e22e">Plotly</span>.<span style="color:#a6e22e">newPlot</span>(<span style="color:#e6db74">&#39;plot&#39;</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">layout</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">config</span>)
+    }
+  },
+  <span style="color:#a6e22e">components</span><span style="color:#f92672">:</span> {
+    <span style="color:#e6db74">&#39;vueSlider&#39;</span><span style="color:#f92672">:</span> window[ <span style="color:#e6db74">&#39;vue-slider-component&#39;</span> ],
+  }
+});
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js">window.<span style="color:#a6e22e">faithful</span> <span style="color:#f92672">=</span> (<span style="color:#66d9ef">function</span>() {
+  <span style="color:#66d9ef">return</span> [
+    <span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">74</span>,<span style="color:#ae81ff">62</span>,<span style="color:#ae81ff">85</span>,<span style="color:#ae81ff">55</span>,<span style="color:#ae81ff">88</span>,<span style="color:#ae81ff">85</span>,<span style="color:#ae81ff">51</span>,<span style="color:#ae81ff">85</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">47</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">52</span>,<span style="color:#ae81ff">62</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">52</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">51</span>,<span style="color:#ae81ff">47</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">69</span>,<span style="color:#ae81ff">74</span>,
+    <span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">55</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">73</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">66</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">74</span>,<span style="color:#ae81ff">52</span>,<span style="color:#ae81ff">48</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">59</span>,<span style="color:#ae81ff">90</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">58</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">58</span>,<span style="color:#ae81ff">73</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">64</span>,<span style="color:#ae81ff">53</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">59</span>,
+    <span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">90</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">71</span>,<span style="color:#ae81ff">64</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">59</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">48</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">60</span>,<span style="color:#ae81ff">92</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">65</span>,<span style="color:#ae81ff">73</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">56</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">71</span>,<span style="color:#ae81ff">62</span>,
+    <span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">60</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">70</span>,<span style="color:#ae81ff">65</span>,<span style="color:#ae81ff">73</span>,<span style="color:#ae81ff">88</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">48</span>,<span style="color:#ae81ff">86</span>,<span style="color:#ae81ff">60</span>,<span style="color:#ae81ff">90</span>,<span style="color:#ae81ff">50</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">63</span>,<span style="color:#ae81ff">72</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">51</span>,<span style="color:#ae81ff">82</span>,
+    <span style="color:#ae81ff">62</span>,<span style="color:#ae81ff">88</span>,<span style="color:#ae81ff">49</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">47</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">52</span>,<span style="color:#ae81ff">86</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">59</span>,<span style="color:#ae81ff">89</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">59</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">50</span>,<span style="color:#ae81ff">85</span>,<span style="color:#ae81ff">59</span>,<span style="color:#ae81ff">87</span>,<span style="color:#ae81ff">53</span>,<span style="color:#ae81ff">69</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">56</span>,<span style="color:#ae81ff">88</span>,
+    <span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">45</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">55</span>,<span style="color:#ae81ff">90</span>,<span style="color:#ae81ff">45</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">56</span>,<span style="color:#ae81ff">89</span>,<span style="color:#ae81ff">46</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">51</span>,<span style="color:#ae81ff">86</span>,<span style="color:#ae81ff">53</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">60</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">59</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">49</span>,<span style="color:#ae81ff">96</span>,<span style="color:#ae81ff">53</span>,
+    <span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">65</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">71</span>,<span style="color:#ae81ff">70</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">93</span>,<span style="color:#ae81ff">53</span>,<span style="color:#ae81ff">89</span>,<span style="color:#ae81ff">45</span>,<span style="color:#ae81ff">86</span>,<span style="color:#ae81ff">58</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">66</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">63</span>,<span style="color:#ae81ff">88</span>,<span style="color:#ae81ff">52</span>,<span style="color:#ae81ff">93</span>,<span style="color:#ae81ff">49</span>,<span style="color:#ae81ff">57</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">68</span>,<span style="color:#ae81ff">81</span>,
+    <span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">73</span>,<span style="color:#ae81ff">50</span>,<span style="color:#ae81ff">85</span>,<span style="color:#ae81ff">74</span>,<span style="color:#ae81ff">55</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">51</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">46</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">55</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">57</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">87</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">51</span>,<span style="color:#ae81ff">78</span>,
+    <span style="color:#ae81ff">60</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">91</span>,<span style="color:#ae81ff">53</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">46</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">49</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">71</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">49</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">64</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">53</span>,<span style="color:#ae81ff">94</span>,<span style="color:#ae81ff">55</span>,<span style="color:#ae81ff">76</span>,<span style="color:#ae81ff">50</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">78</span>,
+    <span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">70</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">70</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">86</span>,<span style="color:#ae81ff">50</span>,<span style="color:#ae81ff">90</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">77</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">64</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">47</span>,<span style="color:#ae81ff">86</span>,<span style="color:#ae81ff">63</span>,<span style="color:#ae81ff">85</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">57</span>,<span style="color:#ae81ff">82</span>,<span style="color:#ae81ff">67</span>,<span style="color:#ae81ff">74</span>,
+    <span style="color:#ae81ff">54</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">73</span>,<span style="color:#ae81ff">73</span>,<span style="color:#ae81ff">88</span>,<span style="color:#ae81ff">80</span>,<span style="color:#ae81ff">71</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">56</span>,<span style="color:#ae81ff">79</span>,<span style="color:#ae81ff">78</span>,<span style="color:#ae81ff">84</span>,<span style="color:#ae81ff">58</span>,<span style="color:#ae81ff">83</span>,<span style="color:#ae81ff">43</span>,<span style="color:#ae81ff">60</span>,<span style="color:#ae81ff">75</span>,<span style="color:#ae81ff">81</span>,<span style="color:#ae81ff">46</span>,<span style="color:#ae81ff">90</span>,<span style="color:#ae81ff">46</span>,<span style="color:#ae81ff">74</span>
+  ];
+})();
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-css" data-lang="css">@<span style="color:#66d9ef">import</span> <span style="color:#f92672">url</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap&#39;</span><span style="color:#f92672">)</span>;
+
+#faithfulapp <span style="color:#f92672">*</span> {
+  <span style="color:#66d9ef">font-family</span>: <span style="color:#e6db74">&#34;Open Sans&#34;</span>, verdana, arial, <span style="color:#66d9ef">sans-serif</span>;
+}
+
+#faithfulapp <span style="color:#f92672">p</span> {
+  <span style="color:#66d9ef">margin</span>: <span style="color:#ae81ff">0</span>;
+}
+
+#faithfulapp  .<span style="color:#a6e22e">body</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">block</span>;
+  <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">100</span><span style="color:#66d9ef">%</span>;
+}
+
+#faithfulapp .<span style="color:#a6e22e">title</span> <span style="color:#f92672">h1</span> {
+  <span style="color:#66d9ef">font-size</span>: <span style="color:#ae81ff">30</span><span style="color:#66d9ef">px</span>;
+  <span style="color:#66d9ef">font-weight</span>: <span style="color:#ae81ff">500</span>;
+  <span style="color:#66d9ef">margin-bottom</span>: <span style="color:#ae81ff">10</span><span style="color:#66d9ef">px</span>;
+}
+
+#faithfulapp .<span style="color:#a6e22e">slidercontainer</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">inline-block</span>;
+  <span style="color:#66d9ef">width</span>: calc(<span style="color:#ae81ff">30</span><span style="color:#66d9ef">%</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">32</span><span style="color:#66d9ef">px</span>);
+  <span style="color:#66d9ef">overflow</span>: <span style="color:#66d9ef">none</span>;
+  <span style="color:#66d9ef">vertical-align</span>: <span style="color:#66d9ef">top</span>;
+  <span style="color:#66d9ef">border</span>: <span style="color:#ae81ff">1</span><span style="color:#66d9ef">px</span> <span style="color:#66d9ef">solid</span> <span style="color:#ae81ff">#999</span>;
+  <span style="color:#66d9ef">border-radius</span>: <span style="color:#ae81ff">5</span><span style="color:#66d9ef">px</span>;
+  <span style="color:#66d9ef">background-color</span>: <span style="color:#ae81ff">#eee</span>;
+  <span style="color:#66d9ef">padding</span>: <span style="color:#ae81ff">35</span><span style="color:#66d9ef">px</span> <span style="color:#ae81ff">15</span><span style="color:#66d9ef">px</span> <span style="color:#ae81ff">25</span><span style="color:#66d9ef">px</span> <span style="color:#ae81ff">15</span><span style="color:#66d9ef">px</span>;
+}
+
+#faithfulapp .<span style="color:#a6e22e">plotcontainer</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">inline-block</span>;
+  <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">70</span><span style="color:#66d9ef">%</span>;
+}
+</code></pre></div></section>
+</div>
+</div>
+<p>Because the Vue application is a pure client-side application, we can embed it directly here, whereas the Shiny app must be hosted on a remote server.  The Vue application looks as follows:</p>
+<!----------------------------------------------------------------------------->
+<link rel="stylesheet" href="./assets/css/01_hello.css" />
+<div id=faithfulapp>
+  <div class="title"><h1>Hello Vue.js!</h1></div>
+  <div class="body">
+    <div class="slidercontainer">
+        <vue-slider
+          v-model="bins" :min="1" :max="50" :tooltip="'always'"
+          :marks="[1,10,20,30,40,50]"
+        ></vue-slider>
+    </div>
+    <div class="plotcontainer">
+      <div id="plot"></div>
+    </div>
+  </div>
+</div>
+<script src="./assets/js/vue-slider-component.umd.min.js"></script>
+<script src="./assets/js/faithful.js"></script>
+<script src='./assets/js/01_hello.js'></script>
+<!----------------------------------------------------------------------------->
+<p>The Shiny application is undeniably simpler from a developer perspective, at least in terms of the volume of code.  This is largely because we are using a pre-canned template, with pre-canned user widgets, and default styling which we have not modified.  Things escalate quickly if any of these things are not true.  For example, if we want a more bespoke layout, custom styling, or non-standard widgets.  Running Shiny applications are made up largely of HTML and JavaScript after all.</p>
+<h1 id="a-less-simple-example-with-bundled-data">A Less Simple Example with Bundled Data</h1>
+<p>In this example we start with a Shiny application that has a relatively large data asset bundled along with the application source–a data frame containing 1,118,488 rows, occupying 125.4MB in-memory, and 3.2MB compressed to disk (or 244.1MB saved as a CSV, and 6.6MB as a gzipped CSV).  We will then make the same data available via a remote data service.  We then modify the Shiny application so it uses the service, and remove all trace of the bundled data.  Finally, we port the Shiny application using Vue.js.</p>
+<h2 id="shiny-with-bundled-data">Shiny with Bundled Data</h2>
+<p>The complete source for our first attempt is relatively simple, and looks as follows:</p>
+<div class="tabs-with-content" id="labour_market_1">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>ui.R</a></li>
+  <li><a>server.R</a></li>
+  <li><a>global.R</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shinyUI</span>(<span style="color:#a6e22e">fluidPage</span>(
+  <span style="color:#a6e22e">titlePanel</span>(<span style="color:#e6db74">&#34;Labour Market Time Series Data&#34;</span>),
+
+  <span style="color:#a6e22e">sidebarLayout</span>(
+    <span style="color:#a6e22e">sidebarPanel</span>(width <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>,
+      <span style="color:#a6e22e">selectizeInput</span>(
+        <span style="color:#e6db74">&#34;subject&#34;</span>, <span style="color:#e6db74">&#34;select subject:&#34;</span>, subject_choices
+      ),
+      <span style="color:#a6e22e">selectizeInput</span>(
+        <span style="color:#e6db74">&#34;group&#34;</span>, <span style="color:#e6db74">&#34;select group:&#34;</span>, <span style="color:#a6e22e">c</span>()
+      ),
+      <span style="color:#a6e22e">selectizeInput</span>(
+        <span style="color:#e6db74">&#34;series&#34;</span>, <span style="color:#e6db74">&#34;select series:&#34;</span>, <span style="color:#a6e22e">c</span>(), multiple <span style="color:#f92672">=</span> <span style="color:#66d9ef">TRUE</span>
+      )
+    ),
+
+    <span style="color:#a6e22e">mainPanel</span>(width <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>,
+      <span style="color:#a6e22e">plotlyOutput</span>(<span style="color:#e6db74">&#34;plot&#34;</span>)
+    )
+  )
+))
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shinyServer</span>(<span style="color:#a6e22e">function</span>(input, output, session) {
+  groups <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+    <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject)
+    <span style="color:#a6e22e">unique</span>(data[
+      subject_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>subject,
+      .(group_code, group_description)
+    ])
+  })
+
+  series <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+    <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group)
+    <span style="color:#a6e22e">unique</span>(data[
+      subject_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>subject <span style="color:#f92672">&amp;</span> group_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>group,
+      <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;series_reference&#34;</span>, <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;series_title_%d&#34;</span>, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5</span>)),
+      with <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>
+    ])
+  })
+
+  values <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+    <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group, input<span style="color:#f92672">$</span>series)
+
+    data[
+      subject_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>subject <span style="color:#f92672">&amp;</span> group_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>group <span style="color:#f92672">&amp;</span>
+        series_reference <span style="color:#f92672">%in%</span> input<span style="color:#f92672">$</span>series
+    ]
+  })
+
+  <span style="color:#a6e22e">observeEvent</span>(<span style="color:#a6e22e">groups</span>(), {
+    group_choices <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setNames</span>(
+      <span style="color:#a6e22e">groups</span>()<span style="color:#f92672">$</span>group_code,
+      <span style="color:#a6e22e">groups</span>()<span style="color:#f92672">$</span>group_description
+    )
+
+    <span style="color:#a6e22e">updateSelectizeInput</span>(session, <span style="color:#e6db74">&#34;group&#34;</span>, choices <span style="color:#f92672">=</span> group_choices)
+  })
+
+  <span style="color:#a6e22e">observeEvent</span>(<span style="color:#a6e22e">series</span>(), {
+    labels <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">apply</span>(<span style="color:#a6e22e">series</span>(), <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">function</span>(z) {
+      z[<span style="color:#ae81ff">-1</span>] <span style="color:#f92672">|&gt;</span> (<span style="color:#a6e22e">\</span>(x) {x[x <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;&#34;</span>]})() <span style="color:#f92672">|&gt;</span> <span style="color:#a6e22e">paste</span>(collapse <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;, &#34;</span>)
+    })
+
+    subject_choices <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setNames</span>(
+      <span style="color:#a6e22e">series</span>()<span style="color:#f92672">$</span>series_reference,
+      <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s - %s&#34;</span>, <span style="color:#a6e22e">series</span>()<span style="color:#f92672">$</span>series_reference, labels)
+    )
+
+    <span style="color:#a6e22e">updateSelectizeInput</span>(session, <span style="color:#e6db74">&#34;series&#34;</span>, choices <span style="color:#f92672">=</span> subject_choices)
+  })
+
+  output<span style="color:#f92672">$</span>plot <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">renderPlotly</span>({
+    <span style="color:#a6e22e">req</span>(<span style="color:#a6e22e">values</span>())
+    <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">is.null</span>(<span style="color:#a6e22e">values</span>())) <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">NULL</span>)
+    <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">nrow</span>(<span style="color:#a6e22e">values</span>()) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">NULL</span>)
+
+    p <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">ggplot</span>(
+      data <span style="color:#f92672">=</span> <span style="color:#a6e22e">values</span>(),
+      <span style="color:#a6e22e">aes</span>(x <span style="color:#f92672">=</span> period, y <span style="color:#f92672">=</span> data_value, col <span style="color:#f92672">=</span> series_reference)
+    ) <span style="color:#f92672">+</span>
+      <span style="color:#a6e22e">geom_line</span>()
+
+    <span style="color:#a6e22e">ggplotly</span>(p)
+  })
+})
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(shiny)
+<span style="color:#a6e22e">library</span>(data.table)
+<span style="color:#a6e22e">library</span>(ggplot2)
+<span style="color:#a6e22e">library</span>(plotly)
+
+data <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">readRDS</span>(<span style="color:#e6db74">&#34;../../data/labour_market.rds&#34;</span>)
+
+subjects <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">unique</span>(data[, .(subject_code, subject_description)])
+
+subject_choices <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setNames</span>(
+  subjects<span style="color:#f92672">$</span>subject_code,
+  <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s - %s&#34;</span>, subjects<span style="color:#f92672">$</span>subject_code, subjects<span style="color:#f92672">$</span>subject_description)
+)
+</code></pre></div></section>
+</div>
+</div>
+<p>and the running application looks as follows:</p>
+<a href="assets/img/labour_market_1.webp" target="_blank">
+<img src="assets/img/labour_market_1.webp" class="Large"/></a>
+<h2 id="creating-a-supporting-data-service">Creating a Supporting Data Service</h2>
+<p>As described, the first cut of our Shiny application has bundled with it a large data frame, but we are only ever interested in a small subset at any point in time.  The subset we are interested in is determined by client selections, and the filtered data is made available via a reactive expression.  For example, in our application, users can select a subject, then a group, and then up to <code>$n$</code> series references, and we then use the selected values to filter the bundled data:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">values <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+  <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group, input<span style="color:#f92672">$</span>series)
+
+  data[
+    subject_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>subject <span style="color:#f92672">&amp;</span> group_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>group <span style="color:#f92672">&amp;</span>
+      series_reference <span style="color:#f92672">%in%</span> input<span style="color:#f92672">$</span>series
+  ]
+})
+</code></pre></div><p>That is, calling <code>values()</code> in our code will always return the correct subset, and any reactive block of code that depends on it will be re-evaluated whenever the underlying inputs change.  Here we plot the result using standard plotting functions, thus separating the logic for deciding <em>what</em> we plot and <em>how</em> we plot.  This is a reasonable practice in Shiny–that we access data via reactive expressions where possible–keeping such concerns separate from other logic, and helping keep our applications modular.  But if we follow such a practice when authoring Shiny applications, we then have a reasonably obvious path for replacing the bundled data with a service–we simply create a service with end-points that roughly match our reactive expressions.  Thus, the only changes we would need to make to our existing application would be to each of the reactive expressions which access the original bundled data.  In this case, a sufficient service is fully described as follows:</p>
+<div class="tabs-with-content" id="labour_market_service">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>labour_market_service.R</a></li>
+  <li class="is-active"><a>run_labour_market_service.R</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#* @apiTitle Labour market data service</span>
+<span style="color:#75715e">#* @apiDescription Data service for HLFS, QES, and LCI time series data.</span>
+
+<span style="color:#a6e22e">library</span>(data.table)
+data <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">readRDS</span>(<span style="color:#e6db74">&#34;../data/labour_market.rds&#34;</span>)
+subjects <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">unique</span>(data[, <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;subject_code&#34;</span>, <span style="color:#e6db74">&#34;subject_description&#34;</span>)])
+
+<span style="color:#75715e">#* @filter cors</span>
+<span style="color:#75715e">#* turn this off in production!!</span>
+cors <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(res) {
+    res<span style="color:#f92672">$</span><span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#34;Access-Control-Allow-Origin&#34;</span>, <span style="color:#e6db74">&#34;*&#34;</span>)
+    plumber<span style="color:#f92672">::</span><span style="color:#a6e22e">forward</span>()
+}
+
+<span style="color:#75715e">#* Return complete set of subjects</span>
+<span style="color:#75715e">#* @get /subjects</span>
+<span style="color:#75715e">#* @serializer json</span>
+<span style="color:#a6e22e">function</span>() {
+  subjects
+}
+
+<span style="color:#75715e">#* Return complete set of groups for selected subject</span>
+<span style="color:#75715e">#* @get /groups/&lt;subjectCode&gt;</span>
+<span style="color:#75715e">#* @serializer json</span>
+<span style="color:#a6e22e">function</span>(subjectCode) {
+  <span style="color:#a6e22e">unique</span>(data[
+    subject_code <span style="color:#f92672">==</span> subjectCode,
+    <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;subject_code&#34;</span>, <span style="color:#e6db74">&#34;group_code&#34;</span>, <span style="color:#e6db74">&#34;group_description&#34;</span>)
+  ])
+}
+
+<span style="color:#75715e">#* Return complete set of series references for selected subject and group</span>
+<span style="color:#75715e">#* @get /series/&lt;subjectCode&gt;/&lt;groupCode&gt;</span>
+<span style="color:#75715e">#* @serializer json</span>
+<span style="color:#a6e22e">function</span>(subjectCode, groupCode) {
+  <span style="color:#a6e22e">unique</span>(data[
+    subject_code <span style="color:#f92672">==</span> subjectCode <span style="color:#f92672">&amp;</span> group_code <span style="color:#f92672">==</span> groupCode,
+    <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;subject_code&#34;</span>, <span style="color:#e6db74">&#34;group_code&#34;</span>, <span style="color:#e6db74">&#34;group_description&#34;</span>,
+      <span style="color:#e6db74">&#34;series_reference&#34;</span>, <span style="color:#e6db74">&#34;units&#34;</span>, <span style="color:#e6db74">&#34;magnitude&#34;</span>,
+      <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;series_title_%d&#34;</span>, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5</span>)), with <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>
+  ])
+}
+
+<span style="color:#75715e">#* Return data for specific references</span>
+<span style="color:#75715e">#* @param seriesReference:[string] Series reference, e.g. &#34;HLFQ.SAA1AZ&#34;</span>
+<span style="color:#75715e">#* @get /values</span>
+<span style="color:#75715e">#* @serializer json</span>
+<span style="color:#a6e22e">function</span>(seriesReference) {
+  data[series_reference <span style="color:#f92672">%in%</span> seriesReference]
+}
+
+<span style="color:#75715e">#* Return data for specific references</span>
+<span style="color:#75715e">#* @param seriesReference:[string] Series reference, e.g. &#34;HLFQ.SAA1AZ&#34;</span>
+<span style="color:#75715e">#* @get /values/&lt;subjectCode&gt;/&lt;groupCode&gt;</span>
+<span style="color:#75715e">#* @serializer json</span>
+<span style="color:#a6e22e">function</span>(subjectCode, groupCode, seriesReference) {
+  data[
+    subject_code <span style="color:#f92672">==</span> subjectCode <span style="color:#f92672">&amp;</span> group_code <span style="color:#f92672">==</span> groupCode <span style="color:#f92672">&amp;</span>
+      series_reference <span style="color:#f92672">%in%</span> seriesReference
+  ]
+}
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(plumber)
+<span style="color:#a6e22e">pr</span>(<span style="color:#e6db74">&#34;labour_market_service.R&#34;</span>) <span style="color:#f92672">|&gt;</span> <span style="color:#a6e22e">pr_run</span>(host <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;0.0.0.0&#34;</span>, port <span style="color:#f92672">=</span> <span style="color:#ae81ff">3001</span>)
+</code></pre></div></section>
+</div>
+</div>
+<p>As an aside, the performance of this service is actually surprisingly good.  This is essentially because we&rsquo;ve used the <a href="https://rdatatable.gitlab.io/data.table/"><code>data.table</code></a> package which is <em>extremely</em> fast.  As an example, here is the result of fetching a single series using  <a href="https://github.com/JoeDog/siege"><code>siege</code></a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">siege -b -c <span style="color:#ae81ff">3</span> -t 10s <span style="color:#e6db74">&#34;http://localhost:3001/series?seriesReference=HLFQ.SAA1AZ&#34;</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">** SIEGE 4.0.7
+** Preparing 3 concurrent users for battle.
+The server is now under siege...
+Lifting the server siege...
+Transactions:                   6216 hits
+Availability:                 100.00 %
+Elapsed time:                   9.12 secs
+Data transferred:               0.33 MB
+Response time:                  0.00 secs
+Transaction rate:             681.58 trans/sec
+Throughput:                     0.04 MB/sec
+Concurrency:                    2.98
+Successful transactions:           0
+Failed transactions:               0
+Longest transaction:            0.06
+Shortest transaction:           0.00
+</code></pre></div><p>(Note that performance slowed if the number of concurrent workers exceeded 3.  This is possibly because my machine has just 6 cores / 12 threads, and <code>data.table</code> was using 6 threads by default already.  In saying that, CPU utilisation appeared low while the test was running.)</p>
+<h2 id="shiny-with-a-data-service-and-no-bundled-data">Shiny with a Data Service (and No Bundled Data)</h2>
+<p>Given an available service, we can easily modify our application, removing all dependencies on the bundled data.  Before listing the complete source, however, we lift out a single reactive expression for illustration–<code>series</code>, in this case:</p>
+<div class="tabs-with-content" id="reactive_ex">
+<div class="tabs is-boxed">
+<ul>
+  <li><a>old</a></li>
+  <li class="is-active"><a>new</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">series <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+  <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group)
+  <span style="color:#a6e22e">unique</span>(data[
+    subject_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>subject <span style="color:#f92672">&amp;</span> group_code <span style="color:#f92672">==</span> input<span style="color:#f92672">$</span>group,
+    <span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;series_reference&#34;</span>, <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;series_title_%d&#34;</span>, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5</span>)),
+    with <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>
+  ])
+})
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">series <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+  <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group)
+  url <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s/series/%s/%s&#34;</span>, service, input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group)
+  response <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setDT</span>(jsonlite<span style="color:#f92672">::</span><span style="color:#a6e22e">fromJSON</span>(url))
+
+  <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">length</span>(response) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">NULL</span>)
+
+  response[
+    ,<span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;series_reference&#34;</span>, <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;series_title_%d&#34;</span>, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5</span>)),
+    with <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>
+  ]
+})
+</code></pre></div></section>
+</div>
+</div>
+<p>Again, our application is mostly unchanged besides these reactive expressions (we remove the data dependency in <code>global.R</code>, and replace it with the path to our service).  The full source is as follows:</p>
+<div class="tabs-with-content" id="labour_market_2">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>ui.R</a></li>
+  <li><a>server.R</a></li>
+  <li><a>global.R</a></li>
+  <li><a>config.yml</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shinyUI</span>(<span style="color:#a6e22e">fluidPage</span>(
+  <span style="color:#a6e22e">titlePanel</span>(<span style="color:#e6db74">&#34;Labour Market Time Series Data&#34;</span>),
+
+  <span style="color:#a6e22e">sidebarLayout</span>(
+    <span style="color:#a6e22e">sidebarPanel</span>(width <span style="color:#f92672">=</span> <span style="color:#ae81ff">4</span>,
+      <span style="color:#a6e22e">selectizeInput</span>(
+        <span style="color:#e6db74">&#34;subject&#34;</span>, <span style="color:#e6db74">&#34;select subject:&#34;</span>, subject_choices
+      ),
+      <span style="color:#a6e22e">selectizeInput</span>(
+        <span style="color:#e6db74">&#34;group&#34;</span>, <span style="color:#e6db74">&#34;select group:&#34;</span>, <span style="color:#a6e22e">c</span>()
+      ),
+      <span style="color:#a6e22e">selectizeInput</span>(
+        <span style="color:#e6db74">&#34;series&#34;</span>, <span style="color:#e6db74">&#34;select series:&#34;</span>, <span style="color:#a6e22e">c</span>(), multiple <span style="color:#f92672">=</span> <span style="color:#66d9ef">TRUE</span>
+      )
+    ),
+
+    <span style="color:#a6e22e">mainPanel</span>(width <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>,
+      <span style="color:#a6e22e">plotlyOutput</span>(<span style="color:#e6db74">&#34;plot&#34;</span>)
+    )
+  )
+))
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">shinyServer</span>(<span style="color:#a6e22e">function</span>(input, output, session) {
+  groups <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+    <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject)
+    url <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s/groups/%s&#34;</span>, service, input<span style="color:#f92672">$</span>subject)
+    <span style="color:#a6e22e">setDT</span>(jsonlite<span style="color:#f92672">::</span><span style="color:#a6e22e">fromJSON</span>(url))
+  })
+
+  series <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+    <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group)
+    url <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s/series/%s/%s&#34;</span>, service, input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group)
+    response <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setDT</span>(jsonlite<span style="color:#f92672">::</span><span style="color:#a6e22e">fromJSON</span>(url))
+
+    <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">length</span>(response) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">NULL</span>)
+
+    response[
+      ,<span style="color:#a6e22e">c</span>(<span style="color:#e6db74">&#34;series_reference&#34;</span>, <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;series_title_%d&#34;</span>, <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#ae81ff">5</span>)),
+      with <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>
+    ]
+  })
+
+  values <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+    <span style="color:#a6e22e">req</span>(input<span style="color:#f92672">$</span>subject, input<span style="color:#f92672">$</span>group, input<span style="color:#f92672">$</span>series)
+
+    url <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">sprintf</span>(
+      <span style="color:#e6db74">&#34;%s/values/%s/%s?%s&#34;</span>,
+      service,
+      input<span style="color:#f92672">$</span>subject,
+      input<span style="color:#f92672">$</span>group,
+      <span style="color:#a6e22e">paste</span>(<span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;seriesReference=%s&#34;</span>, input<span style="color:#f92672">$</span>series), collapse <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;&amp;&#34;</span>)
+    )
+
+    response <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setDT</span>(jsonlite<span style="color:#f92672">::</span><span style="color:#a6e22e">fromJSON</span>(url))
+
+    <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">length</span>(response) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>)
+      <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">NULL</span>)
+    else
+      response[, period <span style="color:#f92672">:=</span> <span style="color:#a6e22e">as.Date</span>(period, format <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;%Y-%m-%d&#34;</span>)]
+  })
+
+  <span style="color:#a6e22e">observeEvent</span>(<span style="color:#a6e22e">groups</span>(), {
+    group_choices <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setNames</span>(
+      <span style="color:#a6e22e">groups</span>()<span style="color:#f92672">$</span>group_code,
+      <span style="color:#a6e22e">groups</span>()<span style="color:#f92672">$</span>group_description
+    )
+
+    <span style="color:#a6e22e">updateSelectizeInput</span>(session, <span style="color:#e6db74">&#34;group&#34;</span>, choices <span style="color:#f92672">=</span> group_choices)
+  })
+
+  <span style="color:#a6e22e">observeEvent</span>(<span style="color:#a6e22e">series</span>(), {
+    labels <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">apply</span>(<span style="color:#a6e22e">series</span>(), <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">function</span>(z) {
+      z[<span style="color:#ae81ff">-1</span>] <span style="color:#f92672">|&gt;</span> (<span style="color:#a6e22e">\</span>(x) {x[x <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;&#34;</span>]})() <span style="color:#f92672">|&gt;</span> <span style="color:#a6e22e">paste</span>(collapse <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;, &#34;</span>)
+    })
+
+    subject_choices <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setNames</span>(
+      <span style="color:#a6e22e">series</span>()<span style="color:#f92672">$</span>series_reference,
+      <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s - %s&#34;</span>, <span style="color:#a6e22e">series</span>()<span style="color:#f92672">$</span>series_reference, labels)
+    )
+
+    <span style="color:#a6e22e">updateSelectizeInput</span>(session, <span style="color:#e6db74">&#34;series&#34;</span>, choices <span style="color:#f92672">=</span> subject_choices)
+  })
+
+  output<span style="color:#f92672">$</span>plot <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">renderPlotly</span>({
+    <span style="color:#a6e22e">req</span>(<span style="color:#a6e22e">values</span>())
+    <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">is.null</span>(<span style="color:#a6e22e">values</span>())) <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">NULL</span>)
+    <span style="color:#a6e22e">if </span>(<span style="color:#a6e22e">nrow</span>(<span style="color:#a6e22e">values</span>()) <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) <span style="color:#a6e22e">return</span>(<span style="color:#66d9ef">NULL</span>)
+
+    p <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">ggplot</span>(
+      data <span style="color:#f92672">=</span> <span style="color:#a6e22e">values</span>(),
+      <span style="color:#a6e22e">aes</span>(x <span style="color:#f92672">=</span> period, y <span style="color:#f92672">=</span> data_value, col <span style="color:#f92672">=</span> series_reference)
+    ) <span style="color:#f92672">+</span>
+      <span style="color:#a6e22e">geom_line</span>()
+
+    <span style="color:#a6e22e">ggplotly</span>(p)
+  })
+})
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(shiny)
+<span style="color:#a6e22e">library</span>(data.table)
+<span style="color:#a6e22e">library</span>(ggplot2)
+<span style="color:#a6e22e">library</span>(plotly)
+<span style="color:#a6e22e">library</span>(config)
+
+service <span style="color:#f92672">&lt;-</span> config<span style="color:#f92672">::</span><span style="color:#a6e22e">get</span>(<span style="color:#e6db74">&#34;service&#34;</span>)
+
+subjects <span style="color:#f92672">&lt;-</span> jsonlite<span style="color:#f92672">::</span><span style="color:#a6e22e">fromJSON</span>(<span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s/subjects&#34;</span>, service))
+
+subject_choices <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">setNames</span>(
+  subjects<span style="color:#f92672">$</span>subject_code,
+  <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s - %s&#34;</span>, subjects<span style="color:#f92672">$</span>subject_code, subjects<span style="color:#f92672">$</span>subject_description)
+)
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yml" data-lang="yml"><span style="color:#f92672">default</span>:
+  <span style="color:#f92672">service</span>: <span style="color:#e6db74">&#34;http://localhost:3001&#34;</span>
+</code></pre></div></section>
+</div>
+</div>
+<p>And note our application starts up a little faster now since we do not have to wait for the bundled data to be read into memory.  And, as noted in the overview, we have disentangled our application and the data completely, and so we can update our data service without needing to modify our application or redeploy it.  Cool.</p>
+<h2 id="vuejs-application-with-a-data-service">Vue.js Application with a Data Service</h2>
+<p>Following the trend, the source code for a client-side Vue application is longer and more verbose than the Shiny code, but not unmanageably so.  The complete code is:</p>
+<div class="tabs-with-content" id="labour_market_3">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>index.html</a></li>
+  <li><a>main.js</a></li>
+  <li><a>styles.css</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">html</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+  &lt;<span style="color:#f92672">title</span>&gt;Labour Market Time Series Data&lt;/<span style="color:#f92672">title</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://unpkg.com/vue-select@3.0.0/dist/vue-select.css&#34;</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;./styles.css&#34;</span> /&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+
+&lt;<span style="color:#f92672">body</span>&gt;
+&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">labmktapp</span>&gt;
+  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;title&#34;</span>&gt;&lt;<span style="color:#f92672">h1</span>&gt;Labour Market Time Series Data&lt;/<span style="color:#f92672">h1</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;body&#34;</span>&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;controls&#34;</span>&gt;
+      &lt;<span style="color:#f92672">p</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;label&#34;</span>&gt;select subject:&lt;/<span style="color:#f92672">p</span>&gt;
+      &lt;<span style="color:#f92672">v-select</span> <span style="color:#a6e22e">v-model</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;selectedSubject&#34;</span> <span style="color:#a6e22e">:options</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;subjects&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;subject-select&#34;</span>&gt;&lt;/<span style="color:#f92672">v-select</span>&gt;
+
+      &lt;<span style="color:#f92672">p</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;label&#34;</span>&gt;select group:&lt;/<span style="color:#f92672">p</span>&gt;
+      &lt;<span style="color:#f92672">v-select</span> <span style="color:#a6e22e">v-model</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;selectedGroup&#34;</span> <span style="color:#a6e22e">:options</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;groups&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;group-select&#34;</span>&gt;&lt;/<span style="color:#f92672">v-select</span>&gt;
+
+      &lt;<span style="color:#f92672">p</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;label&#34;</span>&gt;select series:&lt;/<span style="color:#f92672">p</span>&gt;
+      &lt;<span style="color:#f92672">v-select</span> <span style="color:#a6e22e">v-model</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;selectedSeries&#34;</span> <span style="color:#a6e22e">:options</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;series&#34;</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;series-select&#34;</span> <span style="color:#a6e22e">multiple</span>&gt;&lt;/<span style="color:#f92672">v-select</span>&gt;
+      &lt;/<span style="color:#f92672">select</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;plotcontainer&#34;</span>&gt;
+      &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;labmktplot&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+  &lt;/<span style="color:#f92672">div</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://unpkg.com/vue-select@3.0.0&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://unpkg.com/axios/dist/axios.min.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;https://cdn.plot.ly/plotly-2.8.3.min.js&#39;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;./main.js&#39;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://localhost:3001&#34;</span>;
+
+<span style="color:#a6e22e">Vue</span>.<span style="color:#a6e22e">component</span>(<span style="color:#e6db74">&#39;v-select&#39;</span>, <span style="color:#a6e22e">VueSelect</span>.<span style="color:#a6e22e">VueSelect</span>);
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">app</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Vue</span>({
+  <span style="color:#a6e22e">el</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;#labmktapp&#34;</span>,
+  <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">subjects</span><span style="color:#f92672">:</span> [],
+    <span style="color:#a6e22e">selectedSubject</span><span style="color:#f92672">:</span> {},
+    <span style="color:#a6e22e">groups</span><span style="color:#f92672">:</span> [],
+    <span style="color:#a6e22e">selectedGroup</span><span style="color:#f92672">:</span> {},
+    <span style="color:#a6e22e">series</span><span style="color:#f92672">:</span> [],
+    <span style="color:#a6e22e">selectedSeries</span><span style="color:#f92672">:</span> [],
+    <span style="color:#a6e22e">values</span><span style="color:#f92672">:</span> [],
+    <span style="color:#a6e22e">layout</span><span style="color:#f92672">:</span> {
+      <span style="color:#a6e22e">xaxis</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">title</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">text</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;date&#34;</span>}},
+      <span style="color:#a6e22e">legend</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">orientation</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;h&#34;</span>, <span style="color:#a6e22e">yanchor</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;bottom&#34;</span>, <span style="color:#a6e22e">y</span><span style="color:#f92672">:</span> <span style="color:#f92672">-</span><span style="color:#ae81ff">0.25</span>},
+      <span style="color:#a6e22e">margin</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">t</span><span style="color:#f92672">:</span> <span style="color:#ae81ff">0</span>}
+    },
+    <span style="color:#a6e22e">config</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">responsive</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span> }
+  },
+  <span style="color:#a6e22e">mounted</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">self</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>
+    <span style="color:#a6e22e">axios</span>
+      .<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">server</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/subjects`</span>)
+      .<span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">response</span>) {
+        <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">subjects</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">x</span> =&gt; {
+          <span style="color:#66d9ef">let</span> <span style="color:#a6e22e">obj</span> <span style="color:#f92672">=</span> {}
+          <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;code&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">subject_code</span>
+          <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;label&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">subject_code</span><span style="color:#e6db74">}</span><span style="color:#e6db74"> - </span><span style="color:#e6db74">${</span><span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">subject_description</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>
+          <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">obj</span>
+        })
+        <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSubject</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">subjects</span>[<span style="color:#ae81ff">0</span>]
+        <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedGroup</span> <span style="color:#f92672">=</span> {}
+        <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSeries</span> <span style="color:#f92672">=</span> []
+      })
+      .<span style="color:#66d9ef">catch</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+        <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">error</span>)
+      })
+  },
+  <span style="color:#a6e22e">computed</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">trace</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">refs</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">values</span>
+        .<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">x</span> =&gt; {<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">series_reference</span>})
+        .<span style="color:#a6e22e">filter</span>((<span style="color:#a6e22e">v</span>,<span style="color:#a6e22e">i</span>,<span style="color:#a6e22e">a</span>) =&gt; <span style="color:#a6e22e">a</span>.<span style="color:#a6e22e">indexOf</span>(<span style="color:#a6e22e">v</span>) <span style="color:#f92672">==</span> <span style="color:#a6e22e">i</span>)
+
+      <span style="color:#a6e22e">res</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">refs</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">ref</span> =&gt; {
+        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">sub</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">values</span>.<span style="color:#a6e22e">filter</span>(<span style="color:#a6e22e">x</span> =&gt; <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">series_reference</span> <span style="color:#f92672">==</span> <span style="color:#a6e22e">ref</span>)
+        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">xs</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">x</span> =&gt; {<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">period</span>})
+        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">ys</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">sub</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">x</span> =&gt; {<span style="color:#66d9ef">return</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">data_value</span>})
+        <span style="color:#a6e22e">obj</span> <span style="color:#f92672">=</span> {}
+        <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;type&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;scatter&#34;</span>
+        <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;mode&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;lines&#34;</span>
+        <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;name&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">ref</span>
+        <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;x&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">xs</span>
+        <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;y&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">ys</span>
+        <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">obj</span>
+      })
+
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">res</span>
+    }
+  },
+  <span style="color:#a6e22e">watch</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">selectedSubject</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">self</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>
+      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">server</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/groups/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSubject</span>[<span style="color:#e6db74">&#34;code&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>
+      <span style="color:#a6e22e">axios</span>
+        .<span style="color:#a6e22e">get</span>(<span style="color:#a6e22e">url</span>)
+        .<span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">response</span>) {
+          <span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">x</span> =&gt; {
+            <span style="color:#a6e22e">obj</span> <span style="color:#f92672">=</span> {}
+            <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;code&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">group_code</span>
+            <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;label&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">group_description</span>
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">obj</span>
+          })
+          <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">groups</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">data</span>
+          <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedGroup</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">data</span>[<span style="color:#ae81ff">0</span>]
+        })
+        .<span style="color:#66d9ef">catch</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+          <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">error</span>)
+        })
+    },
+    <span style="color:#a6e22e">selectedGroup</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">self</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>
+      <span style="color:#a6e22e">axios</span>
+        .<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">server</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/series/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSubject</span>[<span style="color:#e6db74">&#34;code&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedGroup</span>[<span style="color:#e6db74">&#34;code&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>)
+        .<span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">response</span>) {
+          <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">series</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">x</span> =&gt; {
+            <span style="color:#a6e22e">obj</span> <span style="color:#f92672">=</span> {}
+            <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;code&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">series_reference</span>
+            <span style="color:#a6e22e">obj</span>[<span style="color:#e6db74">&#34;label&#34;</span>] <span style="color:#f92672">=</span> <span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">series_reference</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34; - &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">titles</span>(<span style="color:#a6e22e">x</span>)
+            <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">obj</span>
+          })
+          <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSeries</span> <span style="color:#f92672">=</span> []
+        })
+        .<span style="color:#66d9ef">catch</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+          <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">error</span>)
+        })
+    },
+    <span style="color:#a6e22e">selectedSeries</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">self</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSeries</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+        <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">values</span> <span style="color:#f92672">=</span> []
+      } <span style="color:#66d9ef">else</span> {
+        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">refQuery</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSeries</span>.<span style="color:#a6e22e">map</span>(<span style="color:#a6e22e">x</span> =&gt; {
+          <span style="color:#66d9ef">return</span> <span style="color:#e6db74">`seriesReference=</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">x</span>.<span style="color:#a6e22e">code</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>
+        }).<span style="color:#a6e22e">join</span>(<span style="color:#e6db74">&#39;&amp;&#39;</span>)
+
+        <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">url</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">server</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/values/</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedSubject</span>[<span style="color:#e6db74">&#34;code&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">/`</span> <span style="color:#f92672">+</span>
+          <span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">selectedGroup</span>[<span style="color:#e6db74">&#34;code&#34;</span>]<span style="color:#e6db74">}</span><span style="color:#e6db74">?</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">refQuery</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>
+
+        <span style="color:#a6e22e">axios</span>
+          .<span style="color:#a6e22e">get</span>(<span style="color:#a6e22e">url</span>)
+          .<span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">response</span>) {
+            <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">values</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>
+          })
+          .<span style="color:#66d9ef">catch</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+            <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">error</span>)
+          })
+      }
+    },
+    <span style="color:#a6e22e">trace</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">if</span> (<span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">trace</span>.<span style="color:#a6e22e">length</span> <span style="color:#f92672">==</span> <span style="color:#ae81ff">0</span>) {
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">hidePlot</span>()
+      } <span style="color:#66d9ef">else</span> {
+        <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">unhidePlot</span>()
+      }
+      <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">updatePlot</span>()
+    }
+  },
+  <span style="color:#a6e22e">methods</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">titles</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>(<span style="color:#a6e22e">s</span>) {
+      <span style="color:#66d9ef">var</span> <span style="color:#a6e22e">res</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_1</span>
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_2</span> <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#a6e22e">res</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">res</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_2</span>
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_3</span> <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#a6e22e">res</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">res</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_3</span>
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_4</span> <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#a6e22e">res</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">res</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_4</span>
+      <span style="color:#66d9ef">if</span> (<span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_5</span> <span style="color:#f92672">!=</span> <span style="color:#e6db74">&#34;&#34;</span>) <span style="color:#a6e22e">res</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">res</span> <span style="color:#f92672">+</span> <span style="color:#e6db74">&#34;, &#34;</span> <span style="color:#f92672">+</span> <span style="color:#a6e22e">s</span>.<span style="color:#a6e22e">series_title_5</span>
+      <span style="color:#66d9ef">return</span> <span style="color:#a6e22e">res</span>
+    },
+    <span style="color:#a6e22e">hidePlot</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;labmktplot&#34;</span>).<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">display</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;none&#34;</span>
+    },
+    <span style="color:#a6e22e">unhidePlot</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      document.<span style="color:#a6e22e">getElementById</span>(<span style="color:#e6db74">&#34;labmktplot&#34;</span>).<span style="color:#a6e22e">style</span>.<span style="color:#a6e22e">display</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;block&#34;</span>
+    },
+    <span style="color:#a6e22e">updatePlot</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#a6e22e">Plotly</span>.<span style="color:#a6e22e">newPlot</span>(<span style="color:#e6db74">&#39;labmktplot&#39;</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">trace</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">layout</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">config</span>)
+    }
+  }
+})
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-css" data-lang="css">@<span style="color:#66d9ef">import</span> <span style="color:#f92672">url</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap&#39;</span><span style="color:#f92672">)</span>;
+
+#labmktapp <span style="color:#f92672">*</span> {
+  <span style="color:#66d9ef">font-family</span>: <span style="color:#e6db74">&#34;Open Sans&#34;</span>, verdana, arial, <span style="color:#66d9ef">sans-serif</span>;
+}
+
+#labmktapp {
+  <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">100</span><span style="color:#66d9ef">%</span>;
+}
+
+#labmktapp <span style="color:#f92672">p</span> {
+  <span style="color:#66d9ef">margin</span>: <span style="color:#ae81ff">0</span>;
+}
+
+#labmktapp .<span style="color:#a6e22e">title</span> <span style="color:#f92672">h1</span> {
+  <span style="color:#66d9ef">font-size</span>: <span style="color:#ae81ff">25</span><span style="color:#66d9ef">px</span>;
+  <span style="color:#66d9ef">font-weight</span>: <span style="color:#ae81ff">500</span>;
+}
+
+#labmktapp .<span style="color:#a6e22e">controls</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">inline-block</span>;
+  <span style="color:#66d9ef">width</span>: calc(<span style="color:#ae81ff">40</span><span style="color:#66d9ef">%</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">30</span><span style="color:#66d9ef">px</span>);
+  <span style="color:#66d9ef">vertical-align</span>: <span style="color:#66d9ef">top</span>;
+  <span style="color:#66d9ef">border</span>: <span style="color:#ae81ff">1</span><span style="color:#66d9ef">px</span> <span style="color:#66d9ef">solid</span> <span style="color:#ae81ff">#999</span>;
+  <span style="color:#66d9ef">border-radius</span>: <span style="color:#ae81ff">5</span><span style="color:#66d9ef">px</span>;
+  <span style="color:#66d9ef">background-color</span>: <span style="color:#ae81ff">#eee</span>;
+  <span style="color:#66d9ef">padding</span>: <span style="color:#ae81ff">10</span><span style="color:#66d9ef">px</span>;
+}
+
+#labmktapp .<span style="color:#a6e22e">plotcontainer</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">inline-block</span>;
+  <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">60</span><span style="color:#66d9ef">%</span>;
+}
+
+#labmktapp .<span style="color:#a6e22e">v-select</span> .<span style="color:#a6e22e">vs__dropdown-toggle</span> {
+  <span style="color:#66d9ef">border-color</span>: <span style="color:#ae81ff">#999</span><span style="color:#75715e">!important</span>;
+  <span style="color:#66d9ef">margin-bottom</span>: <span style="color:#ae81ff">20</span><span style="color:#66d9ef">px</span>;
+}
+
+#labmktapp .<span style="color:#a6e22e">v-select</span> .<span style="color:#a6e22e">vs__dropdown-toggle</span><span style="color:#f92672">,</span> #labmktapp .<span style="color:#a6e22e">vs__dropdown-menu</span> {
+  <span style="color:#66d9ef">background</span>: <span style="color:#ae81ff">#FFF</span>;
+  <span style="color:#66d9ef">font-size</span>: <span style="color:#ae81ff">80</span><span style="color:#66d9ef">%</span>;
+}
+
+#labmktapp <span style="color:#f92672">p</span>.<span style="color:#a6e22e">label</span> {
+  <span style="color:#66d9ef">font-size</span>: <span style="color:#ae81ff">80</span><span style="color:#66d9ef">%</span>;
+  <span style="color:#66d9ef">font-weight</span>: <span style="color:#ae81ff">700</span>;
+  <span style="color:#66d9ef">margin-bottom</span>: <span style="color:#ae81ff">10</span><span style="color:#66d9ef">px</span>;
+}
+</code></pre></div></section>
+</div>
+</div>
+<p>Unlike earlier examples, we cannot embed the Vue application directly here since it now depends on a data service which we have not deployed.  Either way, the resulting application looks as follows:</p>
+<a href="assets/img/labour_market_3.webp" target="_blank">
+<img src="assets/img/labour_market_3.webp" class="Large"/></a>
+<h1 id="smuggling-non-shiny-applications-via-html-templates">Smuggling Non-Shiny Applications via HTML Templates</h1>
+<p>Given a working client-side application, all we need to do to run it via &lsquo;Shiny&rsquo;, it to place the full application in a folder called <code>www</code>, and create an application in the parent directory as follows:</p>
+<div class="tabs-with-content" id="labour_market_4">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>app.R</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(shiny)
+
+<span style="color:#a6e22e">shinyApp</span>(
+  ui <span style="color:#f92672">=</span> <span style="color:#a6e22e">htmlTemplate</span>(<span style="color:#e6db74">&#34;www/index.html&#34;</span>),
+  server <span style="color:#f92672">=</span> <span style="color:#a6e22e">function</span>(input, output, session){}
+)
+</code></pre></div></section>
+</div>
+</div>
+<p>For example, given the Vue application above, we have the following layout on disk:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ tree .
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">.
+├── app.R
+└── www
+    ├── index.html
+    ├── main.js
+    └── styles.css
+</code></pre></div><p>and hey presto:</p>
+<a href="assets/img/hello_vue_via_shiny.webp" target="_blank">
+<img src="assets/img/hello_vue_via_shiny.webp" class="Large"/></a>
+<h1 id="remote-procedure-calls">Remote Procedure Calls</h1>
+<p>The very final example, and the weakest argument, perhaps, for a Shiny-alternative, is where a local application makes a remote procedure call.  That is, we have a Shiny application which could be written as a client-side application except that it needs to use functionality provided by R which we don&rsquo;t have readily available otherwise.  In this case, we can make the R functionality being used available as a remote procedure call, and use that in a client-side application instead.  This option is of dubious utility, and largely depends on the composition of the application.  For example, if the application is large and the amount of work that can only be done by R is small, then we have a reasonable case.  If the application is small, or the code-base is full of calls to R functions that would be hard to replace, then our case is very weak.</p>
+<p>Either way, consider the following very simple Shiny application, which is similar to the earlier &lsquo;Hello Shiny&rsquo; / &lsquo;Hello Vue!&rsquo;, except that we replace the Faithful eruption data with a simple sequence of random uniform numbers:</p>
+<div class="tabs-with-content" id="hello-runif-shiny">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>app.R</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(shiny)
+
+ui <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">fluidPage</span>(
+  <span style="color:#a6e22e">titlePanel</span>(<span style="color:#e6db74">&#34;Hello runif from Shiny!&#34;</span>),
+  <span style="color:#a6e22e">sidebarLayout</span>(
+    <span style="color:#a6e22e">sidebarPanel</span>(
+      <span style="color:#a6e22e">sliderInput</span>(
+        inputId <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;nobs&#34;</span>,
+        label <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;Number of observations:&#34;</span>,
+        min <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>, max <span style="color:#f92672">=</span> <span style="color:#ae81ff">10000</span>, value <span style="color:#f92672">=</span> <span style="color:#ae81ff">1000</span>
+      )
+    ),
+    <span style="color:#a6e22e">mainPanel</span>(
+      <span style="color:#a6e22e">plotOutput</span>(outputId <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;distPlot&#34;</span>)
+    )
+  )
+)
+
+server <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(input, output) {
+  data <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">reactive</span>({
+    <span style="color:#a6e22e">runif</span>(input<span style="color:#f92672">$</span>nobs)
+  })
+
+  output<span style="color:#f92672">$</span>distPlot <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">renderPlot</span>({
+    <span style="color:#a6e22e">hist</span>(
+      <span style="color:#a6e22e">data</span>(), col <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;#75AADB&#34;</span>, border <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;white&#34;</span>,
+      xlab <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;x&#34;</span>,
+      main <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;distribution of random uniform numbers&#34;</span>)
+    })
+}
+
+<span style="color:#a6e22e">shinyApp</span>(ui <span style="color:#f92672">=</span> ui, server <span style="color:#f92672">=</span> server)
+</code></pre></div></section>
+</div>
+</div>
+<p>The application looks as follows:</p>
+<a href="assets/img/hello_runif_shiny.webp" target="_blank">
+<img src="assets/img/hello_runif_shiny.webp" class="Large"/></a>
+<p>In order to port the application to Vue, we first need to make the <code>runif</code> function available via a remote call, and this is precisely what we did above in the Plumber section.  The complete service is as follows:</p>
+<div class="tabs-with-content" id="rand_service">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>rand.R</a></li>
+  <li class="is-active"><a>run_rand.R</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#75715e">#* @apiTitle Random uniform numbers</span>
+<span style="color:#75715e">#* @apiDescription Data service for generating sequences of random uniform numbers</span>
+
+<span style="color:#75715e">#* @filter cors</span>
+<span style="color:#75715e">#* turn this off in production!!</span>
+cors <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(res) {
+    res<span style="color:#f92672">$</span><span style="color:#a6e22e">setHeader</span>(<span style="color:#e6db74">&#34;Access-Control-Allow-Origin&#34;</span>, <span style="color:#e6db74">&#34;*&#34;</span>)
+    plumber<span style="color:#f92672">::</span><span style="color:#a6e22e">forward</span>()
+}
+
+<span style="color:#75715e">#* Get a sequence of random numbers</span>
+<span style="color:#75715e">#* @param n Size of sequence</span>
+<span style="color:#75715e">#* @get /rand</span>
+<span style="color:#a6e22e">function</span>(n) <span style="color:#a6e22e">runif</span>(n)
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(plumber)
+<span style="color:#a6e22e">pr</span>(<span style="color:#e6db74">&#34;rand.R&#34;</span>) <span style="color:#f92672">|&gt;</span> <span style="color:#a6e22e">pr_run</span>(host <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;0.0.0.0&#34;</span>, port <span style="color:#f92672">=</span> <span style="color:#ae81ff">3002</span>)
+</code></pre></div></section>
+</div>
+</div>
+<p>The complete code listing for the Vue application is as follows:</p>
+<div class="tabs-with-content" id="hello-vue">
+<div class="tabs is-boxed">
+<ul>
+  <li class="is-active"><a>index.html</a></li>
+  <li><a>main.js</a></li>
+  <li><a>styles.css</a></li>
+</ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-html" data-lang="html">&lt;<span style="color:#f92672">html</span>&gt;
+&lt;<span style="color:#f92672">head</span>&gt;
+  &lt;<span style="color:#f92672">title</span>&gt;Hello runif!!&lt;/<span style="color:#f92672">title</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue-slider-component@latest/theme/default.css&#34;</span>&gt;
+  &lt;<span style="color:#f92672">link</span> <span style="color:#a6e22e">rel</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;stylesheet&#34;</span> <span style="color:#a6e22e">href</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;./styles.css&#34;</span> /&gt;
+&lt;/<span style="color:#f92672">head</span>&gt;
+
+&lt;<span style="color:#f92672">body</span>&gt;
+&lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">runifapp</span>&gt;
+  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;title&#34;</span>&gt;&lt;<span style="color:#f92672">h1</span>&gt;Hello runif from Vue.js!&lt;/<span style="color:#f92672">h1</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+  &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;body&#34;</span>&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;slidercontainer&#34;</span>&gt;
+        &lt;<span style="color:#f92672">vue-slider</span>
+          <span style="color:#a6e22e">v-model</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;nobs&#34;</span>
+          <span style="color:#a6e22e">:min</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;1&#34;</span>
+          <span style="color:#a6e22e">:max</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;10000&#34;</span>
+          <span style="color:#a6e22e">:lazy</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;true&#34;</span>
+          <span style="color:#a6e22e">:marks</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;[1, 2000, 4000, 6000, 8000, 10000]&#34;</span>
+          <span style="color:#a6e22e">:tooltip</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;&#39;always&#39;&#34;</span>
+        &gt;&lt;/<span style="color:#f92672">vue-slider</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">class</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;plotcontainer&#34;</span>&gt;
+      &lt;<span style="color:#f92672">div</span> <span style="color:#a6e22e">id</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;plot&#34;</span>&gt;&lt;/<span style="color:#f92672">div</span>&gt;
+    &lt;/<span style="color:#f92672">div</span>&gt;
+  &lt;/<span style="color:#f92672">div</span>&gt;
+&lt;/<span style="color:#f92672">div</span>&gt;
+
+
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://cdn.jsdelivr.net/npm/vue-slider-component@latest/dist/vue-slider-component.umd.min.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#34;https://unpkg.com/axios/dist/axios.min.js&#34;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;https://cdn.plot.ly/plotly-2.8.3.min.js&#39;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+&lt;<span style="color:#f92672">script</span> <span style="color:#a6e22e">src</span><span style="color:#f92672">=</span><span style="color:#e6db74">&#39;./main.js&#39;</span>&gt;&lt;/<span style="color:#f92672">script</span>&gt;
+
+&lt;/<span style="color:#f92672">body</span>&gt;
+&lt;/<span style="color:#f92672">html</span>&gt;
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-js" data-lang="js"><span style="color:#66d9ef">const</span> <span style="color:#a6e22e">server</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;http://localhost:3002&#34;</span>;
+
+<span style="color:#66d9ef">var</span> <span style="color:#a6e22e">faithfulapp</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">Vue</span>({
+  <span style="color:#a6e22e">el</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;#runifapp&#39;</span>,
+  <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> [],
+    <span style="color:#a6e22e">layout</span><span style="color:#f92672">:</span> {
+      <span style="color:#a6e22e">title</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;distribution of random uniform numbers&#34;</span>,
+      <span style="color:#a6e22e">xaxis</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">title</span><span style="color:#f92672">:</span> {<span style="color:#a6e22e">text</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#34;x&#34;</span>}}
+    },
+    <span style="color:#a6e22e">config</span><span style="color:#f92672">:</span> { <span style="color:#a6e22e">responsive</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">true</span> },
+    <span style="color:#a6e22e">nobs</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">null</span>
+  },
+  <span style="color:#a6e22e">computed</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">series</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">return</span> [{
+        <span style="color:#a6e22e">x</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">data</span>,
+        <span style="color:#a6e22e">type</span><span style="color:#f92672">:</span> <span style="color:#e6db74">&#39;histogram&#39;</span>,
+        <span style="color:#a6e22e">nbinsx</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">bins</span>
+      }];
+    }
+  },
+  <span style="color:#a6e22e">watch</span><span style="color:#f92672">:</span> {
+    <span style="color:#a6e22e">nobs</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">self</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>
+
+      <span style="color:#a6e22e">axios</span>
+        .<span style="color:#a6e22e">get</span>(<span style="color:#e6db74">`</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">server</span><span style="color:#e6db74">}</span><span style="color:#e6db74">/rand?n=</span><span style="color:#e6db74">${</span><span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">nobs</span><span style="color:#e6db74">}</span><span style="color:#e6db74">`</span>)
+        .<span style="color:#a6e22e">then</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">response</span>) {
+          <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">data</span> <span style="color:#f92672">=</span> <span style="color:#a6e22e">response</span>.<span style="color:#a6e22e">data</span>
+        })
+        .<span style="color:#66d9ef">catch</span>(<span style="color:#66d9ef">function</span> (<span style="color:#a6e22e">error</span>) {
+          <span style="color:#a6e22e">console</span>.<span style="color:#a6e22e">log</span>(<span style="color:#a6e22e">error</span>)
+        })
+    },
+    <span style="color:#a6e22e">data</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+      <span style="color:#a6e22e">Plotly</span>.<span style="color:#a6e22e">newPlot</span>(<span style="color:#e6db74">&#39;plot&#39;</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">series</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">layout</span>, <span style="color:#66d9ef">this</span>.<span style="color:#a6e22e">config</span>)
+    }
+  },
+  <span style="color:#a6e22e">mounted</span><span style="color:#f92672">:</span> <span style="color:#66d9ef">function</span>() {
+    <span style="color:#66d9ef">const</span> <span style="color:#a6e22e">self</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">this</span>
+    <span style="color:#a6e22e">self</span>.<span style="color:#a6e22e">nobs</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">1000</span>
+  },
+  <span style="color:#a6e22e">components</span><span style="color:#f92672">:</span> {
+    <span style="color:#e6db74">&#39;vueSlider&#39;</span><span style="color:#f92672">:</span> window[ <span style="color:#e6db74">&#39;vue-slider-component&#39;</span> ],
+  }
+});
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-css" data-lang="css">@<span style="color:#66d9ef">import</span> <span style="color:#f92672">url</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;https://fonts.googleapis.com/css2?family=Open+Sans&amp;display=swap&#39;</span><span style="color:#f92672">)</span>;
+
+#runifapp <span style="color:#f92672">*</span> {
+  <span style="color:#66d9ef">font-family</span>: <span style="color:#e6db74">&#34;Open Sans&#34;</span>, verdana, arial, <span style="color:#66d9ef">sans-serif</span>;
+}
+
+#runifapp <span style="color:#f92672">p</span> {
+  <span style="color:#66d9ef">margin</span>: <span style="color:#ae81ff">0</span>;
+}
+
+#runifapp  .<span style="color:#a6e22e">body</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">block</span>;
+  <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">100</span><span style="color:#66d9ef">%</span>;
+}
+
+#runifapp .<span style="color:#a6e22e">title</span> <span style="color:#f92672">h1</span> {
+  <span style="color:#66d9ef">font-size</span>: <span style="color:#ae81ff">30</span><span style="color:#66d9ef">px</span>;
+  <span style="color:#66d9ef">font-weight</span>: <span style="color:#ae81ff">500</span>;
+  <span style="color:#66d9ef">margin-bottom</span>: <span style="color:#ae81ff">10</span><span style="color:#66d9ef">px</span>;
+}
+
+#runifapp .<span style="color:#a6e22e">slidercontainer</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">inline-block</span>;
+  <span style="color:#66d9ef">width</span>: calc(<span style="color:#ae81ff">30</span><span style="color:#66d9ef">%</span> <span style="color:#f92672">-</span> <span style="color:#ae81ff">58</span><span style="color:#66d9ef">px</span>);
+  <span style="color:#66d9ef">overflow</span>: <span style="color:#66d9ef">none</span>;
+  <span style="color:#66d9ef">vertical-align</span>: <span style="color:#66d9ef">top</span>;
+  <span style="color:#66d9ef">border</span>: <span style="color:#ae81ff">1</span><span style="color:#66d9ef">px</span> <span style="color:#66d9ef">solid</span> <span style="color:#ae81ff">#999</span>;
+  <span style="color:#66d9ef">border-radius</span>: <span style="color:#ae81ff">5</span><span style="color:#66d9ef">px</span>;
+  <span style="color:#66d9ef">background-color</span>: <span style="color:#ae81ff">#eee</span>;
+  <span style="color:#66d9ef">padding</span>: <span style="color:#ae81ff">35</span><span style="color:#66d9ef">px</span> <span style="color:#ae81ff">25</span><span style="color:#66d9ef">px</span> <span style="color:#ae81ff">25</span><span style="color:#66d9ef">px</span> <span style="color:#ae81ff">25</span><span style="color:#66d9ef">px</span>;
+}
+
+#runifapp .<span style="color:#a6e22e">plotcontainer</span> {
+  <span style="color:#66d9ef">display</span>: <span style="color:#66d9ef">inline-block</span>;
+  <span style="color:#66d9ef">width</span>: <span style="color:#ae81ff">70</span><span style="color:#66d9ef">%</span>;
+}
+</code></pre></div></section>
+</div>
+</div>
+<p>The application looks as follows:</p>
+<a href="assets/img/hello_runif_vue.webp" target="_blank">
+<img src="assets/img/hello_runif_vue.webp" class="Large"/></a>
+<script src='../../js/tabs.js'></script>
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka">akka</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-actor">akka-actor</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospark">geospark</a></span>
+        
+            <span class="tag"><a href="../../tags/kafka">kafka</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="../../tags/postgraphile">postgraphile</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/postgrest">postgrest</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/scala">scala</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/sedona">sedona</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/single-page-web-apps">single-page-web-apps</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../2022/2022-01-20-too-much-shiny/">Too Much Shiny?!</a></h1>
+            <time class="has-text-grey-light is-size-7">20 January 2022</time>
+        
+            <h1><a href="../../2022/2022-01-09-agent-based-simulations-with-akka/">Agent Based Simulations with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">9 January 2022</time>
+        
+            <h1><a href="../../2021/2021-08-14-data-services-from-postgres/">Data Services from Existing PostgreSQL Databases</a></h1>
+            <time class="has-text-grey-light is-size-7">14 August 2021</time>
+        
+            <h1><a href="../../2021/2021-08-08-online-learning-with-akka/">Online Learning with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">8 August 2021</time>
+        
+            <h1><a href="../../2021/2021-07-30-online-learning-with-apache-kafka/">Online Learning with Apache Kafka</a></h1>
+            <time class="has-text-grey-light is-size-7">30 July 2021</time>
+        
+    </div>
+</div>
+    <br>
+                
+  
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Related posts</h1>
+      
+      
+            <h1><a href="../../2020/2020-10-31-using-postgis-as-a-spatial-backend-for-r/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+      
+            <h1><a href="../../2019/2019-09-17-building-tile-services-on-the-fly-with-geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <time class="has-text-grey-light is-size-7">17 September 2019</time>
+      
+    </div>
+</div>
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2022">2022</a> (2)<br>
+        
+            <a href="../../archives/2021">2021</a> (4)<br>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (2)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2022 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+</body>
+</html>
