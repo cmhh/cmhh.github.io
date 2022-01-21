@@ -65,57 +65,48 @@
 <p>As noted, for our first example we take the union of all meshblocks by Regional Council.  Visually:</p>
 <p><img src="assets/dissolve01.png" alt=""></p>
 <p>We discuss each approach in detail below, but a high-level summary is as follows:</p>
-<div class="three-col-container">
-<div class="three-col ttle">PostGIS</div>
-<div class="three-col ttle">R</div>
-<div class="three-col ttle">Sedona</div>
-<div class="three-col">
-<pre><code class="language-sql hljs">SELECT
+<div class="tabs-with-content" id="ex1">
+<div class="tabs is-boxed">
+  <ul>
+    <li class="is-active"><a>PostGIS</a></li>
+    <li><a>R</a></li>
+    <li><a>Sedona</a></li>
+  </ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span>
   regc2021_v, 
-  ST_Multi(ST_Union(geom)) as geom
-FROM 
+  ST_Multi(ST_Union(geom)) <span style="color:#66d9ef">as</span> geom
+<span style="color:#66d9ef">FROM</span> 
   statsnz.meshblock2021
-GROUP BY 
+<span style="color:#66d9ef">GROUP</span> <span style="color:#66d9ef">BY</span> 
   regc2021_v
-ORDER BY
+<span style="color:#66d9ef">ORDER</span> <span style="color:#66d9ef">BY</span>
   regc2021_v
-&nbsp;  
-&nbsp;  
-&nbsp;  </code></pre>
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">rc <span style="color:#f92672">&lt;-</span> mbhg <span style="color:#f92672">%&gt;%</span>
+  <span style="color:#a6e22e">group_by</span>(REGC2021_V) <span style="color:#f92672">%&gt;%</span>
+  <span style="color:#a6e22e">summarise</span>(n <span style="color:#f92672">=</span> <span style="color:#a6e22e">n</span>())
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">val</span> rc <span style="color:#66d9ef">=</span> spark<span style="color:#f92672">.</span>sql<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">  SELECT 
+</span><span style="color:#e6db74">    REGC2021_V, 
+</span><span style="color:#e6db74">    ST_Union_Aggr(geometry) 
+</span><span style="color:#e6db74">      as geometry 
+</span><span style="color:#e6db74">  FROM 
+</span><span style="color:#e6db74">    mb 
+</span><span style="color:#e6db74">  GROUP BY
+</span><span style="color:#e6db74">    REGC2021_V 
+</span><span style="color:#e6db74">  ORDER BY
+</span><span style="color:#e6db74">    REGC2021_V
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#f92672">)</span>
+</code></pre></div></section>
 </div>
-<div class="three-col">
-<pre><code class="language-r hljs">rc <- mbhg %>%
-  group_by(REGC2021_V) %>%
-  summarise(n = n())
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  
-&nbsp;  </code></pre>
 </div>
-<div class="three-col">
-<pre><code class="language-scala hljs">val rc = spark.sql("""
-  SELECT 
-    REGC2021_V, 
-    ST_Union_Aggr(geometry) 
-      as geometry 
-  FROM 
-    mb 
-  GROUP BY
-    REGC2021_V 
-  ORDER BY
-    REGC2021_V
-""")</code></pre>
-</div>
-<div class="three-col">121 seconds</div>
-<div class="three-col">124 seconds</div>
-<div class="three-col">152 seconds (stand-alone)</div>
-</div>
-<p>Sedona will scale to some extent–when run on a cluster using Elastic MapReduce (6.2.0), Sedona took 122 seconds with 6 workers, and 108 seconds with 12 workers.  Other optimisations are likely possible when tuning various cluster parameters, such as number of workers, driver memory, and so on.</p>
+<p>The run-times are 121, 124, and 152 seconds, respectively, for PostGIS, R, and Sedona.  Sedona will scale to some extent–when run on a cluster using Elastic MapReduce (6.2.0), Sedona took 122 seconds with 6 workers, and 108 seconds with 12 workers.  Other optimisations are likely possible when tuning various cluster parameters, such as number of workers, driver memory, and so on.</p>
 <h2 id="postgis">PostGIS</h2>
 <p>Assuming we have stored the meshblock features in a PostGIS table called <code>statsnz.meshblock2021</code>, we can dissolve them by running the following SQL query:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span>
@@ -268,60 +259,51 @@ ggplotly(p)
 <p>For the next example, we find the meshblock polygon each of our address points belongs to, and we then borrow attributes from the containing polygon, attaching them directly as attributes of each address point.  Visually:</p>
 <p><img src="assets/intersect01.png" alt=""></p>
 <p>We discuss each approach in detail below, but a high-level summary is as follows:</p>
-<div class="three-col-container">
-<div class="three-col ttle">PostGIS</div>
-<div class="three-col ttle">R</div>
-<div class="three-col ttle">Sedona</div>
-<div class="three-col">
-<pre><code class="language-sql hljs">SELECT 
+<div class="tabs-with-content" id="ex2">
+<div class="tabs is-boxed">
+  <ul>
+    <li class="is-active"><a>PostGIS</a></li>
+    <li><a>R</a></li>
+    <li><a>Sedona</a></li>
+  </ul>
+</div>
+<div>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> 
   addr.address_id, 
   addr.full_add_1,  
   mb.mb2021_v1_, 
   addr.geom 
-FROM
+<span style="color:#66d9ef">FROM</span>
   linz.address addr, 
   statsnz.meshblock2021 mb 
-WHERE 
+<span style="color:#66d9ef">WHERE</span> 
   st_intersects(addr.geom, mb.geom)
-&nbsp;
-&nbsp;
-</code></pre>
-</div>
-<div class="three-col">
-<pre><code class="language-scala r">sf::st_intersection(
-  select(
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">sf<span style="color:#f92672">::</span><span style="color:#a6e22e">st_intersection</span>(
+  <span style="color:#a6e22e">select</span>(
     addr, ADDRESS_ID, FULL_ADD_1
   ), 
-  select(mbhg, MB2021_V1_)
+  <span style="color:#a6e22e">select</span>(mbhg, MB2021_V1_)
 ) 
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-&nbsp;
-</code></pre>
+</code></pre></div></section>
+<section class="tab-content">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">val</span> rc <span style="color:#66d9ef">=</span> spark<span style="color:#f92672">.</span>sql<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;&#34;&#34;
+</span><span style="color:#e6db74">  SELECT 
+</span><span style="color:#e6db74">    REGC2021_V, 
+</span><span style="color:#e6db74">    ST_Union_Aggr(geometry) 
+</span><span style="color:#e6db74">      as geometry 
+</span><span style="color:#e6db74">  FROM 
+</span><span style="color:#e6db74">    mb 
+</span><span style="color:#e6db74">  GROUP BY
+</span><span style="color:#e6db74">    REGC2021_V 
+</span><span style="color:#e6db74">  ORDER BY
+</span><span style="color:#e6db74">    REGC2021_V
+</span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#f92672">)</span>
+</code></pre></div></div>
 </div>
-<div class="three-col">
-<pre><code class="language-scala hljs">val rc = spark.sql("""
-  SELECT 
-    REGC2021_V, 
-    ST_Union_Aggr(geometry) 
-      as geometry 
-  FROM 
-    mb 
-  GROUP BY
-    REGC2021_V 
-  ORDER BY
-    REGC2021_V
-""")
-</code></pre>
-</div>
-<div class="three-col">193 seconds</div>
-<div class="three-col">3194 seconds</div>
-<div class="three-col">268 seconds (stand-alone)</div>
-</div>
-<p>As before, Sedona will scale to some extent–when run on a cluster using Elastic MapReduce (6.2.0), Sedona took 154 seconds with 6 workers, and 110 seconds with 12 workers.  Other optimisations are likely possible when tuning various cluster parameters, such as number of workers, driver memory, and so on.  R is extremely slow in this case because we do not create and exploit any kind of spatial indexing.</p>
+<p>The run-times are 193, 3194, and 268 seconds, respectively, for PostGIS, R, and Sedona.  As before, Sedona will scale to some extent–when run on a cluster using Elastic MapReduce (6.2.0), Sedona took 154 seconds with 6 workers, and 110 seconds with 12 workers.  Other optimisations are likely possible when tuning various cluster parameters, such as number of workers, driver memory, and so on.  R is extremely slow in this case because we do not create and exploit any kind of spatial indexing.</p>
 <h2 id="postgis-1">PostGIS</h2>
 <p>Assuming we have address points stored in a PostGIS table called <code>linz.address</code>, and meshblock as before in <code>statsnz.meshblock2021</code>, we can borrow attributes from each address' enclosing meshblock as follows:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-sql" data-lang="sql"><span style="color:#66d9ef">SELECT</span> 
@@ -474,7 +456,7 @@ resolvers <span style="color:#f92672">++=</span> <span style="color:#a6e22e">Seq
 <p><a href="https://koordinates.com/from/datafinder.stats.govt.nz/layer/105173/">Meshblock Higher Geographies 2021 (high definition)</a> is a set of 53596 polygons covering the full extent of New Zealand.  It was downloaded in ESRI shapefile format.  Zipped, it weighs in at 155MB, and unzipped, 504MB.  All other higher geographies maintained by Stats NZ are collections of meshblocks, and the attribute table provided includes concordances.</p>
 <p><a href="https://koordinates.com/from/data.linz.govt.nz/layer/53353/">NZ Street Address</a> is a set of 2107573 address points.  Zipped, the shapefile is 178MB, and unzipped it is 2.8GB.  The address points are split into 3 different shapefiles when using <a href="https://koordinates.com">Koordinates</a>, which we collapsed into one post-download.</p>
 <p>Note that Sedona seems to require shapefiles to be stored in a certain way.  Specifically, that we put shapefiles in a folder which has the same name as the individual components.  For the meshblocks, this means:</p>
-<pre tabindex="0"><code>meshblock-higher-geographies-2021-high-definition
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">meshblock-higher-geographies-2021-high-definition
 ├── meshblock-higher-geographies-2021-high-definition.cpg
 ├── meshblock-higher-geographies-2021-high-definition.dbf
 ├── meshblock-higher-geographies-2021-high-definition.prj
@@ -482,11 +464,11 @@ resolvers <span style="color:#f92672">++=</span> <span style="color:#a6e22e">Seq
 ├── meshblock-higher-geographies-2021-high-definition.shx
 ├── meshblock-higher-geographies-2021-high-definition.txt
 └── meshblock-higher-geographies-2021-high-definition.xml
-</code></pre><p>Most other systems don&rsquo;t require us to collect the components in a folder in this way, even if it might be sensible to organise things this way.  In R, for example, we&rsquo;d just refer to the <code>shp</code> component and the rest would be detected for as.  For example:</p>
+</code></pre></div><p>Most other systems don&rsquo;t require us to collect the components in a folder in this way, even if it might be sensible to organise things this way.  In R, for example, we&rsquo;d just refer to the <code>shp</code> component and the rest would be detected for as.  For example:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">addr <span style="color:#f92672">&lt;-</span> sf<span style="color:#f92672">::</span><span style="color:#a6e22e">st_read</span>(<span style="color:#e6db74">&#34;nz-street-address.shp&#34;</span>)
 </code></pre></div><p>Note that when using Elastic MapReduce, we need to copy our input features to the Hadoop filesystem.  For example:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">hdfs dfs -copyFromLocal meshblock-higher-geographies-2021-high-definition /user/hadoop/
-</code></pre></div>
+</code></pre></div><script src='../../js/tabs.js'></script>
             </div>
         </div>
     </div>
