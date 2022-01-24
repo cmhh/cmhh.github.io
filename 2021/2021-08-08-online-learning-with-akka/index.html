@@ -169,7 +169,7 @@
 </code></pre></div><p>Note that actors can be created with an object-oriented or functional style, and we&rsquo;ve opted for the functional approach here.  So in the case of the consumer, we&rsquo;ve tracked the number of total training images received, mostly to demonstrate how one might go about maintaining state–we <em>could</em> use mutable variables, but instead we define our <code>Behavior</code> recursively.</p>
 <p>Rather than send messages directly to either of our producer or consumer actors, we communicate exclusively with a coordinator actor.  We send the coordinator any of the following:</p>
 <ul>
-<li><code>RequestSendAccuracy</code> - coordinator will tell the producer to send <code>Image</code>s to the consumer</li>
+<li><code>RequestSendImage</code> - coordinator will tell the producer to send <code>Image</code>s to the consumer</li>
 <li><code>RequestAccuracy</code> - coordinator will tell the consumer to send an <code>Accuracy</code> object</li>
 <li><code>RequestClassifier</code> - coordinator will tell the consumer to send a <code>Classifier</code> object</li>
 <li><code>Stop</code> - tell both the consumer and producer to <code>Stop</code></li>
