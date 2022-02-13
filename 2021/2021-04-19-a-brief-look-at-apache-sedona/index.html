@@ -225,21 +225,28 @@
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">val</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span><span style="color:#f92672">,</span> t<span style="color:#f92672">)</span> <span style="color:#66d9ef">=</span> timeit <span style="color:#f92672">{</span> rc<span style="color:#f92672">.</span>show <span style="color:#f92672">}</span>
 </code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala">t<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Double</span> <span style="color:#f92672">=</span> <span style="color:#ae81ff">152.024319529</span>
 </code></pre></div><p>At 152 seconds this is a little slower than PostGIS, but pretty reasonable all the same.  However, there is a pretty big caveat here.  Spark is pretty sophisticated, and in practice performance will vary a lot depending on how things are configured.  We can vary the number of executors, the number of cores each executor can use, driver memory, and so on, and so on.  In this case we did not spend any time tuning these parameters, but we did deliberately repartition the input meshblock features into 36 chunks, and this has a dramatic effect on performance.  The following chart shows runtime as a function of the number of partitions:</p>
-<pre tabindex="0"><code class="language-{r" data-lang="{r">library(ggplot2)
+<a href="assets/timings.png" target="_blank">
+<img src="assets/timings.png" class="Large">
+</a>
+<!--
+```{r echo = FALSE, warning = FALSE, message = FALSE}
+library(ggplot2)
 library(plotly)
 
-df &lt;- data.frame(
+df <- data.frame(
   partitions = c(1, 6, 12, 36, 54, 75, 100, 200),
   time = c(4905, 729, 310, 152, 138, 158, 170, 269)
 )
 
-p &lt;- ggplot(data = df, aes(x = partitions, y = time)) + 
+p <- ggplot(data = df, aes(x = partitions, y = time)) + 
   geom_line() + 
   geom_point() +
-  xlab(&quot;number of partitions&quot;) +
-  ylab(&quot;runtime (seconds)&quot;)
+  xlab("number of partitions") +
+  ylab("runtime (seconds)")
 ggplotly(p)
-</code></pre><p>The machine this task was run on has 12 cores, and the best performance seems to be roughly where there are 3 times as many partitions as cores.</p>
+```
+-->
+<p>The machine this task was run on has 12 cores, and the best performance seems to be roughly where there are 3 times as many partitions as cores.</p>
 <p>Note that those familiar with Spark could attempt to do things a bit more&hellip; primitively.  Looking again at the original object, <code>mbrdd</code>, we can get the underlying <code>RDD</code> as:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala">mbrdd<span style="color:#f92672">.</span>getRawSpatialRDD<span style="color:#f92672">.</span>rdd
 </code></pre></div><p>This is essentially just a collection of objects of type <code>Geometry</code>.  We can call a method <code>getUserData</code> on a <code>Geometry</code> object to get the attributes associated with a feature as a single tab-delimited string.  The 24th field is the regional council code, and we can use this to create a pair <code>RDD</code>:</p>
