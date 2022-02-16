@@ -2,157 +2,157 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/archives/2022/</loc>
+    <loc>https://cmhh.github.io/archives/2022/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/archives/</loc>
+    <loc>https://cmhh.github.io/archives/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/</loc>
+    <loc>https://cmhh.github.io/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/post/</loc>
+    <loc>https://cmhh.github.io/post/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/r/</loc>
+    <loc>https://cmhh.github.io/tags/r/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/shiny/</loc>
+    <loc>https://cmhh.github.io/tags/shiny/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/single-page-web-apps/</loc>
+    <loc>https://cmhh.github.io/tags/single-page-web-apps/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/</loc>
+    <loc>https://cmhh.github.io/tags/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2022/2022-01-20-too-much-shiny/</loc>
+    <loc>https://cmhh.github.io/2022/2022-01-20-too-much-shiny/</loc>
     <lastmod>2022-01-20T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2022/2022-01-09-agent-based-simulations-with-akka/</loc>
+    <loc>https://cmhh.github.io/2022/2022-01-09-agent-based-simulations-with-akka/</loc>
     <lastmod>2022-01-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/akka/</loc>
+    <loc>https://cmhh.github.io/tags/akka/</loc>
     <lastmod>2022-01-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/akka-actor/</loc>
+    <loc>https://cmhh.github.io/tags/akka-actor/</loc>
     <lastmod>2022-01-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/scala/</loc>
+    <loc>https://cmhh.github.io/tags/scala/</loc>
     <lastmod>2022-01-09T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/archives/2021/</loc>
+    <loc>https://cmhh.github.io/archives/2021/</loc>
     <lastmod>2021-08-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2021/2021-08-14-data-services-from-postgres/</loc>
+    <loc>https://cmhh.github.io/2021/2021-08-14-data-services-from-postgres/</loc>
     <lastmod>2021-08-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/postgraphile/</loc>
+    <loc>https://cmhh.github.io/tags/postgraphile/</loc>
     <lastmod>2021-08-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/postgresql/</loc>
+    <loc>https://cmhh.github.io/tags/postgresql/</loc>
     <lastmod>2021-08-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/postgrest/</loc>
+    <loc>https://cmhh.github.io/tags/postgrest/</loc>
     <lastmod>2021-08-14T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/deeplearning4j/</loc>
+    <loc>https://cmhh.github.io/tags/deeplearning4j/</loc>
     <lastmod>2021-08-08T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2021/2021-08-08-online-learning-with-akka/</loc>
+    <loc>https://cmhh.github.io/2021/2021-08-08-online-learning-with-akka/</loc>
     <lastmod>2021-08-08T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/kafka/</loc>
+    <loc>https://cmhh.github.io/tags/kafka/</loc>
     <lastmod>2021-07-30T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2021/2021-07-30-online-learning-with-apache-kafka/</loc>
+    <loc>https://cmhh.github.io/2021/2021-07-30-online-learning-with-apache-kafka/</loc>
     <lastmod>2021-07-30T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2021/2021-04-19-a-brief-look-at-apache-sedona/</loc>
+    <loc>https://cmhh.github.io/2021/2021-04-19-a-brief-look-at-apache-sedona/</loc>
     <lastmod>2021-04-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/geospark/</loc>
+    <loc>https://cmhh.github.io/tags/geospark/</loc>
     <lastmod>2021-04-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/postgis/</loc>
+    <loc>https://cmhh.github.io/tags/postgis/</loc>
     <lastmod>2021-04-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/sedona/</loc>
+    <loc>https://cmhh.github.io/tags/sedona/</loc>
     <lastmod>2021-04-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/spark/</loc>
+    <loc>https://cmhh.github.io/tags/spark/</loc>
     <lastmod>2021-04-19T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/archives/2020/</loc>
+    <loc>https://cmhh.github.io/archives/2020/</loc>
     <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/docker/</loc>
+    <loc>https://cmhh.github.io/tags/docker/</loc>
     <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2020/2020-12-05-working-productively-on-windows-using-wsl2-and-docker/</loc>
+    <loc>https://cmhh.github.io/2020/2020-12-05-working-productively-on-windows-using-wsl2-and-docker/</loc>
     <lastmod>2020-12-05T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2020/2020-10-31-docker-on-windows-with-wsl2/</loc>
+    <loc>https://cmhh.github.io/2020/2020-10-31-docker-on-windows-with-wsl2/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2020/2020-10-31-using-postgis-as-a-spatial-backend-for-r/</loc>
+    <loc>https://cmhh.github.io/2020/2020-10-31-using-postgis-as-a-spatial-backend-for-r/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/wsl2/</loc>
+    <loc>https://cmhh.github.io/tags/wsl2/</loc>
     <lastmod>2020-10-31T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/akka-http/</loc>
+    <loc>https://cmhh.github.io/tags/akka-http/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2020/2020-06-01-seasonal-adjustment-as-a-service/</loc>
+    <loc>https://cmhh.github.io/2020/2020-06-01-seasonal-adjustment-as-a-service/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/seasonal-adjustment/</loc>
+    <loc>https://cmhh.github.io/tags/seasonal-adjustment/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/vuejs/</loc>
+    <loc>https://cmhh.github.io/tags/vuejs/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/x13-arima-seats/</loc>
+    <loc>https://cmhh.github.io/tags/x13-arima-seats/</loc>
     <lastmod>2020-06-01T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/archives/2019/</loc>
+    <loc>https://cmhh.github.io/archives/2019/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2019/2019-09-17-building-tile-services-on-the-fly-with-geoserver/</loc>
+    <loc>https://cmhh.github.io/2019/2019-09-17-building-tile-services-on-the-fly-with-geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/geoserver/</loc>
+    <loc>https://cmhh.github.io/tags/geoserver/</loc>
     <lastmod>2019-09-17T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/archives/2017/</loc>
+    <loc>https://cmhh.github.io/archives/2017/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/qgis/</loc>
+    <loc>https://cmhh.github.io/tags/qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/tiles/</loc>
+    <loc>https://cmhh.github.io/tags/tiles/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2017/2017-01-26-web-maps-and-tiles-with-qgis/</loc>
+    <loc>https://cmhh.github.io/2017/2017-01-26-web-maps-and-tiles-with-qgis/</loc>
     <lastmod>2017-01-26T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/archives/2016/</loc>
+    <loc>https://cmhh.github.io/archives/2016/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2016/2016-11-28-serving-geospatial-features-with-mapnik-and-tilestache/</loc>
+    <loc>https://cmhh.github.io/2016/2016-11-28-serving-geospatial-features-with-mapnik-and-tilestache/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/tilestache/</loc>
+    <loc>https://cmhh.github.io/tags/tilestache/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/wmts/</loc>
+    <loc>https://cmhh.github.io/tags/wmts/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/tags/nodejs/</loc>
+    <loc>https://cmhh.github.io/tags/nodejs/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/2016/2016-05-28-web-services-with-nodejs/</loc>
+    <loc>https://cmhh.github.io/2016/2016-05-28-web-services-with-nodejs/</loc>
     <lastmod>2016-05-28T00:00:00+00:00</lastmod>
   </url>
 </urlset>
