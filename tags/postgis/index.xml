@@ -5,10 +5,19 @@
     <description>Recent content in postgis on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 19 Apr 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 25 Feb 2022 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/tags/postgis/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Serving PostGIS Features Over HTTP</title>
+      <link>/2022/2022-02-25-serving_postgis_feautres/</link>
+      <pubDate>Fri, 25 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-02-25-serving_postgis_feautres/</guid>
+      <description>Overview I love spatial data, and I use it a LOT. My typical use case mostly involves downloading a feature class from some online source, and then using it entirely locally. If I just want to look at it, I&amp;rsquo;ll drop it in QGIS, but oftentimes I&amp;rsquo;ll load the features into a (containerised) PostGIS-enabled database. Unfortunately, many of the features I&amp;rsquo;m interested in are harder to download than I&amp;rsquo;d like. Take the Stats NZ Geographic Data Service, for example.</description>
+    </item>
     
     <item>
       <title>A Brief Look at Apache Sedona</title>

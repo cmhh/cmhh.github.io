@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Serving PostGIS Features Over HTTP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
+</head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Serving PostGIS Features Over HTTP
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <h1 id="overview">Overview</h1>
+<p>I love spatial data, and I use it a LOT.  My typical use case mostly involves downloading a feature class from some online source, and then using it entirely locally.  If I just want to look at it, I&rsquo;ll drop it in <a href="https://qgis.org/en/site/">QGIS</a>, but oftentimes I&rsquo;ll load the features into a (containerised) <a href="https://postgis.net/">PostGIS</a>-enabled database.  Unfortunately, many of the features I&rsquo;m interested in are harder to download than I&rsquo;d like.  Take the <a href="https://datafinder.stats.govt.nz/">Stats NZ Geographic Data Service</a>, for example.  Let&rsquo;s say we simply wish to get a local copy of the <a href="https://datafinder.stats.govt.nz/layer/106667-regional-council-2022-clipped-generalised/">Regional Council 2022 Clipped (generalised)</a> feature class.  We can&rsquo;t download this directly (or include a link in a blog-post or tutorial)–instead we:</p>
+<ul>
+<li>create an account if we don&rsquo;t have one already</li>
+<li>ensure we have logged in</li>
+<li>select the feature class</li>
+<li>click a download link</li>
+<li>select the output format and coordinate reference in a dialog</li>
+<li>click &lsquo;accept terms and create download&rsquo; link</li>
+<li>wait (sometimes for a <em>long</em> time) for our download to be created</li>
+<li>download feature class via the returned link</li>
+</ul>
+<p>There is a programmatic interface, but this is even less accessible, and requires the following steps:</p>
+<ul>
+<li>create an account if we don&rsquo;t have one already</li>
+<li>create an API key (making sure it has the right functionality selected, also)</li>
+<li>create a download via the <code>exports/layers</code> endpoint</li>
+<li>poll the returned endpoint until the state becomes <code>complete</code></li>
+<li>download feature class via the embedded download link</li>
+</ul>
+<p>Such services are useful for less straightforward applications, such as providing WMTS layers which can be used in leaflet or openlayers.  But in the situation outlined, it would be more convenient to simply be able to download the data without fanfare via a direct link.  For example, it would be extremely easy (and cheap) to simply dump the more popular features classes in an S3 bucket in a handful of common formats.  But we could still make features available directly, in the preferred format, via a web service&hellip;</p>
+<h1 id="postgis-via-http">PostGIS via HTTP</h1>
+<p>PostGIS is awesome, we can all agree, and surely every provider of spatial data is using it, right?  So I thought I&rsquo;d see how easy it might be to stand up a service that can serve features stored in PostGIS to users in their preferred format.  I <a href="https://github.com/cmhh/featureserver">made something</a> that is probably not all that robust, but it was easy, and quite fun, so I thought I&rsquo;d describe it.  It certainly wouldn&rsquo;t be that hard to enhance if somebody was motivated, so&hellip;</p>
+<p>The basic process is actually very simple.  We simply use <a href="https://gdal.org/">GDAL</a>, via the <a href="https://gdal.org/programs/ogr2ogr.html"><code>ogr2ogr</code></a> command-line tool, to convert a PostGIS table to a feature class, and then we use <a href="https://doc.akka.io/docs/akka-http/current/index.html">Akka HTTP</a> to stream the resulting file to users.  <code>ogr2ogr</code> is run as an external process, which is a bit clunky, but serviceable.  GDAL does have <a href="https://gdal.org/api/java/index.html">Java bindings</a>, but the <a href="https://github.com/OSGeo/gdal/blob/master/swig/java/apps/ogr2ogr.java">Java version of <code>ogr2ogr</code></a> I found online was 1718 lines of code, and I didn&rsquo;t have the energy to replicate something similar in Scala (we don&rsquo;t need a full ogr2ogr implementation since we&rsquo;re only using PostGIS as source, and only exporting to a handful of possible formats).  Note that we use Scala throughout.</p>
+<h2 id="a-quick-demo">A Quick Demo</h2>
+<p>A containerised version of the service can be started by running the following (note that <a href="https://git-lfs.github.com/">Git large file storage</a> is required in order to fetch the example feature classes, and <a href="https://www.scala-sbt.org/download.html">sbt</a> is required to build the service itself):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ git lfs clone git@github.com:cmhh/featureserver.git
+$ cd featureserver
+$ sbt assembly
+$ docker-compose up -d
+</code></pre></div><p>The server will be running on <code>localhost:9002</code>.  To list available features, we <code>GET</code> <code>localhost:9002/featureserver/listFeatures</code>:</p>
+<a href="assets/listFeatures.png" target="_blank">
+<img src="assets/listFeatures.png" class="Large"/></a>
+<p>Then, for example, to download <code>regional_council_2022</code> as a GeoPackage file we&rsquo;d <code>GET</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">http://localhost:9002/featureserver/getFeatureClass?catalog=gis&amp;schema=statsnz&amp;name=regional_council_2022
+</code></pre></div><p>This will result in a file named <code>regional_council_2022.gpkg.zip</code> which can be unzipped locally, or happily used directly in QGIS:</p>
+<video width="878" controls>
+  <source src="assets/getFeatureClass.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video> 
+<p>Now lets look in a <em>little</em> more detail (again, full source <a href="https://github.com/cmhh/featureserver">here</a>)&hellip;</p>
+<h2 id="get-some-data">Get some data</h2>
+<p>I downloaded a number of feature classes from <a href="https://datafinder.stats.govt.nz/">Stats NZ Geographic Data Service</a> as GeoPackages, and loaded them to a <a href="https://github.com/cmhh/featureserver/tree/main/data">https://github.com/cmhh/featureserver/tree/main/data</a> repository:</p>
+<table>
+<thead>
+<tr>
+<th>file</th>
+<th>original source</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/communityboard2022.gpkg">communityboard2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106696-community-board-2022-clipped-generalised/">Community Board 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/constituency2022.gpkg">constituency2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106660-constituency-2022-clipped-generalised/">Constituency 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/maoriconstituency2022.gpkg">maoriconstituency2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106664-maori-constituency-2022-clipped-generalised/">Māori Constituency 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/maoriward2022.gpkg">maoriward2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106700-maori-ward-2022-clipped-generalised/">Māori Ward 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/meshblock2022.gpkg">meshblock2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106723-meshblock-2022-clipped-generalised/">Meshblock 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/regionalcouncil2022.gpkg">regionalcouncil2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106667-regional-council-2022-clipped-generalised/">Regional Council 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/statisticalarea12022.gpkg">statisticalarea12022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106709-statistical-area-1-2022-clipped-generalised/">Statistical Area 1 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/statisticalarea22022.gpkg">statisticalarea22022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106706-statistical-area-2-2022-clipped-generalised/">Statistical Area 2 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/subdivision2022.gpkg">subdivision2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106672-subdivision-2022-clipped-generalised/">Territorial Authority 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/ta2022.gpkg">ta2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106669-territorial-authority-2022-clipped-generalised/">Territorial Authority 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/talb2022.gpkg">talb2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106694-territorial-authority-local-board-2022-clipped-generalised/">Territorial Authority Local Board 2022 Clipped (generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/urbanrural2022.gpkg">urbanrural2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106703-urban-rural-2022-clipped-generalised/">Urban Rural 2022 Clipped (Generalised)</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/ward2022.gpkg">ward2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106698-ward-2022-clipped-generalised/">Ward 2022 Clipped (Generalised)</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="get-a-running-postgis-instance">Get a running PostGIS instance</h2>
+<p>As noted, I like to run PostGIS on-demand in a Docker container.  We can do this easily enough by creating <code>Dockerfile</code> with the following content:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive
+<span style="color:#66d9ef">ENV</span> SHELL<span style="color:#f92672">=</span>/bin/bash<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span>  apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get -y dist-upgrade <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get install -y --no-install-recommends <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    wget gnupg2 ca-certificates gdal-bin sudo vim <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    libgdal-dev libgeos-dev libproj-dev libsqlite3-dev libudunits2-dev <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sh -c <span style="color:#e6db74">&#39;echo &#34;deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main&#34; &gt; /etc/apt/sources.list.d/pgdg.list&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get install -y --no-install-recommends postgresql-14 postgresql-14-postgis-3 postgis <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sed -i -e <span style="color:#e6db74">&#39;s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/&#39;</span> /etc/locale.gen <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  dpkg-reconfigure --frontend<span style="color:#f92672">=</span>noninteractive locales <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  update-locale LANG<span style="color:#f92672">=</span>en_US.UTF-8 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm -rf /var/lib/apt/lists/* <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> service postgresql start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -c <span style="color:#e6db74">&#39;create database gis;&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -d gis -c <span style="color:#e6db74">&#39;create extension postgis;&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -d gis -c <span style="color:#e6db74">&#39;create extension postgis_raster;&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -d gis -c <span style="color:#e6db74">&#39;create extension postgis_sfcgal;&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -d gis -c <span style="color:#e6db74">&#39;create extension postgis_topology;&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -d gis -c <span style="color:#e6db74">&#34;SET postgis.gdal_enabled_drivers = &#39;ENABLE_ALL&#39;;&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -c <span style="color:#e6db74">&#39;create user gisuser;&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -c <span style="color:#e6db74">&#34;alter user gisuser with encrypted password &#39;gisuser&#39;;&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sudo -u postgres psql -c <span style="color:#e6db74">&#39;grant all privileges on database gis to gisuser;&#39;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  printf <span style="color:#e6db74">&#34;\tlisten_addresses=&#39;*&#39;\t&#34;</span> &gt;&gt; /etc/postgresql/14/main/postgresql.conf <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sed -i -E <span style="color:#e6db74">&#39;/local +all +all +peer/ s/peer/md5/&#39;</span> /etc/postgresql/14/main/pg_hba.conf <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sed -i -E <span style="color:#e6db74">&#39;/host +all +all +127.0.0.1\/32 +scram-sha-256/ s/127.0.0.1\/32/0.0.0.0\/0   /&#39;</span> /etc/postgresql/14/main/pg_hba.conf <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sed -i -E <span style="color:#e6db74">&#39;/host +all +all +::1\/128 +scram-sha-256/ s/::1\/128/::0\/0  /&#39;</span> /etc/postgresql/14/main/pg_hba.conf <span style="color:#f92672">&amp;&amp;</span><span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  printf <span style="color:#e6db74">&#34;localhost:5432:gis:gisuser:gisuser&#34;</span> &gt;&gt; /root/.pgpass <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  chmod <span style="color:#ae81ff">0600</span> /root/.pgpass<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> adduser --disabled-password --gecos <span style="color:#e6db74">&#34;&#34;</span> gisuser <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  usermod --password <span style="color:#66d9ef">$(</span>openssl passwd -1 gisuser<span style="color:#66d9ef">)</span> gisuser <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  usermod -aG sudo gisuser<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 5432</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> service postgresql start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  tail -f<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>We build this and run an instance as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">$ docker build -t postgis &lt;path to Dockerfile&gt;/.
+$ docker run -d --rm --name postgis -v data:/data -p 5433:5432 postgis
+</code></pre></div><p>We deliberately mount the <code>data</code> folder holding each of our GeoPackages, and the we run commands along the lines of:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">PGPASSWORD<span style="color:#f92672">=</span>gisuser psql -U gisuser -d gis -c <span style="color:#e6db74">&#39;create schema statsnz;&#39;</span>
+
+ogr2ogr <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -f PostgreSQL PG:<span style="color:#e6db74">&#34;dbname=&#39;gis&#39; user=&#39;gisuser&#39; password=&#39;gisuser&#39;&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  regionalcouncil2022.gpkg <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -nln statsnz.regional_council_2022
+
+ogr2ogr <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -f PostgreSQL PG:<span style="color:#e6db74">&#34;dbname=&#39;gis&#39; user=&#39;gisuser&#39; password=&#39;gisuser&#39;&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  maoriconstituency2022.gpkg <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -nln statsnz.maori_constituency_2022
+</code></pre></div><p>We can automate this further (and, obviously be safer with passwords and root priviliges), but this is good for illustration.</p>
+<h2 id="save-postgis-table-as-files-on-disk">Save PostGIS table as &lsquo;files&rsquo; on disk</h2>
+<p>We first write a function with the following signature:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">def</span> command<span style="color:#f92672">(</span>
+  catalog<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> schema<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> table<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> 
+  path<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> format<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Option</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Format</span><span style="color:#f92672">],</span> epsg<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Option</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Int</span><span style="color:#f92672">],</span> simplify<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Option</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Double</span><span style="color:#f92672">]</span>
+<span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Result</span><span style="color:#f92672">[</span><span style="color:#66d9ef">String</span><span style="color:#f92672">]</span>
+</code></pre></div><p><code>Result</code> is a simple custom type, similar to <code>Try</code>, except that the happy path is further differentiated into <code>Empty</code> and <code>NonEmpty</code>, and we do this so that we can send different HTTP codes in each case (while still using pattern matching).  The <code>command</code> function first confirms the requested feature class exists, returning a valid <code>ogr2ogr</code> command inside a <code>NonEmpty</code> <code>Result</code> if it does, and an <code>Empty</code> <code>Result</code> if not.  If the PostGIS database is unreachable, the result will be a <code>Throwable</code> inside an <code>Error</code> <code>Result</code>.  But, as an example (the output isn&rsquo;t as pretty–I added some line breaks!):</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala">utils<span style="color:#f92672">.</span>command<span style="color:#f92672">(</span>
+  <span style="color:#e6db74">&#34;gis&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;statsnz&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;regional_council_2022&#34;</span><span style="color:#f92672">,</span> 
+  <span style="color:#e6db74">&#34;blah&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;geopackage&#34;</span><span style="color:#f92672">,</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">4326</span><span style="color:#f92672">),</span> <span style="color:#a6e22e">Some</span><span style="color:#f92672">(</span><span style="color:#ae81ff">100</span><span style="color:#f92672">)</span>
+<span style="color:#f92672">)</span> <span style="color:#66d9ef">match</span> <span style="color:#f92672">{</span> 
+  <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">NonEmpty</span><span style="color:#f92672">(</span>cmd<span style="color:#f92672">)</span> <span style="color:#66d9ef">=&gt;</span> println<span style="color:#f92672">(</span>cmd<span style="color:#f92672">)</span> 
+  <span style="color:#66d9ef">case</span> <span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> <span style="color:#f92672">()</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">ogr2ogr -f <span style="color:#e6db74">&#34;GPKG&#34;</span> <span style="color:#e6db74">&#34;blah/regional_council_2022.gpkg&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  PG:<span style="color:#e6db74">&#34;host=localhost port=5433 user=gisuser password=gisuser dbname=gis&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  <span style="color:#e6db74">&#34;statsnz.regional_council_2022&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -t_srs <span style="color:#e6db74">&#34;EPSG:4326&#34;</span> -simplify 100.0 -nlt MULTIPOLYGON <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -nln <span style="color:#e6db74">&#34;regional_council_2022&#34;</span> -overwrite
+</code></pre></div><p>This command can be run as a process easily enough:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> sys.process._
+<span style="color:#66d9ef">val</span> p <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Process</span><span style="color:#f92672">(</span><span style="color:#e6db74">s&#34;&#34;&#34;</span><span style="color:#e6db74">$cmd</span><span style="color:#e6db74">&#34;&#34;&#34;</span><span style="color:#f92672">)</span>
+p<span style="color:#f92672">.!!</span>
+</code></pre></div><p>We then zip the results using the <code>java.util.zip</code> library using the following function:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">import</span> java.nio.file.Files
+<span style="color:#66d9ef">import</span> java.io.<span style="color:#f92672">{</span><span style="color:#a6e22e">File</span><span style="color:#f92672">,</span> <span style="color:#a6e22e">FileInputStream</span><span style="color:#f92672">,</span> <span style="color:#a6e22e">FileOutputStream</span><span style="color:#f92672">}</span>
+<span style="color:#66d9ef">import</span> java.util.zip.<span style="color:#f92672">{</span><span style="color:#a6e22e">ZipEntry</span><span style="color:#f92672">,</span> <span style="color:#a6e22e">ZipOutputStream</span><span style="color:#f92672">}</span>
+<span style="color:#66d9ef">import</span> com.typesafe.config.<span style="color:#f92672">{</span><span style="color:#a6e22e">Config</span><span style="color:#f92672">,</span> <span style="color:#a6e22e">ConfigFactory</span><span style="color:#f92672">}</span>
+<span style="color:#66d9ef">import</span> scala.util.Try
+
+<span style="color:#66d9ef">def</span> zip<span style="color:#f92672">(</span>folder<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> outfile<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Try</span><span style="color:#f92672">[</span><span style="color:#66d9ef">String</span><span style="color:#f92672">]</span> <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Try</span> <span style="color:#f92672">{</span>
+  <span style="color:#66d9ef">val</span> dir<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">File</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">File</span><span style="color:#f92672">(</span>folder<span style="color:#f92672">)</span>
+  <span style="color:#66d9ef">val</span> files <span style="color:#66d9ef">=</span> dir<span style="color:#f92672">.</span>listFiles<span style="color:#f92672">().</span>toList
+  <span style="color:#66d9ef">val</span> fos<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">FileOutputStream</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">FileOutputStream</span><span style="color:#f92672">(</span>outfile<span style="color:#f92672">)</span>
+  <span style="color:#66d9ef">val</span> zos<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">ZipOutputStream</span> <span style="color:#f92672">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ZipOutputStream</span><span style="color:#f92672">(</span>fos<span style="color:#f92672">)</span>
+  files<span style="color:#f92672">.</span>foreach<span style="color:#f92672">(</span>f <span style="color:#66d9ef">=&gt;</span> <span style="color:#f92672">{</span>
+    <span style="color:#66d9ef">val</span> fis <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">FileInputStream</span><span style="color:#f92672">(</span>f<span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">val</span> entry <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">new</span> <span style="color:#a6e22e">ZipEntry</span><span style="color:#f92672">(</span>f<span style="color:#f92672">.</span>getName<span style="color:#f92672">())</span>
+    zos<span style="color:#f92672">.</span>putNextEntry<span style="color:#f92672">(</span>entry<span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">val</span> buff <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">Array</span><span style="color:#f92672">.</span>fill<span style="color:#f92672">[</span><span style="color:#66d9ef">Byte</span><span style="color:#f92672">](</span><span style="color:#ae81ff">1024</span><span style="color:#f92672">)(</span><span style="color:#ae81ff">0</span><span style="color:#f92672">)</span>
+    <span style="color:#66d9ef">def</span> loop<span style="color:#f92672">(</span>s<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">FileInputStream</span><span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Unit</span> <span style="color:#f92672">=</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">val</span> n <span style="color:#66d9ef">=</span> s<span style="color:#f92672">.</span>read<span style="color:#f92672">(</span>buff<span style="color:#f92672">)</span>
+      <span style="color:#66d9ef">if</span> <span style="color:#f92672">(</span>n <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">)</span> <span style="color:#f92672">()</span>
+      <span style="color:#66d9ef">else</span> <span style="color:#f92672">{</span>
+        zos<span style="color:#f92672">.</span>write<span style="color:#f92672">(</span>buff<span style="color:#f92672">,</span> <span style="color:#ae81ff">0</span><span style="color:#f92672">,</span> n<span style="color:#f92672">)</span>
+        loop<span style="color:#f92672">(</span>s<span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+    loop<span style="color:#f92672">(</span>fis<span style="color:#f92672">)</span>
+    fis<span style="color:#f92672">.</span>close<span style="color:#f92672">()</span>
+    f<span style="color:#f92672">.</span>delete<span style="color:#f92672">()</span>
+  <span style="color:#f92672">})</span>
+
+  zos<span style="color:#f92672">.</span>close<span style="color:#f92672">()</span>
+  fos<span style="color:#f92672">.</span>close<span style="color:#f92672">()</span>
+  outfile
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Actually, we combine all the steps into a single function with the following signature:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">def</span> exportAndZip<span style="color:#f92672">(</span>
+  catalog<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> schema<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> table<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span>
+  format<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">String</span><span style="color:#f92672">,</span> epsg<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Option</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Int</span><span style="color:#f92672">],</span> simplify<span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Option</span><span style="color:#f92672">[</span><span style="color:#66d9ef">Double</span><span style="color:#f92672">]</span>
+<span style="color:#f92672">)</span><span style="color:#66d9ef">:</span> <span style="color:#66d9ef">Result</span><span style="color:#f92672">[(</span><span style="color:#66d9ef">String</span>, <span style="color:#66d9ef">String</span><span style="color:#f92672">)]</span>
+</code></pre></div><p>The resulting tuple contains the folder where the ouptput is stored, and the name of the compressed archive.  The output folder will be a temporary folder, and later it will be deleted after it has been streamed to the client–so many side-effects!</p>
+<h2 id="stream-files-to-clients">Stream &lsquo;files&rsquo; to clients</h2>
+<p>Clients will be able to <code>GET</code> a feature class via the <code>/getFeatureClass</code> endpoint.  The logic for this is:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-scala" data-lang="scala"><span style="color:#66d9ef">val</span> getFeatureClass <span style="color:#66d9ef">=</span> path<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;getFeatureClass&#34;</span><span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+  parameters<span style="color:#f92672">(</span>
+    <span style="color:#e6db74">&#34;catalog&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;schema&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;name&#34;</span><span style="color:#f92672">,</span> <span style="color:#e6db74">&#34;format&#34;</span><span style="color:#f92672">.</span>withDefault<span style="color:#f92672">(</span><span style="color:#e6db74">&#34;gpkg&#34;</span><span style="color:#f92672">),</span> <span style="color:#e6db74">&#34;epsg&#34;</span><span style="color:#f92672">.</span>as<span style="color:#f92672">[</span><span style="color:#66d9ef">Int</span><span style="color:#f92672">].?,</span> <span style="color:#e6db74">&#34;simplify&#34;</span><span style="color:#f92672">.</span>as<span style="color:#f92672">[</span><span style="color:#66d9ef">Double</span><span style="color:#f92672">].?</span>
+  <span style="color:#f92672">){</span> <span style="color:#f92672">(</span>catalog<span style="color:#f92672">,</span> schema<span style="color:#f92672">,</span> name<span style="color:#f92672">,</span> format<span style="color:#f92672">,</span> epsg<span style="color:#f92672">,</span> simplify<span style="color:#f92672">)</span> <span style="color:#66d9ef">=&gt;</span>
+    utils<span style="color:#f92672">.</span>exportAndZip<span style="color:#f92672">(</span>catalog<span style="color:#f92672">,</span> schema<span style="color:#f92672">,</span> name<span style="color:#f92672">,</span> format<span style="color:#f92672">,</span> epsg<span style="color:#f92672">,</span> simplify<span style="color:#f92672">)</span> <span style="color:#66d9ef">match</span> <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">NonEmpty</span><span style="color:#f92672">(</span>res<span style="color:#f92672">)</span> <span style="color:#66d9ef">=&gt;</span>
+        <span style="color:#66d9ef">val</span> d <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">new</span> java<span style="color:#f92672">.</span>io<span style="color:#f92672">.</span><span style="color:#a6e22e">File</span><span style="color:#f92672">(</span>res<span style="color:#f92672">.</span>_1<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">val</span> f <span style="color:#66d9ef">=</span> <span style="color:#66d9ef">new</span> java<span style="color:#f92672">.</span>io<span style="color:#f92672">.</span><span style="color:#a6e22e">File</span><span style="color:#f92672">(</span>res<span style="color:#f92672">.</span>_2<span style="color:#f92672">)</span>
+        <span style="color:#66d9ef">val</span> source <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">FileIO</span>
+          <span style="color:#f92672">.</span>fromPath<span style="color:#f92672">(</span>f<span style="color:#f92672">.</span>toPath<span style="color:#f92672">)</span>
+          <span style="color:#f92672">.</span>watchTermination<span style="color:#f92672">()</span> <span style="color:#f92672">{</span> <span style="color:#66d9ef">case</span> <span style="color:#f92672">(</span><span style="color:#66d9ef">_</span><span style="color:#f92672">,</span> result<span style="color:#f92672">)</span> <span style="color:#66d9ef">=&gt;</span> 
+            result<span style="color:#f92672">.</span>onComplete<span style="color:#f92672">(</span><span style="color:#66d9ef">_</span> <span style="color:#66d9ef">=&gt;</span> <span style="color:#f92672">{</span>
+              f<span style="color:#f92672">.</span>delete<span style="color:#f92672">()</span>
+              d<span style="color:#f92672">.</span>delete<span style="color:#f92672">()</span>
+            <span style="color:#f92672">})</span>
+          <span style="color:#f92672">}</span>
+        respondWithHeader<span style="color:#f92672">(</span>`Content-Disposition`<span style="color:#f92672">(</span>attachment<span style="color:#f92672">,</span> <span style="color:#a6e22e">Map</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#34;filename&#34;</span> <span style="color:#f92672">-&gt;</span> f<span style="color:#f92672">.</span>getName<span style="color:#f92672">())))</span> <span style="color:#f92672">{</span>
+          complete<span style="color:#f92672">(</span><span style="color:#a6e22e">HttpEntity</span><span style="color:#f92672">(</span><span style="color:#a6e22e">ContentTypes</span><span style="color:#f92672">.</span>`application/octet-stream`<span style="color:#f92672">,</span> source<span style="color:#f92672">))</span>
+        <span style="color:#f92672">}</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">Empty</span> <span style="color:#66d9ef">=&gt;</span>
+        complete<span style="color:#f92672">(</span><span style="color:#a6e22e">HttpResponse</span><span style="color:#f92672">(</span>
+          <span style="color:#a6e22e">StatusCodes</span><span style="color:#f92672">.</span><span style="color:#a6e22e">NoContent</span>
+        <span style="color:#f92672">))</span>
+      <span style="color:#66d9ef">case</span> <span style="color:#a6e22e">Error</span><span style="color:#f92672">(</span>e<span style="color:#f92672">)</span> <span style="color:#66d9ef">=&gt;</span>
+        complete<span style="color:#f92672">(</span><span style="color:#a6e22e">HttpResponse</span><span style="color:#f92672">(</span>
+          <span style="color:#a6e22e">StatusCodes</span><span style="color:#f92672">.</span><span style="color:#a6e22e">InternalServerError</span><span style="color:#f92672">,</span> 
+          entity <span style="color:#66d9ef">=</span> <span style="color:#a6e22e">HttpEntity</span><span style="color:#f92672">(</span><span style="color:#a6e22e">ContentTypes</span><span style="color:#f92672">.</span>`application/json`<span style="color:#f92672">,</span> <span style="color:#e6db74">s&#34;&#34;&#34;&#34;</span><span style="color:#e6db74">${</span>e<span style="color:#f92672">.</span>getMessage<span style="color:#f92672">()</span><span style="color:#e6db74">}</span><span style="color:#e6db74">&#34;&#34;&#34;&#34;</span><span style="color:#f92672">)</span>
+        <span style="color:#f92672">))</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Neat!</p>
+<h2 id="issues">Issues</h2>
+<p>The server <em>works</em> as it is.  We can use it to download PostGIS features.  We can reproject and simplify our data, and we can export to GeoPackage, shapefile, or GeoJSON.  It&rsquo;s likely the server will stop responding if several people simultaneously download a large feature class, but who knows!  Also, there isn&rsquo;t much in the way of feedback–if a client requests a large feature class that takes a while to prepare (the <code>meshblock_2022</code> dataset is the biggest here, at around 90MB, and takes about 10 seconds to finish streaming, with no re-projection or simplifying) they won&rsquo;t have any way of checking progress.  Also, we delete objects after streaming, while it might make more sense to cache them for some period of time in the event they could be recycled.</p>
+<script src='../../js/tabs.js'></script>
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka">akka</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-actor">akka-actor</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospark">geospark</a></span>
+        
+            <span class="tag"><a href="../../tags/kafka">kafka</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="../../tags/postgraphile">postgraphile</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/postgrest">postgrest</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="../../tags/scala">scala</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/sedona">sedona</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/single-page-web-apps">single-page-web-apps</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../2022/2022-02-25-serving_postgis_feautres/">Serving PostGIS Features Over HTTP</a></h1>
+            <time class="has-text-grey-light is-size-7">25 February 2022</time>
+        
+            <h1><a href="../../2022/2022-01-20-too-much-shiny/">Too Much Shiny?!</a></h1>
+            <time class="has-text-grey-light is-size-7">20 January 2022</time>
+        
+            <h1><a href="../../2022/2022-01-09-agent-based-simulations-with-akka/">Agent Based Simulations with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">9 January 2022</time>
+        
+            <h1><a href="../../2021/2021-08-14-data-services-from-postgres/">Data Services from Existing PostgreSQL Databases</a></h1>
+            <time class="has-text-grey-light is-size-7">14 August 2021</time>
+        
+            <h1><a href="../../2021/2021-08-08-online-learning-with-akka/">Online Learning with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">8 August 2021</time>
+        
+    </div>
+</div>
+    <br>
+                
+  
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Related posts</h1>
+      
+      
+            <h1><a href="../../2020/2020-10-31-using-postgis-as-a-spatial-backend-for-r/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+      
+            <h1><a href="../../2020/2020-06-01-seasonal-adjustment-as-a-service/">Seasonal Adjustment as a Service</a></h1>
+            <time class="has-text-grey-light is-size-7">1 June 2020</time>
+      
+    </div>
+</div>
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2022">2022</a> (3)<br>
+        
+            <a href="../../archives/2021">2021</a> (4)<br>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (3)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2022 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+</body>
+</html>

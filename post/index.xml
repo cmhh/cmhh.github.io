@@ -5,10 +5,19 @@
     <description>Recent content in Posts on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 20 Jan 2022 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 25 Feb 2022 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Serving PostGIS Features Over HTTP</title>
+      <link>/2022/2022-02-25-serving_postgis_feautres/</link>
+      <pubDate>Fri, 25 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-02-25-serving_postgis_feautres/</guid>
+      <description>Overview I love spatial data, and I use it a LOT. My typical use case mostly involves downloading a feature class from some online source, and then using it entirely locally. If I just want to look at it, I&amp;rsquo;ll drop it in QGIS, but oftentimes I&amp;rsquo;ll load the features into a (containerised) PostGIS-enabled database. Unfortunately, many of the features I&amp;rsquo;m interested in are harder to download than I&amp;rsquo;d like. Take the Stats NZ Geographic Data Service, for example.</description>
+    </item>
     
     <item>
       <title>Too Much Shiny?!</title>
@@ -134,6 +143,16 @@ In this post we look at the open source Quantum GIS.</description>
       <guid>/2016/2016-11-28-serving-geospatial-features-with-mapnik-and-tilestache/</guid>
       <description>Overview When making maps for display on the web, the size of the various objects being rendered can quickly become overwhelming. For example, a polygon feature class containing New Zealand Meshblocks, a set of roughly 40,000 mutually exclusive and exhaustive polygons, is more than 100MB when stored as a shapefile, but much larger uncompressed and rendered in a browser window.
 There are various approaches one can take to attempt to deal with this issue, though useful solutions tend to depend on server-side processing.</description>
+    </item>
+    
+    <item>
+      <title>Using R Packages to Disseminate Data</title>
+      <link>/2016/2016-07-20-data-packages/</link>
+      <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/2016/2016-07-20-data-packages/</guid>
+      <description>Introduction R packages can include datasets, and it is very common to do so. This shouldn’t really come as a surprise–R is a statistical language in the end, and it is normal to include working examples with pacakges; and including datasets against which to run unit tests and other examples is clearly a useful thing to do.
+But datasets themselves aren’t central to most packages–statistical methodologies often are, and the data is there for testing or illustrative purposes.</description>
     </item>
     
     <item>

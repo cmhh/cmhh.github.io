@@ -5,10 +5,28 @@
     <description>Recent content in Tags on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 20 Jan 2022 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 25 Feb 2022 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>akka-http</title>
+      <link>/tags/akka-http/</link>
+      <pubDate>Fri, 25 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/akka-http/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>postgis</title>
+      <link>/tags/postgis/</link>
+      <pubDate>Fri, 25 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/postgis/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>R</title>
@@ -119,15 +137,6 @@
     </item>
     
     <item>
-      <title>postgis</title>
-      <link>/tags/postgis/</link>
-      <pubDate>Mon, 19 Apr 2021 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/postgis/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Sedona</title>
       <link>/tags/sedona/</link>
       <pubDate>Mon, 19 Apr 2021 00:00:00 +0000</pubDate>
@@ -160,15 +169,6 @@
       <pubDate>Sat, 31 Oct 2020 00:00:00 +0000</pubDate>
       
       <guid>/tags/wsl2/</guid>
-      <description></description>
-    </item>
-    
-    <item>
-      <title>akka-http</title>
-      <link>/tags/akka-http/</link>
-      <pubDate>Mon, 01 Jun 2020 00:00:00 +0000</pubDate>
-      
-      <guid>/tags/akka-http/</guid>
       <description></description>
     </item>
     
@@ -241,6 +241,15 @@
       <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
       
       <guid>/tags/wmts/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>R packages</title>
+      <link>/tags/r-packages/</link>
+      <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/r-packages/</guid>
       <description></description>
     </item>
     
