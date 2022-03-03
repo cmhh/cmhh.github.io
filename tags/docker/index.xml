@@ -5,10 +5,19 @@
     <description>Recent content in docker on cmhh</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 05 Dec 2020 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 03 Mar 2022 00:00:00 +0000</lastBuildDate>
     
         <atom:link href="/tags/docker/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Deploying Shiny Applications</title>
+      <link>/2022/2022-03-03-deploying-shiny-apps/</link>
+      <pubDate>Thu, 03 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-03-03-deploying-shiny-apps/</guid>
+      <description>Overview In an earlier post, we discussed Shiny, a framework for building web applications using R, and suggested that we might be overdoing it a little. Whether true or not, Shiny is very popular indeed, and so I thought it would be fun to look at how one might go about deploying a Shiny application for public consumption. So, what follows is just a description of various deployment methods, but note that while Shiny is the focus, some of the deployment methods apply to more general scenarios–notably those approaches based upon containerisation.</description>
+    </item>
     
     <item>
       <title>Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</title>

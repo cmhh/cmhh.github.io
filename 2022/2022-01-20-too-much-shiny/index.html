@@ -58,6 +58,7 @@
 <p>Shiny is an R package that makes it easy to build interactive web apps straight from R. You can host standalone apps on a webpage or embed them in R Markdown documents or build dashboards. You can also extend your Shiny apps with CSS themes, htmlwidgets, and JavaScript actions.</p>
 </blockquote>
 <p>Shiny is a wonderful tool, providing a low-entry option for R programmers to develop single-page web applications.  But, <em>in my opinion</em>, it is over-used, and often pushed a fair bit beyond its ideal use-case.  In this post, we consider where Shiny might be a good option, and where it might not.  And even when Shiny is a good option, there are still some common patterns which might be better served by alternative approaches.</p>
+<p>(Note that the source code for all the apps and services in this post can be downloaded from <a href="https://github.com/cmhh/too-much-shiny">cmhh/too-much-shiny</a>.)</p>
 <h1 id="shiny-in-practice">Shiny in Practice?</h1>
 <p>Fundamentally, Shiny applications run on a remote server, with a persistent communication channel being established between the client and the remote server, typically a WebSocket.  An obvious alternative is to create an application that runs in the client&rsquo;s browser, with no such requirement for a <em>persistent</em> connection to any such server.  The two approaches each have their own strengths and weaknesses, and there are certainly situations where Shiny is a sensible solution.</p>
 <p>Firstly, data might well be too large to be bundled in a client-side application.  A common solution is to bundle data with a Shiny application–clients then make selections which are actioned on the remote computer, and only small slices are sent to the client at any one time.  This works well enough, but has a few drawbacks, the main one being that applications need to be redeployed whenever the underlying data is updated.  An alternative, though, is to create a data service which the application can call.  New data can be deployed, then, without interruption to the published application, and in this case it might also become plausible to deploy the application as a client-side application, with no remote dependencies other than the data service itself.  Of course, we really are only shifting the problem since we still need to host our data service, and to establish a process for updating the underlying data, and this may or may not be easier in practice than bundling data with a Shiny application.</p>
@@ -1327,6 +1328,10 @@ cors <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">functi
         
             <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
         
+            <span class="tag"><a href="../../tags/aws">aws</a></span>
+        
+            <span class="tag"><a href="../../tags/azure">azure</a></span>
+        
             <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
         
             <span class="tag"><a href="../../tags/docker">docker</a></span>
@@ -1384,6 +1389,9 @@ cors <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">functi
     <div class="card-content">
         <h1 class="title is-5">Recent posts</h1>
         
+            <h1><a href="../../2022/2022-03-03-deploying-shiny-apps/">Deploying Shiny Applications</a></h1>
+            <time class="has-text-grey-light is-size-7">3 March 2022</time>
+        
             <h1><a href="../../2022/2022-02-25-serving_postgis_feautres/">Serving PostGIS Features Over HTTP</a></h1>
             <time class="has-text-grey-light is-size-7">25 February 2022</time>
         
@@ -1395,9 +1403,6 @@ cors <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">functi
         
             <h1><a href="../../2021/2021-08-14-data-services-from-postgres/">Data Services from Existing PostgreSQL Databases</a></h1>
             <time class="has-text-grey-light is-size-7">14 August 2021</time>
-        
-            <h1><a href="../../2021/2021-08-08-online-learning-with-akka/">Online Learning with Akka</a></h1>
-            <time class="has-text-grey-light is-size-7">8 August 2021</time>
         
     </div>
 </div>
@@ -1411,6 +1416,9 @@ cors <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">functi
     <div class="card-content">
         <h1 class="title is-5">Related posts</h1>
       
+      
+            <h1><a href="../../2022/2022-03-03-deploying-shiny-apps/">Deploying Shiny Applications</a></h1>
+            <time class="has-text-grey-light is-size-7">3 March 2022</time>
       
             <h1><a href="../../2020/2020-10-31-using-postgis-as-a-spatial-backend-for-r/">Using PostGIS as a Spatial Backend for R</a></h1>
             <time class="has-text-grey-light is-size-7">31 October 2020</time>
@@ -1430,7 +1438,7 @@ cors <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">functi
     <div class="card-content">
         <h1 class="title is-5">Archives</h1>
         
-            <a href="../../archives/2022">2022</a> (3)<br>
+            <a href="../../archives/2022">2022</a> (4)<br>
         
             <a href="../../archives/2021">2021</a> (4)<br>
         
