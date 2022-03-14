@@ -49,7 +49,12 @@
         <div class="tile is-child box">
             <div class="content">
                 <h1 id="overview">Overview</h1>
-<p>In an <a href="../2022-01-20-too-much-shiny">earlier post</a>, we discussed <a href="https://shiny.rstudio.com/">Shiny</a>, a framework for building web applications using R, and suggested that we might be overdoing it a little.  Whether true or not, Shiny is very popular indeed, and so I thought it would be fun to look at how one might go about deploying a Shiny application for public consumption.  So, what follows is just a description of various deployment methods, but note that while Shiny is the focus, <em>some</em> of the deployment methods apply to more general scenarios–notably those approaches based upon containerisation.</p>
+<p>In an <a href="../2022-01-20-too-much-shiny">earlier post</a>, we discussed <a href="https://shiny.rstudio.com/">Shiny</a>, a framework for building web applications using R, and suggested that we might be overdoing it a little.  Whether true or not, Shiny is very popular indeed, and so I thought it would be fun to look at how one might go about deploying a Shiny application for public consumption.  So, what follows is just a description of various deployment methods, but note that while Shiny is the focus, <em>some</em> of the deployment methods apply to more general scenarios–notably those approaches based upon containerisation.  The post is on the long side, so we summarise the methods here briefly:</p>
+<ul>
+<li>deploy using a hosted service, <a href="https://www.shinyapps.io">shinyapps.io</a></li>
+<li>deploy locally using an enterprise tool such <a href="https://www.rstudio.com/products/connect/">RStudio Connect</a> (not discussed)</li>
+<li>deploy using <a href=""></a></li>
+</ul>
 <h1 id="an-example-application">An Example Application</h1>
 <p>It doesn&rsquo;t really matter what our application is, but for illustration, let us simply use the following simple application throughout:</p>
 <div class="tabs-with-content" id="hello-runif-shiny">
@@ -390,9 +395,13 @@ $ docker push runifapp.azurecr.io/test/runifapp
         
             <span class="tag"><a href="../../tags/geospark">geospark</a></span>
         
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+        
             <span class="tag"><a href="../../tags/kafka">kafka</a></span>
         
             <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
         
             <span class="tag"><a href="../../tags/postgis">postgis</a></span>
         
@@ -482,6 +491,9 @@ $ docker push runifapp.azurecr.io/test/runifapp
             <h1><a href="../../2019/2019-09-17-building-tile-services-on-the-fly-with-geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
             <time class="has-text-grey-light is-size-7">17 September 2019</time>
       
+            <h1><a href="../../2016/2016-11-27-routing-in-r-using-osrm/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
+            <time class="has-text-grey-light is-size-7">27 November 2016</time>
+      
             <h1><a href="../../2016/2016-07-20-data-packages/">Using R Packages to Disseminate Data</a></h1>
             <time class="has-text-grey-light is-size-7">20 July 2016</time>
       
@@ -504,7 +516,7 @@ $ docker push runifapp.azurecr.io/test/runifapp
         
             <a href="../../archives/2017">2017</a> (1)<br>
         
-            <a href="../../archives/2016">2016</a> (3)<br>
+            <a href="../../archives/2016">2016</a> (4)<br>
         
     </div>
 </div>

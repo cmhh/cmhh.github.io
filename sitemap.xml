@@ -161,6 +161,15 @@
     <loc>/tags/wmts/</loc>
     <lastmod>2016-11-28T00:00:00+00:00</lastmod>
   </url><url>
+    <loc>/tags/geospatial/</loc>
+    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/tags/osrm/</loc>
+    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>/2016/2016-11-27-routing-in-r-using-osrm/</loc>
+    <lastmod>2016-11-27T00:00:00+00:00</lastmod>
+  </url><url>
     <loc>/tags/r-packages/</loc>
     <lastmod>2016-07-20T00:00:00+00:00</lastmod>
   </url><url>

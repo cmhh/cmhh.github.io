@@ -21,6 +21,16 @@ There are various approaches one can take to attempt to deal with this issue, th
     </item>
     
     <item>
+      <title>Routing in R Using the Open Source Routing Machine (OSRM)</title>
+      <link>/2016/2016-11-27-routing-in-r-using-osrm/</link>
+      <pubDate>Sun, 27 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/2016/2016-11-27-routing-in-r-using-osrm/</guid>
+      <description>Overview Edit 2020-07-16: The original version of this post included a bespoke decoder for geometries encoded as Google polylines. The post has been updated to use the googlePolylines package instead.
+I often find myself needing to establish the travel time or distance between arrays of addresses. In the past I have used ArcMap’s Network Analyst tool, but have found the syntax to be clunky at best, and the performance to be very mediocre.</description>
+    </item>
+    
+    <item>
       <title>Using R Packages to Disseminate Data</title>
       <link>/2016/2016-07-20-data-packages/</link>
       <pubDate>Wed, 20 Jul 2016 00:00:00 +0000</pubDate>
