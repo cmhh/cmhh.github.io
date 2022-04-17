@@ -1,0 +1,23 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>snowflake on cmhh</title>
+    <link>/tags/snowflake/</link>
+    <description>Recent content in snowflake on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 17 Apr 2022 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/snowflake/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Loading Spatial Data to Snowflake from R</title>
+      <link>/2022/2022-04-17-r-spatial-snowflake/</link>
+      <pubDate>Sun, 17 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-04-17-r-spatial-snowflake/</guid>
+      <description>Overview I&amp;rsquo;ve recently started using Snowflake for work. I&amp;rsquo;m keen to enable more active use of geospatial data, and so I&amp;rsquo;ve been weighing up the merits of using something like Snowflake rather than, say, PostGIS. Snowflake is lacking in features compared to PostGIS–it has far fewer spatial functions, and a particular issue for me is the lack of support for any geodetic datum other than WGS84. On the other hand, if most of your other data will be stored in Snowflake, then having it all in one place greatly enhances the ability to mash things up in-place.</description>
+    </item>
+    
+  </channel>
+</rss>
