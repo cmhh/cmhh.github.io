@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Loading Spatial Data to Snowflake from R</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
+</head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Loading Spatial Data to Snowflake from R
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <h1 id="overview">Overview</h1>
+<p>I&rsquo;ve recently started using <a href="https://www.snowflake.com/">Snowflake</a> for work.  I&rsquo;m keen to enable more active use of geospatial data, and so I&rsquo;ve been weighing up the merits of using something like Snowflake rather than, say, <a href="https://postgis.net/">PostGIS</a>.  Snowflake is lacking in features compared to PostGIS–it has far fewer spatial functions, and a particular issue for me is the lack of support for any geodetic datum other than WGS84.  On the other hand, if most of your other data will be stored in Snowflake, then having it all in one place greatly enhances the ability to mash things up in-place.</p>
+<p>As part of my exploration, one thing I found particularly niggly was the load process itself.  It is relatively easy to load data into PostGIS from a variety of data sources, either using the <a href="https://gdal.org/programs/ogr2ogr.html"><code>ogr2ogr</code></a> tool provided as part of the <a href="https://gdal.org/">GDAL</a> suite; or utilities provided by PostGIS itself, such as <a href="https://postgis.net/docs/using_postgis_dbmanagement.html#shp2pgsql_usage"><code>shp2pgsql</code></a>.  By contrast, I&rsquo;d found loading spatial data to Snowflake significantly less straightforward.  I understand that <a href="https://www.safe.com/">FME Workbench</a> can handle the job, but I don&rsquo;t have access to it currently where I work, and don&rsquo;t think I&rsquo;d use it enough to justify its procurement.</p>
+<p>Curiously, my first attempt (which worked rather well), involved PostGIS.  I&rsquo;d first load a feature class to PostGIS, then I&rsquo;d dump the results of a query into a CSV file, where I&rsquo;d replace the geometry with well-known text (WKT) using the <code>ST_AS_TEXT</code> function.  When copying data from CSV, Snowflake will happily convert WKT to its own <code>GEOGRAPHY</code> type if that&rsquo;s what the schema demands, and so the method is effective enough.  However, if exploring the use of Snowflake as an alternative to PostGIS, it does seem peculiar to involve PostGIS as part of the load process.</p>
+<p>As an alternative, we can use either of the ODBC or JDBC drivers to insert records.  We just need to find a client library or wrapper that we&rsquo;re comfortable with.  I found an approach using R which is both easy and performant, and so I thought it would be worth describing.  The post will be brief, but hopefully useful to somebody.</p>
+<h1 id="our-task">Our Task</h1>
+<p>We&rsquo;ll simply create a schema in a Snowflake database called <code>GIS</code>, and then we&rsquo;ll load a reasonably large feature class into a table.  We&rsquo;ll use New Zealand building outlines extracted from <a href="https://www.openstreetmap.org">OpenStreetMap</a>.  A New Zealand extract can be downloaded directly from:</p>
+<p><a href="https://download.geofabrik.de/australia-oceania/new-zealand-latest-free.shp.zip">Geofabrik Download Server - New Zealand</a></p>
+<p>This contains 18 or so feature classes, including land use and places of interest, but we&rsquo;ll consider specifically the shapefile named <code>gis_osm_buildings_a_free_1</code>.  This is about 500MB on disk, and contains nearly 1.5 million outlines.</p>
+<a href="assets/buildings.png" target="_blank">
+<img src="assets/buildings.png" class="Large"/></a>
+<h1 id="requirements">Requirements</h1>
+<p>The primary requirement will simply be a recent version of <a href="https://cran.r-project.org/">R</a>, and the <a href="https://r-spatial.github.io/sf/"><code>sf</code></a> package.  In addition, we will also choose to do basic manipulation using the <a href="https://github.com/Rdatatable/data.table"><code>data.table</code></a> package.  We will need additional packages, and the specifics will depend whether we are using the ODBC or JDBC drivers.</p>
+<h2 id="odbc">ODBC</h2>
+<p>If using ODBC, R users will need to install the <a href="https://github.com/r-dbi/odbc">odbc</a> package, as well as the Snowflake ODBC driver.  See:</p>
+<p><a href="https://docs.snowflake.com/en/user-guide/odbc.html">ODBC Driver</a></p>
+<h2 id="jdbc">JDBC</h2>
+<p>If using JDBC, R users will need to install the <a href="http://www.rforge.net/RJDBC/">RJDBC</a> package.  This depends in turn on the <a href="http://www.rforge.net/rJava/">rJava</a> package, and a usable Java Development Kit will need to be present for this to work correctly.  Otherwise, users simply need to download the JDBC driver.  This can be fetched directly from Maven, for example via:</p>
+<p><a href="https://repo1.maven.org/maven2/net/snowflake/snowflake-jdbc/3.13.17/snowflake-jdbc-3.13.17.jar">snowflake-jdbc &raquo; 3.13.17</a></p>
+<p>The ODBC driver will probably be a <em>little</em> faster than the JDBC driver.  In saying that, <em>if</em> you work in a Windows environment, the ODBC driver will need to be installed via an MSI file, and this might require some effort in some enterprise settings.  On the other hand, the JDBC driver has no such requirement, and is easy enough to use <em>if you already have access to a functioning JDK</em>.</p>
+<h1 id="lets-do-it">Let&rsquo;s Do It&hellip;</h1>
+<p>We first need to establish a database connection.  If using ODBC, this will look something like:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">con <span style="color:#f92672">&lt;-</span> DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbConnect</span>(
+  odbc<span style="color:#f92672">::</span><span style="color:#a6e22e">odbc</span>(), 
+  .connection_string <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;
+</span><span style="color:#e6db74">  Driver=SnowflakeDSIIDriver;
+</span><span style="color:#e6db74">  server=&lt;server&gt;.&lt;location&gt;.snowflakecomputing.com;
+</span><span style="color:#e6db74">  uid=&lt;user ID&gt;;
+</span><span style="color:#e6db74">  authenticator=externalbrowser;
+</span><span style="color:#e6db74">  database=&lt;database&gt;;
+</span><span style="color:#e6db74">  warehouse=&lt;warehouse&gt;;
+</span><span style="color:#e6db74">  tracing=2;
+</span><span style="color:#e6db74">  &#34;</span>
+)
+</code></pre></div><p>If using JDBC, this will look something like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">library</span>(RJDBC)
+
+<span style="color:#75715e"># I like to define an infix operator for concatenating strings...</span>
+`%+%` <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">function</span>(a, b) <span style="color:#a6e22e">sprintf</span>(<span style="color:#e6db74">&#34;%s%s&#34;</span>, a, b)
+
+<span style="color:#75715e"># create the driver</span>
+drv <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">JDBC</span>(
+  <span style="color:#e6db74">&#34;net.snowflake.client.jdbc.SnowflakeDriver&#34;</span>,
+  <span style="color:#e6db74">&#34;./inst/java/snowflake-jdbc-3.13.17.jar&#34;</span>
+)
+
+<span style="color:#75715e"># create connection string</span>
+constr <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">sprintf</span>(
+  <span style="color:#e6db74">&#34;jdbc:snowflake://%s.snowflakecomputing.com/?&#34;</span> <span style="color:#f92672">%+%</span> 
+    <span style="color:#e6db74">&#34;db=%s&amp;wharehouse=%s&amp;user=%s&amp;authenticator=externalbrowser&#34;</span>,
+  <span style="color:#e6db74">&#34;&lt;account&gt;.&lt;location&gt;&#34;</span>,
+  <span style="color:#e6db74">&#34;&lt;database&gt;&#34;</span>,
+  <span style="color:#e6db74">&#34;&lt;warehouse&gt;&#34;</span>,
+  <span style="color:#e6db74">&#34;&lt;user ID&gt;&#34;</span>
+)
+
+<span style="color:#75715e"># create connection</span>
+con <span style="color:#f92672">&lt;-</span> DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbConnect</span>(drv, constr)
+</code></pre></div><p>We then create our <code>GIS</code> schema:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbSendQuery</span>(con, <span style="color:#e6db74">&#34;CREATE SCHEMA IF NOT EXISTS GIS&#34;</span>)
+</code></pre></div><p>We will also need to create an empty table to hold our features:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">create_query <span style="color:#f92672">&lt;-</span> <span style="color:#e6db74">&#34;
+</span><span style="color:#e6db74">CREATE TABLE GIS.OSM_BUILDINGS_A_FREE_1 (
+</span><span style="color:#e6db74">  OSM_ID VARCHAR PRIMARY KEY,
+</span><span style="color:#e6db74">  CODE INTEGER,
+</span><span style="color:#e6db74">  FCLASS VARCHAR,
+</span><span style="color:#e6db74">  NAME VARCHAR,
+</span><span style="color:#e6db74">  TYPE VARCHAR,
+</span><span style="color:#e6db74">  GEOMETRY GEOGRAPHY
+</span><span style="color:#e6db74">)
+</span><span style="color:#e6db74">&#34;</span>
+
+DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbSendQuery</span>(con, create_query)
+</code></pre></div><p>We then import our shapefile as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">buildings <span style="color:#f92672">&lt;-</span><span style="color:#a6e22e">st_read</span>(<span style="color:#e6db74">&#34;data-raw/osm/gis_osm_buildings_a_free_1.shp&#34;</span>)
+</code></pre></div><p>We know the geometry column is called <code>geometry</code> since this is the value of the the <code>sf_column</code> attribute:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">attr</span>(buildings, <span style="color:#e6db74">&#39;sf_column&#39;</span>)
+</code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">[1] &#34;geometry&#34;
+</code></pre></div><p>Now we simply convert to <code>data.table</code>, and replace the <code>geometry</code> column with the well-known binary representation:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">buildings[, geometry <span style="color:#f92672">:=</span> <span style="color:#a6e22e">st_as_binary</span>(geometry, hex <span style="color:#f92672">=</span> <span style="color:#66d9ef">TRUE</span>, pureR <span style="color:#f92672">=</span> <span style="color:#66d9ef">FALSE</span>)]
+</code></pre></div><p>On my machine with with i7-950H (12) processor this, took <strong>9.7 seconds</strong>.  This object is about 1.3GB in-memory and contains nearly 1.5 million features, so this is pretty quick.  In my first attempt at this, I tried to extract well-known text (WKT), as opposed to binary, using <code>st_as_text</code>, and this same step took around 20 minutes!!</p>
+<p>All we need to do now is upper-case the column names to match our target schema, and we can then load our table directly:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r"><span style="color:#a6e22e">setNames</span>(buildings, <span style="color:#a6e22e">colnames</span>(buildings), <span style="color:#a6e22e">toupper</span>(<span style="color:#a6e22e">colnames</span>(buildings)))
+</code></pre></div><p>When attempting to load the data in one go I received a memory allocation error.  I didn&rsquo;t look into this in much detail, and simply decided to load the data in chunks.  To do this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-r" data-lang="r">lo <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">seq</span>(<span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">nrow</span>(buildings), <span style="color:#ae81ff">10000</span>)
+hi <span style="color:#f92672">&lt;-</span> <span style="color:#a6e22e">c</span>(lo[<span style="color:#ae81ff">-1</span>] <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>, <span style="color:#a6e22e">nrow</span>(buildings))
+
+<span style="color:#a6e22e">for </span>(i in <span style="color:#ae81ff">1</span><span style="color:#f92672">:</span><span style="color:#a6e22e">length</span>(lo)) {
+  DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">dbAppendTable</span>(
+    con,
+    DBI<span style="color:#f92672">::</span><span style="color:#a6e22e">Id</span>(schema <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;GIS&#34;</span>, table <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;OSM_BUILDINGS_A_FREE_1&#34;</span>), 
+    buildings[lo[i]<span style="color:#f92672">:</span>hi[i],]
+  )
+}
+</code></pre></div><p>This took 11 minutes for me overall.  We had 146 lots of 10000, and the Snowflake logs suggest that each of these took about 2 seconds.  So, about 6 minutes was spend loading data, with the balance, around 5 minutes, being spent transferring the data over the wire.  Overall, I&rsquo;m pretty happy with this from a performance perspective, and it would be easy enough to turn what we showed here into something a bit more generic.  Either way, until such time as a Snowflake driver is added to GDAL, this will do fine.</p>
+
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka">akka</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-actor">akka-actor</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/aws">aws</a></span>
+        
+            <span class="tag"><a href="../../tags/azure">azure</a></span>
+        
+            <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospark">geospark</a></span>
+        
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+        
+            <span class="tag"><a href="../../tags/kafka">kafka</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="../../tags/postgraphile">postgraphile</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/postgrest">postgrest</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="../../tags/scala">scala</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/sedona">sedona</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/single-page-web-apps">single-page-web-apps</a></span>
+        
+            <span class="tag"><a href="../../tags/snowflake">snowflake</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../2022/2022-04-17-r-spatial-snowflake/">Loading Spatial Data to Snowflake from R</a></h1>
+            <time class="has-text-grey-light is-size-7">17 April 2022</time>
+        
+            <h1><a href="../../2022/2022-03-03-deploying-shiny-apps/">Deploying Shiny Applications</a></h1>
+            <time class="has-text-grey-light is-size-7">3 March 2022</time>
+        
+            <h1><a href="../../2022/2022-02-25-serving_postgis_feautres/">Serving PostGIS Features Over HTTP</a></h1>
+            <time class="has-text-grey-light is-size-7">25 February 2022</time>
+        
+            <h1><a href="../../2022/2022-01-20-too-much-shiny/">Too Much Shiny?!</a></h1>
+            <time class="has-text-grey-light is-size-7">20 January 2022</time>
+        
+            <h1><a href="../../2022/2022-01-09-agent-based-simulations-with-akka/">Agent Based Simulations with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">9 January 2022</time>
+        
+    </div>
+</div>
+    <br>
+                
+  
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Related posts</h1>
+      
+      
+            <h1><a href="../../2022/2022-03-03-deploying-shiny-apps/">Deploying Shiny Applications</a></h1>
+            <time class="has-text-grey-light is-size-7">3 March 2022</time>
+      
+            <h1><a href="../../2022/2022-01-20-too-much-shiny/">Too Much Shiny?!</a></h1>
+            <time class="has-text-grey-light is-size-7">20 January 2022</time>
+      
+            <h1><a href="../../2020/2020-10-31-using-postgis-as-a-spatial-backend-for-r/">Using PostGIS as a Spatial Backend for R</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+      
+            <h1><a href="../../2019/2019-09-17-building-tile-services-on-the-fly-with-geoserver/">Building Tile Services on-the-fly with GeoServer</a></h1>
+            <time class="has-text-grey-light is-size-7">17 September 2019</time>
+      
+            <h1><a href="../../2016/2016-11-27-routing-in-r-using-osrm/">Routing in R Using the Open Source Routing Machine (OSRM)</a></h1>
+            <time class="has-text-grey-light is-size-7">27 November 2016</time>
+      
+            <h1><a href="../../2016/2016-07-20-data-packages/">Using R Packages to Disseminate Data</a></h1>
+            <time class="has-text-grey-light is-size-7">20 July 2016</time>
+      
+    </div>
+</div>
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2022">2022</a> (5)<br>
+        
+            <a href="../../archives/2021">2021</a> (4)<br>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (4)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2022 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>docker on cmhh</title>
+    <link>/tags/docker/</link>
+    <description>Recent content in docker on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 03 Mar 2022 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Deploying Shiny Applications</title>
+      <link>/2022/2022-03-03-deploying-shiny-apps/</link>
+      <pubDate>Thu, 03 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-03-03-deploying-shiny-apps/</guid>
+      <description>Overview In an earlier post, we discussed Shiny, a framework for building web applications using R, and suggested that we might be overdoing it a little. Whether true or not, Shiny is very popular indeed, and so I thought it would be fun to look at how one might go about deploying a Shiny application for public consumption. So, what follows is just a description of various deployment methods, but note that while Shiny is the focus, some of the deployment methods apply to more general scenarios–notably those approaches based upon containerisation.</description>
+    </item>
+    
+    <item>
+      <title>Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</title>
+      <link>/2020/2020-12-05-working-productively-on-windows-using-wsl2-and-docker/</link>
+      <pubDate>Sat, 05 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/2020-12-05-working-productively-on-windows-using-wsl2-and-docker/</guid>
+      <description>Overview A relatively common scenario in enterprise is to provide users a Windows desktop with a relatively small set of tools, and without administrative access. Depending on the type of work required, this sort of configuration might be perfectly reasonable, but for others it will be productivity-limiting at best.
+Here we discuss the use of Windows Subsystem for Linux 2 (WSL2), along with Docker, as a means of end-user enablement that might offer a reasonable compromise between safety and productivity.</description>
+    </item>
+    
+    <item>
+      <title>Docker on Windows with Windows Subsystem for Linux 2</title>
+      <link>/2020/2020-10-31-docker-on-windows-with-wsl2/</link>
+      <pubDate>Sat, 31 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/2020/2020-10-31-docker-on-windows-with-wsl2/</guid>
+      <description>Overview Windows Subsystem for Linux version 2 (WSL2) brings something like a native Linux environment to Windows. And because it&amp;rsquo;s native, we can even run Docker on WSL2 and access the running containers from the Windows host without hassle.
+Dependencies All that is required to run WSL2 is Windows Server 2019 or higher, or Windows 10 (any edition) build 2004 or higher. And, of course, we must also install a working Linux distribution.</description>
+    </item>
+    
+  </channel>
+</rss>

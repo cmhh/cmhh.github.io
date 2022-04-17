@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>cmhh  | Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css" />
+    <link href="../../css/highlight/atom-one-dark-reasonable.css" rel='stylesheet' type='text/css' />
+    <link rel="stylesheet" href="../../css/blog.css" />
+    <link rel="stylesheet" href="../../css/custom.css" />
+</head>
+<body>
+
+    
+    <nav class="navbar is-fixed-top" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="../../">Home</a>
+            
+        </div>
+    </nav>
+    
+
+    
+    <section class="hero is-info is-medium">
+        <div class="hero-body" style="background-image: url(/img/bg-blog-2.jpg);">
+            <div class="container has-text-centered">
+                <br>
+                <h1 class="title is-size-1">
+                    
+                        Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker
+                    
+                </h1>
+                
+            </div>
+        </div>
+    </section>
+
+
+<div class="container">
+    <div class="section">
+    
+
+<div class="columns">
+    <div class="column is-9">
+        <div class="tile is-child box">
+            <div class="content">
+                <h1 id="overview">Overview</h1>
+<p>A relatively common scenario in enterprise is to provide users a Windows desktop with a relatively small set of tools, and without administrative access.  Depending on the type of work required, this sort of configuration might be perfectly reasonable, but for others it will be productivity-limiting <em>at best</em>.</p>
+<p>Here we discuss the use of Windows Subsystem for Linux 2 (WSL2), along with Docker, as a means of end-user enablement that might offer a reasonable compromise between safety and productivity.  WSL2 allows Windows users to install a largely feature-complete version of Linux within Windows itself, which can be used &lsquo;remotely&rsquo; via Visual Studio Code (vscode) for almost anything.  Normal users will have administrative rights within the Linux installation, but will not have any heightened access over the host OS itself, meaning users are free to experiment with little risk to the host.</p>
+<p>Linux on WSL is a perfectly reasonable sandpit in its own right–we can experiment as suggested, and if we somehow break the install we can simply blow it away and start again.  Even so, we can choose to use the Linux instance only to build Docker images and run Docker containers, ensuring the Linux system remains free of clutter, while providing yet another layer of abstraction.  That is, we run tools via Docker, which runs via Linux on WSL2, rather than installing those tools in Windows.  The target tools are then accessed remotely via SSH or similar, or via some other client interface, such as a web browser or web service.</p>
+<a href="assets/dev.png" target="_blank">
+<img src="assets/dev.png" class="Large">
+</a>
+<h1 id="prerequisites">Prerequisites</h1>
+<p>The goal is to demonstrate that we can make Windows a productive environment in an enterprise setting, with only a minimal set of tools to bootstrap our efforts.  All that is strictly required is:</p>
+<ul>
+<li>WSL2 is enabled on Windows</li>
+<li>Ubuntu 20.04 is installed for WSL2</li>
+<li>Docker is installed on Ubuntu 20.04</li>
+<li>OpenSSH client is enabled on Windows</li>
+<li>Visual Studio Code is installed on Windows</li>
+<li>remote extensions are installed for vscode</li>
+</ul>
+<p>WSL2 is available on Windows 10, any edition, build 2004 and up, as well as for Windows Server 2016 and higher.  For more installation details, see <a href="https://cmhh.github.io/post/docker_wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a>.  In an enterprise setting, it would be possible to do most of this in a single powershell script, run as administrator on startup, for example.</p>
+<h1 id="docker-basics">Docker Basics</h1>
+<p>To create a Docker image, we just need a file called <code>Dockerfile</code> containing a complete set of instructions for the build.  That is, a container is (or can be) completely reproducible given only the <code>Dockerfile</code>, and so it is often sufficient to manage just this in a version control system.</p>
+<p>We&rsquo;ll see <code>Dockerfile</code> examples in the following sections, but given such a file, all we need to do to actually create a runnable image called <code>foo</code> is to run:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t foo &lt;path to Dockerfile&gt;
+</code></pre></div><p>Once created, we can then run instances of the image by running something like the following:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name mycontainer foo 
+</code></pre></div><p>Of course, this is the simplest possible setup, and things can certainly ramp up a bit.  We can copy files from local folders into the image, parameterise the build by using build arguments, add environment variables at runtime, create ad hoc networks for collections of containers, create volumes or mount local folders for persisting data, and more.</p>
+<h1 id="containers-as-generic-development-environments">Containers as Generic Development Environments</h1>
+<p>Docker containers can be used as isolated development environments.  In an enterprise setting, it is common to block Windows executable files that have not been certified in some way.  However, we can write code, compile it, and run the resulting binaries inside containers, rather than on the host operating system.   Even if we copy the resulting binaries to the host, and the binaries aren&rsquo;t blocked as such, they might require a runtime that isn&rsquo;t present, or they might otherwise not be binary compatible.</p>
+<p>Security aside, the approach also proves useful for other reasons.  Namely, it can just be easier to manage a myriad of different build environments, all on a single host.  We can develop standard images for various different use cases–a container for Java development, or maybe even different containers for different versions of Java or even different build tools (Maven or Gradle, for example), a container for Node.js development, and so on.</p>
+<p>Consider the following Dockerfile:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-dockerfile" data-lang="dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive
+
+<span style="color:#66d9ef">RUN</span>  apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get -y dist-upgrade <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get install -y --no-install-recommends <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    openssh-server openjdk-8-jdk locales apt-transport-https gnupg2 git vim wget curl xz-utils ca-certificates <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    build-essential gfortran <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sed -i -e <span style="color:#e6db74">&#39;s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/&#39;</span> /etc/locale.gen <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  dpkg-reconfigure --frontend<span style="color:#f92672">=</span>noninteractive locales <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  update-locale LANG<span style="color:#f92672">=</span>en_US.UTF-8 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  echo <span style="color:#e6db74">&#34;deb https://dl.bintray.com/sbt/debian /&#34;</span> | tee -a /etc/apt/sources.list.d/sbt.list <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  curl -sL <span style="color:#e6db74">&#34;https://keyserver.ubuntu.com/pks/lookup?op=get&amp;search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823&#34;</span> | apt-key add <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get install -y sbt <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  curl https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb --output packages-microsoft-prod.deb <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  dpkg -i packages-microsoft-prod.deb <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  curl https://nodejs.org/dist/v14.15.1/node-v14.15.1-linux-x64.tar.xz --output node-v14.15.1-linux-x64.tar.xz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  tar -xf node-v14.15.1-linux-x64.tar.xz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  mv node-v14.15.1-linux-x64 /usr/local/node <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  echo <span style="color:#e6db74">&#34;export PATH=</span>$PATH<span style="color:#e6db74">:/usr/local/node/bin&#34;</span> &gt;&gt; /etc/bash.bashrc <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm node-v14.15.1-linux-x64.tar.xz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get install -y dotnet-sdk-5.0 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm packages-microsoft-prod.deb <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get clean <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm -rf /var/lib/apt/lists/* <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  EXPOSE <span style="color:#ae81ff">22</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  CMD mkdir -p /root/.ssh <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    echo <span style="color:#e6db74">&#34;</span>$PUB_KEY<span style="color:#e6db74">&#34;</span> &gt;&gt; /root/.ssh/authorized_keys <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    echo <span style="color:#e6db74">&#34;</span>$PUB_KEY<span style="color:#e6db74">&#34;</span> &gt;&gt; /root/.ssh/id_rsa.pub <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    echo <span style="color:#e6db74">&#34;</span>$PRIVATE_KEY<span style="color:#e6db74">&#34;</span> &gt;&gt; /root/.ssh/id_rsa <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    chmod <span style="color:#ae81ff">700</span> /root/.ssh <span style="color:#f92672">&amp;&amp;</span> chmod <span style="color:#ae81ff">600</span> /root/.ssh/* <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    service ssh start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    tail -f /dev/null  <span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>Those accustomed to working on Linux will find the content of the file relatively straightforward, but in summary the file does the following:</p>
+<ul>
+<li>installs the usual GNU compiler suite</li>
+<li>installs OpenJDK 8 for Java development</li>
+<li>installs git so we can work with git repositories</li>
+<li>installs sbt, a Java and Scala build tool</li>
+<li>installs .NET 5.0 for C# 9 and F# 5 development, including ASP.NET web applications</li>
+<li>installs Node.js for JavaScript development</li>
+<li>installs OpenSSH server so the container can be accessed remotely</li>
+</ul>
+<p>To build the container from the <a href="docker/development">development</a> directory:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t development .
+</code></pre></div><p>and to run an instance:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm --name development <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -v $PWD/.ivy2:/root/.ivy2 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -v $PWD/.cache:/root/.cache <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -v $PWD/.npm:/root/.npm <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -v $PWD/.vscode-server:/root/.vscode-server <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -e <span style="color:#e6db74">&#34;PUB_KEY=</span><span style="color:#66d9ef">$(</span>cat $HOME/.ssh/id_rsa.pub<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -e <span style="color:#e6db74">&#34;PRIVATE_KEY=</span><span style="color:#66d9ef">$(</span>cat $HOME/.ssh/id_rsa<span style="color:#66d9ef">)</span><span style="color:#e6db74">&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -p 23:22 -p 9001:9001 -p 5001:5001 -p 3001:3001 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  development
+</code></pre></div><p>In this case, we copy our keys to the container <em>at runtime</em> so that we can connect without a password via a standard SSH client.  In particular, we add the following to our SSH config:</p>
+<pre tabindex="0"><code>Host devdocker
+  HostName localhost
+  Port 23
+  User root
+</code></pre><p>and we can then use Visual Studio Code to develop in the usual way, but using the running container.  We bring up the command palette (<span class="key">CTRL</span>+<span class="key">SHIFT</span>+<span class="key">P</span>) and select &ldquo;Remote-SSH: Connect to Host&hellip;&rdquo;</p>
+<img src=assets/vscode01.png class=large>
+<p>Then select &ldquo;dockerdev&rdquo;:</p>
+<img src=assets/vscode02.png class=large>
+<p>At this point, a new vscode window will open, connected remotely to the running container:</p>
+<a href="assets/vscode03.png" target="_blank">
+<img src="assets/vscode03.png" class="Large">
+</a>
+<p>We can clone repositories from a version control system, and commit changes; and provided the right ports are open, we can also test web services and so forth locally:</p>
+<a href="assets/vscode04.png" target="_blank">
+<img src="assets/vscode04.png" class="Large">
+</a>
+<h1 id="deployment-via-containers">Deployment via Containers</h1>
+<p>Applications are routinely deployed using containers.  In this case, we run a simple <a href="https://github.com/cmhh/seasadj">seasonal adjustment service</a>.  The <code>Dockerfile</code> is as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:20.04</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND noninteractive<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> SHELL /bin/bash<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span>  apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get -y dist-upgrade <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get install -y --no-install-recommends ca-certificates openjdk-8-jre-headless wget gfortran make <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  mkdir -p /tmp/x13 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  cd /tmp/x13 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  wget https://www.census.gov/ts/x13as/unix/x13ashtmlsrc_V1.1_B39.tar.gz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  tar -xvf x13ashtmlsrc_V1.1_B39.tar.gz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  make -j20 -f makefile.gf <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  mv x13asHTMLv11b39 /usr/bin/x13ashtml <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  cd / <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm -fR /tmp/x13 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  wget https://github.com/cmhh/seasadj/releases/download/0.1.0-SNAPSHOT/seasadj.jar <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get remove -y wget gfortran make <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\ </span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  apt-get autoremove -y <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get clean <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm -rf /var/lib/apt/lists/* <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 9001</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [<span style="color:#e6db74">&#34;java&#34;</span>, <span style="color:#e6db74">&#34;-cp&#34;</span>, <span style="color:#e6db74">&#34;/seasadj.jar&#34;</span>, <span style="color:#e6db74">&#34;org.cmhh.seasadj.Service&#34;</span>]<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>In this example, we simply create a basic instance with a Java runtime, and download an <a href="https://github.com/cmhh/seasadj/releases/download/0.1.0-SNAPSHOT/seasadj.jar">artefact</a> from GitHub to serve as our entrypoint.  Note that the service itself also requires <a href="https://www.census.gov/srd/www/x13as/">X13-ARIMA-SEATS</a> be present, so we download the source and compile it as part of the image build.</p>
+<p>As usual, the container is built as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t seasadj .
+</code></pre></div><p>and run as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -td --rm --name seasadj -p 9001:9001 seasadj
+</code></pre></div><p>The service is stateless.  It accepts one or more input specifications as a JSON array, and returns seasonally adjusted data in the same format.  For example, to adjust the following JSON input:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+  <span style="color:#f92672">&#34;ap&#34;</span>: {
+    <span style="color:#f92672">&#34;series&#34;</span>: {
+      <span style="color:#f92672">&#34;title&#34;</span>: <span style="color:#e6db74">&#34;Air Passengers&#34;</span>,
+      <span style="color:#f92672">&#34;start&#34;</span>: <span style="color:#ae81ff">1958.01</span>,
+      <span style="color:#f92672">&#34;data&#34;</span>: [
+        <span style="color:#ae81ff">340.0</span>, <span style="color:#ae81ff">318.0</span>, <span style="color:#ae81ff">362.0</span>, <span style="color:#ae81ff">348.0</span>, <span style="color:#ae81ff">363.0</span>, <span style="color:#ae81ff">435.0</span>, 
+        <span style="color:#ae81ff">491.0</span>, <span style="color:#ae81ff">505.0</span>, <span style="color:#ae81ff">404.0</span>, <span style="color:#ae81ff">359.0</span>, <span style="color:#ae81ff">310.0</span>, <span style="color:#ae81ff">337.0</span>, 
+        <span style="color:#ae81ff">360.0</span>, <span style="color:#ae81ff">342.0</span>, <span style="color:#ae81ff">406.0</span>, <span style="color:#ae81ff">396.0</span>, <span style="color:#ae81ff">420.0</span>, <span style="color:#ae81ff">472.0</span>, 
+        <span style="color:#ae81ff">548.0</span>, <span style="color:#ae81ff">559.0</span>, <span style="color:#ae81ff">463.0</span>, <span style="color:#ae81ff">407.0</span>, <span style="color:#ae81ff">362.0</span>, <span style="color:#ae81ff">405.0</span>, 
+        <span style="color:#ae81ff">417.0</span>, <span style="color:#ae81ff">391.0</span>, <span style="color:#ae81ff">419.0</span>, <span style="color:#ae81ff">461.0</span>, <span style="color:#ae81ff">472.0</span>, <span style="color:#ae81ff">535.0</span>, 
+        <span style="color:#ae81ff">622.0</span>, <span style="color:#ae81ff">606.0</span>, <span style="color:#ae81ff">508.0</span>, <span style="color:#ae81ff">461.0</span>, <span style="color:#ae81ff">390.0</span>, <span style="color:#ae81ff">432.0</span>
+      ]
+    },
+    <span style="color:#f92672">&#34;x11&#34;</span>: <span style="color:#66d9ef">null</span>
+  }
+}
+</code></pre></div><p>we could use CURL as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">curl <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -X POST <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -H <span style="color:#e6db74">&#34;Content-Type: application/json&#34;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -d @airpassengers.min.json <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  localhost:9001/seasadj/adjust <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --compressed --output airpassengers.output.json
+</code></pre></div><p>We could even build a SPA.  The following is a screenshot of a basic app written using Vue.js, for example:</p>
+<a href="assets/seasadjclient.png" target="_blank">
+<img src="assets/seasadjclient.png" class="Large">
+</a>
+<p>Under basic load testing, the service could handle around 230 transactions per second on a laptop with an 8 core AMD Ryzen 5 2500U with Radeon Vega Mobile Gfx 2.00 GHz processor.  And while no security is provided directly, authentication methods can be added easily if required, and communication can be encrypted easily enough using Nginx or similar.</p>
+<h1 id="databases-via-containers">Databases via Containers</h1>
+<p>Fully functional versions of popular databases are often available via official Docker images, both relational and NoSQL alike.  For development purposes, containerised databases will generally suffice, and can be run in a completely local context.</p>
+<p>Consider the following <code>Dockerfile</code>, a modified version of <a href="https://github.com/robyvandamme/adventureworks-docker">adventureworks-docker</a>, which provides a containerised version of Microsoft SQL Server with the popular AdventureWorks database pre-loaded:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mcr.microsoft.com/mssql/server</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /setup</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> ./setup .<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> /bin/bash ./entrypoint.sh<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>This is very simple, though does depend on a large SQL script, <code>setup-db.sql</code>.  To build:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t adventureworks .
+</code></pre></div><p>To run an instance:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --name adventureworks <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -e <span style="color:#e6db74">&#39;ACCEPT_EULA=Y&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -e <span style="color:#e6db74">&#39;MSSQL_SA_PASSWORD=password-1234&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -p 1433:1433 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  adventureworks
+</code></pre></div><p>Once running, one can then connect using database clients such as the excellent <a href="https://dbeaver.com/">DBeaver</a>:</p>
+<a href="assets/dbeaver.png" target="_blank">
+<img src="assets/dbeaver.png" class="Large">
+</a>
+<p>The database provided is a full-featured version of SQL Server, and so is sufficient for local development, but also general purpose testing.  Want to know what sort of performance improvement would be achieved with the addition of a columnstore index?  You can test the locally–no need to appeal to a physical or remote test environment, certainly if one doesn&rsquo;t already exist, or if a process must be followed to be granted access.</p>
+<h1 id="analytics-via-containers">Analytics via Containers</h1>
+<p>Containers can be used to house any manner of analytical environment, from R with RStudio, to JupyterLab with a variety of kernels, and even to a fully-functional, if not highly performing, Big Data stack.</p>
+<p>Consider the following <code>Dockerfile</code>, which, when built, provides a running instance of RStudio Server:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">ARG</span> ubuntu_version<span style="color:#f92672">=</span><span style="color:#ae81ff">20</span>.04<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> ubuntu:$ubuntu_version</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ARG</span> cores<span style="color:#f92672">=</span><span style="color:#ae81ff">12</span>
+<span style="color:#66d9ef">ARG</span> r_version<span style="color:#f92672">=</span><span style="color:#ae81ff">4</span>.0.3<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ARG</span> rstudio_version<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span>.4.1032<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENV</span> DEBIAN_FRONTEND<span style="color:#f92672">=</span>noninteractive
+<span style="color:#66d9ef">ENV</span> SHELL<span style="color:#f92672">=</span>/bin/bash<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span>  apt-get update <span style="color:#f92672">&amp;&amp;</span> apt-get -y dist-upgrade <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get install -y --no-install-recommends <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    gnupg2 dirmngr ca-certificates build-essential <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    libcairo2-dev <span style="color:#e6db74">&#39;^perl-modules-[0-9].[0-9]+$&#39;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    libssl-dev libgit2-dev libcurl4-gnutls-dev libxml2-dev curl wget htop locales <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    openjdk-8-jdk python3-pip git vim libudunits2-dev <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    grass gdal-bin libgdal-dev libgeos-dev libproj-dev proj-bin proj-data <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    libblas3 libatlas-base-dev liblapack-dev libreadline-dev gfortran <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    libx11-dev libxt-dev zlib1g-dev libbz2-dev liblzma-dev libpcre2-dev <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>    sudo lsb-release gdebi-core psmisc libclang-dev libapparmor1 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  apt-get clean <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm -rf /var/lib/apt/lists/* <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  sed -i -e <span style="color:#e6db74">&#39;s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/&#39;</span> /etc/locale.gen <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  dpkg-reconfigure --frontend<span style="color:#f92672">=</span>noninteractive locales <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  update-locale LANG<span style="color:#f92672">=</span>en_US.UTF-8 <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  wget -qO- <span style="color:#e6db74">&#34;https://yihui.org/gh/tinytex/tools/install-unx.sh&#34;</span> | sh -s - --admin --no-path <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  mv /root/.TinyTeX /usr/local/TinyTex <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  /usr/local/TinyTex/bin/*/tlmgr path add <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  mkdir /src <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  cd /src <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  wget https://cran.r-project.org/src/base/R-<span style="color:#66d9ef">$(</span>echo $r_version | cut -d<span style="color:#e6db74">&#39;.&#39;</span> -f 1<span style="color:#66d9ef">)</span>/R-<span style="color:#e6db74">${</span>r_version<span style="color:#e6db74">}</span>.tar.gz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  tar -xvf R-<span style="color:#e6db74">${</span>r_version<span style="color:#e6db74">}</span>.tar.gz <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  cd /src/R-<span style="color:#e6db74">${</span>r_version<span style="color:#e6db74">}</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  ./configure --enable-R-shlib --with-blas --with-lapack --enable-memory-profiling --with-cairo <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  make -j $cores <span style="color:#f92672">&amp;&amp;</span> make install <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  ln -s /usr/local/lib/R/bin/R /usr/bin/R <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  ln -s /usr/local/lib/R/bin/Rscript /usr/bin/Rscript <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  cd / <span style="color:#f92672">&amp;&amp;</span> rm -fR src <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  echo <span style="color:#e6db74">&#34;local({\n  r &lt;- getOption(&#39;repos&#39;)\n  r[&#39;CRAN&#39;] &lt;- &#39;https://cloud.r-project.org&#39;\n  options(repos = r)\n})&#34;</span> &gt; /usr/local/lib/R/etc/Rprofile.site <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  echo <span style="color:#e6db74">&#34;\noptions(&#39;bitmapType&#39; = &#39;cairo&#39;)&#34;</span> &gt;&gt; /usr/local/lib/R/etc/Rprofile.site <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  echo <span style="color:#e6db74">&#34;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&#34;</span> &gt; /usr/local/lib/R/etc/Renviron.site <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  R -e <span style="color:#e6db74">&#34;install.packages(&#39;renv&#39;)&#34;</span> <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  wget https://s3.amazonaws.com/rstudio-ide-build/server/bionic/amd64/rstudio-server-<span style="color:#e6db74">${</span>rstudio_version<span style="color:#e6db74">}</span>-amd64.deb <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  gdebi --non-interactive rstudio-server-<span style="color:#e6db74">${</span>rstudio_version<span style="color:#e6db74">}</span>-amd64.deb <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rm rstudio-server-<span style="color:#e6db74">${</span>rstudio_version<span style="color:#e6db74">}</span>-amd64.deb<span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span>  <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> adduser --disabled-password --gecos <span style="color:#e6db74">&#34;&#34;</span> guest <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  usermod --password <span style="color:#66d9ef">$(</span>openssl passwd -1 guest<span style="color:#66d9ef">)</span> guest <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  usermod -aG sudo guest <span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">EXPOSE</span><span style="color:#e6db74"> 8787</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010">
+</span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">CMD</span> service rstudio-server start <span style="color:#f92672">&amp;&amp;</span> <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  tail -f /dev/null<span style="color:#960050;background-color:#1e0010">
+</span></code></pre></div><p>The <code>Dockerfile</code> accepts build arguments, so images containing different versions of R, for example, can be created from the same set of instructions.  For example:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker build -t rstudio:4.0.3 --build-arg r_version<span style="color:#f92672">=</span>4.0.3 .
+</code></pre></div><p>To run a container with the image:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker run -d --rm <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  --name rstudio <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -p 8787:8787 <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  -v <span style="color:#e6db74">${</span>PWD<span style="color:#e6db74">}</span>/.local:/home/guest/.local <span style="color:#ae81ff">\
+</span><span style="color:#ae81ff"></span>  rstudio:4.0.3
+</code></pre></div><p>At this point, RStudio Server will be available via a web browser at <code>localhost:8787</code>:</p>
+<a href="assets/rstudioex.png" target="_blank">
+<img src="assets/rstudioex.png" class="Large">
+</a>
+<h1 id="using-a-registry">Using a Registry</h1>
+<p>Consider the analytics example above, consisting of a containerised R environment.  Such an image might well be of value to an entire group of analysts, so rather than provide a <code>Dockerfile</code> that each person can use to build their own image, we could build the image once and then push it to a central registry for anybody to use.</p>
+<p>We use Docker compose to create a very simple example using a local registry and a <a href="https://github.com/Joxit/docker-registry-ui">basic web-based UI</a>.  Consider the following, which we save as <code>docker-compose.yml</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">version</span>: <span style="color:#e6db74">&#34;3.8&#34;</span>
+<span style="color:#f92672">services</span>:
+  <span style="color:#f92672">registry</span>:
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">registry:2</span>
+    <span style="color:#f92672">ports</span>:
+      - <span style="color:#ae81ff">5000</span>:<span style="color:#ae81ff">5000</span>
+    <span style="color:#f92672">volumes</span>:
+      - <span style="color:#ae81ff">./registry-data:/var/lib/registry</span>
+    <span style="color:#f92672">networks</span>:
+      - <span style="color:#ae81ff">registrynet</span>
+  <span style="color:#f92672">ui</span>:
+    <span style="color:#f92672">image</span>: <span style="color:#ae81ff">joxit/docker-registry-ui:static</span>
+    <span style="color:#f92672">ports</span>:
+      - <span style="color:#ae81ff">8080</span>:<span style="color:#ae81ff">80</span>
+    <span style="color:#f92672">environment</span>:
+      - <span style="color:#ae81ff">REGISTRY_TITLE=Local Docker Registry</span>
+      - <span style="color:#ae81ff">REGISTRY_URL=http://registry:5000</span>
+    <span style="color:#f92672">depends_on</span>:
+      - <span style="color:#ae81ff">registry</span>
+    <span style="color:#f92672">networks</span>:
+      - <span style="color:#ae81ff">registrynet</span>
+<span style="color:#f92672">networks</span>:
+  <span style="color:#f92672">registrynet</span>:
+</code></pre></div><p>This describes the coordination of two containers as a single registry setup, and can be run as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker-compose up -d
+</code></pre></div><p>The R image build earlier can be tagged and pushed to the registry as follows:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">docker tag rstudio:4.0.3 localhost:8080/rstudio:4.0.3
+docker push localhost:8080/rstudio:4.0.3
+</code></pre></div><p>The UI itself will be available in our web browser at <code>localhost:8080</code>:</p>
+<a href="assets/registryui.png" target="_blank">
+<img src="assets/registryui.png" class="Large">
+</a>
+<h1 id="summary">Summary</h1>
+<p>WSL2 lets us use a Windows machine for any manner of local development and analytics.  A Linux instance running via WSL2 gives us a degree of isolation, and so is relatively safe–perhaps no less safe than allowing the local use of something like Python.  We can ramp up the isolation by using the Linux instance exclusively to build Docker images and run Docker containers.  Besides, using containers dramatically simplifies application deployment, and is relatively standard at this point, and so is a useful skill to develop.</p>
+<p>Having access to a Linux instance, and having the ability to build and run container images, means there&rsquo;s almost nothing we couldn&rsquo;t build or test locally, so with little cost or administrative drag.  The use cases here are by no means exhaustive, but we can:</p>
+<ul>
+<li>use containers to build and test applications locally</li>
+<li>use containers to test deployment of applications</li>
+<li>use containers to house (possibly ephemeral) database instances</li>
+<li>use containers to run or test analytical / data science platforms</li>
+<li>and much more!</li>
+</ul>
+
+            </div>
+        </div>
+    </div>
+    <div class="column is-3">
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Tags</h1>
+        <div class="tags">
+        
+            <span class="tag"><a href="../../tags/akka">akka</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-actor">akka-actor</a></span>
+        
+            <span class="tag"><a href="../../tags/akka-http">akka-http</a></span>
+        
+            <span class="tag"><a href="../../tags/aws">aws</a></span>
+        
+            <span class="tag"><a href="../../tags/azure">azure</a></span>
+        
+            <span class="tag"><a href="../../tags/deeplearning4j">deeplearning4j</a></span>
+        
+            <span class="tag"><a href="../../tags/docker">docker</a></span>
+        
+            <span class="tag"><a href="../../tags/geoserver">geoserver</a></span>
+        
+            <span class="tag"><a href="../../tags/geospark">geospark</a></span>
+        
+            <span class="tag"><a href="../../tags/geospatial">geospatial</a></span>
+        
+            <span class="tag"><a href="../../tags/kafka">kafka</a></span>
+        
+            <span class="tag"><a href="../../tags/nodejs">nodejs</a></span>
+        
+            <span class="tag"><a href="../../tags/osrm">osrm</a></span>
+        
+            <span class="tag"><a href="../../tags/postgis">postgis</a></span>
+        
+            <span class="tag"><a href="../../tags/postgraphile">postgraphile</a></span>
+        
+            <span class="tag"><a href="../../tags/postgresql">postgresql</a></span>
+        
+            <span class="tag"><a href="../../tags/postgrest">postgrest</a></span>
+        
+            <span class="tag"><a href="../../tags/qgis">qgis</a></span>
+        
+            <span class="tag"><a href="../../tags/r">r</a></span>
+        
+            <span class="tag"><a href="../../tags/r-packages">r-packages</a></span>
+        
+            <span class="tag"><a href="../../tags/scala">scala</a></span>
+        
+            <span class="tag"><a href="../../tags/seasonal-adjustment">seasonal-adjustment</a></span>
+        
+            <span class="tag"><a href="../../tags/sedona">sedona</a></span>
+        
+            <span class="tag"><a href="../../tags/shiny">shiny</a></span>
+        
+            <span class="tag"><a href="../../tags/single-page-web-apps">single-page-web-apps</a></span>
+        
+            <span class="tag"><a href="../../tags/snowflake">snowflake</a></span>
+        
+            <span class="tag"><a href="../../tags/spark">spark</a></span>
+        
+            <span class="tag"><a href="../../tags/tiles">tiles</a></span>
+        
+            <span class="tag"><a href="../../tags/tilestache">tilestache</a></span>
+        
+            <span class="tag"><a href="../../tags/vuejs">vuejs</a></span>
+        
+            <span class="tag"><a href="../../tags/wmts">wmts</a></span>
+        
+            <span class="tag"><a href="../../tags/wsl2">wsl2</a></span>
+        
+            <span class="tag"><a href="../../tags/x13-arima-seats">x13-arima-seats</a></span>
+        
+        </div>          
+    </div>
+</div><br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Recent posts</h1>
+        
+            <h1><a href="../../2022/2022-04-17-r-spatial-snowflake/">Loading Spatial Data to Snowflake from R</a></h1>
+            <time class="has-text-grey-light is-size-7">17 April 2022</time>
+        
+            <h1><a href="../../2022/2022-03-03-deploying-shiny-apps/">Deploying Shiny Applications</a></h1>
+            <time class="has-text-grey-light is-size-7">3 March 2022</time>
+        
+            <h1><a href="../../2022/2022-02-25-serving_postgis_feautres/">Serving PostGIS Features Over HTTP</a></h1>
+            <time class="has-text-grey-light is-size-7">25 February 2022</time>
+        
+            <h1><a href="../../2022/2022-01-20-too-much-shiny/">Too Much Shiny?!</a></h1>
+            <time class="has-text-grey-light is-size-7">20 January 2022</time>
+        
+            <h1><a href="../../2022/2022-01-09-agent-based-simulations-with-akka/">Agent Based Simulations with Akka</a></h1>
+            <time class="has-text-grey-light is-size-7">9 January 2022</time>
+        
+    </div>
+</div>
+    <br>
+                
+  
+
+
+
+<div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Related posts</h1>
+      
+      
+            <h1><a href="../../2022/2022-03-03-deploying-shiny-apps/">Deploying Shiny Applications</a></h1>
+            <time class="has-text-grey-light is-size-7">3 March 2022</time>
+      
+            <h1><a href="../../2020/2020-10-31-docker-on-windows-with-wsl2/">Docker on Windows with Windows Subsystem for Linux 2</a></h1>
+            <time class="has-text-grey-light is-size-7">31 October 2020</time>
+      
+    </div>
+</div>
+
+    
+<br>
+        <div class="card">
+    <div class="card-content">
+        <h1 class="title is-5">Archives</h1>
+        
+            <a href="../../archives/2022">2022</a> (5)<br>
+        
+            <a href="../../archives/2021">2021</a> (4)<br>
+        
+            <a href="../../archives/2020">2020</a> (4)<br>
+        
+            <a href="../../archives/2019">2019</a> (1)<br>
+        
+            <a href="../../archives/2017">2017</a> (1)<br>
+        
+            <a href="../../archives/2016">2016</a> (4)<br>
+        
+    </div>
+</div>
+
+    </div>
+</div>
+
+
+    </div>
+</div>
+
+<footer class="footer has-background-grey-darker has-text-white">
+    <div class="content has-text-centered">
+        <p>
+            <span class="icon is-large"><a href="https://github.com/cmhh" class="mysocial" rel="me"><i class="fab fa-github fa-3x"></i></a></span>&nbsp;&nbsp;
+            <span class="icon is-large"><a href="mailto://cmhhansen@outlook.com" class="mysocial" rel="me"><i class="fas fa-envelope fa-3x"></i></a></span>&nbsp;&nbsp;
+            <br><br>
+            Copyright &copy; cmhh 2022 - Theme by <a href="https://jeffprod.com" class="mysocial">JeffProd.com</a>
+        </p>
+    </div>
+</footer>
+
+<script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+<script src="../../js/highlight.pack.js"></script>
+<script>hljs.initHighlightingOnLoad();</script>
+
+<script src="//yihui.org/js/math-code.js"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
+
+
+</body>
+</html>

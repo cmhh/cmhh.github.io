@@ -1,0 +1,33 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Akka on cmhh</title>
+    <link>/tags/akka/</link>
+    <description>Recent content in Akka on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 09 Jan 2022 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/akka/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Agent Based Simulations with Akka</title>
+      <link>/2022/2022-01-09-agent-based-simulations-with-akka/</link>
+      <pubDate>Sun, 09 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-01-09-agent-based-simulations-with-akka/</guid>
+      <description>Overview In this post we describe a relatively simple agent-based simulation. The simulation itself is a rough approximation of a household survey, consisting of a large collection of dwellings, in turn surveyed in a strictly face-to-face setting by one of a number of independent field collectors.
+We describe the simulation in terms of the actor model, though we do so in a way that is largely agnostic with respect to programming language or actor framework.</description>
+    </item>
+    
+    <item>
+      <title>Online Learning with Akka</title>
+      <link>/2021/2021-08-08-online-learning-with-akka/</link>
+      <pubDate>Sun, 08 Aug 2021 00:00:00 +0000</pubDate>
+      
+      <guid>/2021/2021-08-08-online-learning-with-akka/</guid>
+      <description>Overview In a previous post, we looked at how we could consume messages in a Kafka topic, and use those messages for online training of a classifier. In this post, we look at how Akka could be used to solve the same problem, in broadly the same way. Akka is an implementation of the actor model, and is particularly well suited for building event-driven, reactive systems since the actors involved communicate exclusively by sending and reacting to messages.</description>
+    </item>
+    
+  </channel>
+</rss>

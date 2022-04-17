@@ -1,0 +1,24 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>TileStache on cmhh</title>
+    <link>/tags/tilestache/</link>
+    <description>Recent content in TileStache on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 28 Nov 2016 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/tags/tilestache/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Serving Geospatial Features with Mapnik and TileStache</title>
+      <link>/2016/2016-11-28-serving-geospatial-features-with-mapnik-and-tilestache/</link>
+      <pubDate>Mon, 28 Nov 2016 00:00:00 +0000</pubDate>
+      
+      <guid>/2016/2016-11-28-serving-geospatial-features-with-mapnik-and-tilestache/</guid>
+      <description>Overview When making maps for display on the web, the size of the various objects being rendered can quickly become overwhelming. For example, a polygon feature class containing New Zealand Meshblocks, a set of roughly 40,000 mutually exclusive and exhaustive polygons, is more than 100MB when stored as a shapefile, but much larger uncompressed and rendered in a browser window.
+There are various approaches one can take to attempt to deal with this issue, though useful solutions tend to depend on server-side processing.</description>
+    </item>
+    
+  </channel>
+</rss>

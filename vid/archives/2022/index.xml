@@ -1,0 +1,62 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>2022 on cmhh</title>
+    <link>/archives/2022/</link>
+    <description>Recent content in 2022 on cmhh</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 17 Apr 2022 00:00:00 +0000</lastBuildDate>
+    
+        <atom:link href="/archives/2022/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Loading Spatial Data to Snowflake from R</title>
+      <link>/2022/2022-04-17-r-spatial-snowflake/</link>
+      <pubDate>Sun, 17 Apr 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-04-17-r-spatial-snowflake/</guid>
+      <description>Overview I&amp;rsquo;ve recently started using Snowflake for work. I&amp;rsquo;m keen to enable more active use of geospatial data, and so I&amp;rsquo;ve been weighing up the merits of using something like Snowflake rather than, say, PostGIS. Snowflake is lacking in features compared to PostGIS–it has far fewer spatial functions, and a particular issue for me is the lack of support for any geodetic datum other than WGS84. On the other hand, if most of your other data will be stored in Snowflake, then having it all in one place greatly enhances the ability to mash things up in-place.</description>
+    </item>
+    
+    <item>
+      <title>Deploying Shiny Applications</title>
+      <link>/2022/2022-03-03-deploying-shiny-apps/</link>
+      <pubDate>Thu, 03 Mar 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-03-03-deploying-shiny-apps/</guid>
+      <description>Overview In an earlier post, we discussed Shiny, a framework for building web applications using R, and suggested that we might be overdoing it a little. Whether true or not, Shiny is very popular indeed, and so I thought it would be fun to look at how one might go about deploying a Shiny application for public consumption. So, what follows is just a description of various deployment methods, but note that while Shiny is the focus, some of the deployment methods apply to more general scenarios–notably those approaches based upon containerisation.</description>
+    </item>
+    
+    <item>
+      <title>Serving PostGIS Features Over HTTP</title>
+      <link>/2022/2022-02-25-serving_postgis_feautres/</link>
+      <pubDate>Fri, 25 Feb 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-02-25-serving_postgis_feautres/</guid>
+      <description>Overview I love spatial data, and I use it a LOT. My typical use case mostly involves downloading a feature class from some online source, and then using it entirely locally. If I just want to look at it, I&amp;rsquo;ll drop it in QGIS, but oftentimes I&amp;rsquo;ll load the features into a (containerised) PostGIS-enabled database. Unfortunately, many of the features I&amp;rsquo;m interested in are harder to download than I&amp;rsquo;d like. Take the Stats NZ Geographic Data Service, for example.</description>
+    </item>
+    
+    <item>
+      <title>Too Much Shiny?!</title>
+      <link>/2022/2022-01-20-too-much-shiny/</link>
+      <pubDate>Thu, 20 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-01-20-too-much-shiny/</guid>
+      <description>--  Overview From the Shiny website:
+ Shiny is an R package that makes it easy to build interactive web apps straight from R. You can host standalone apps on a webpage or embed them in R Markdown documents or build dashboards. You can also extend your Shiny apps with CSS themes, htmlwidgets, and JavaScript actions.
+ Shiny is a wonderful tool, providing a low-entry option for R programmers to develop single-page web applications.</description>
+    </item>
+    
+    <item>
+      <title>Agent Based Simulations with Akka</title>
+      <link>/2022/2022-01-09-agent-based-simulations-with-akka/</link>
+      <pubDate>Sun, 09 Jan 2022 00:00:00 +0000</pubDate>
+      
+      <guid>/2022/2022-01-09-agent-based-simulations-with-akka/</guid>
+      <description>Overview In this post we describe a relatively simple agent-based simulation. The simulation itself is a rough approximation of a household survey, consisting of a large collection of dwellings, in turn surveyed in a strictly face-to-face setting by one of a number of independent field collectors.
+We describe the simulation in terms of the actor model, though we do so in a way that is largely agnostic with respect to programming language or actor framework.</description>
+    </item>
+    
+  </channel>
+</rss>
