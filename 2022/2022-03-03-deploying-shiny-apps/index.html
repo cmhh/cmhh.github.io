@@ -52,8 +52,10 @@
 <p>In an <a href="../2022-01-20-too-much-shiny">earlier post</a>, we discussed <a href="https://shiny.rstudio.com/">Shiny</a>, a framework for building web applications using R, and suggested that we might be overdoing it a little.  Whether true or not, Shiny is very popular indeed, and so I thought it would be fun to look at how one might go about deploying a Shiny application for public consumption.  So, what follows is just a description of various deployment methods, but note that while Shiny is the focus, <em>some</em> of the deployment methods apply to more general scenarios–notably those approaches based upon containerisation.  The post is on the long side, so we summarise the methods here briefly:</p>
 <ul>
 <li>deploy using a hosted service, <a href="https://www.shinyapps.io">shinyapps.io</a></li>
-<li>deploy locally using an enterprise tool such <a href="https://www.rstudio.com/products/connect/">RStudio Connect</a> (not discussed)</li>
-<li>deploy using <a href=""></a></li>
+<li>deploy using <a href="https://www.rstudio.com/products/shiny/download-server/">Shiny Server Open Source</a></li>
+<li>deploy a single instance via a terminal process or a container, and proxy using NGINX</li>
+<li>deploy with <a href="https://shinyproxy.io/">ShinyProxy</a></li>
+<li>deploy via the public cloud (e.g. Azure App Services)</li>
 </ul>
 <h1 id="an-example-application">An Example Application</h1>
 <p>It doesn&rsquo;t really matter what our application is, but for illustration, let us simply use the following simple application throughout:</p>
