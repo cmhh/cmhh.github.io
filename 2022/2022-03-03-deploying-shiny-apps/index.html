@@ -175,7 +175,7 @@ $ docker run -d --rm --name shiny-server --network host -v &lt;path to apps&gt;:
 </code></pre></div><p>Then, of course, the app will be available on port 3001 on the host:</p>
 <a href="assets/basic01.png" target="_blank">
 <img src="assets/basic01.png" class="Large"/></a>
-<p>As before, if NGINX is running on the same host, it easy enough to make the available to the public using a location directive as follows:</p>
+<p>As before, if NGINX is running on the same host, it easy enough to make the application available to the public using a location directive as follows:</p>
 <div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-plaintext" data-lang="plaintext">location /runif/ {
   proxy_pass http://localhost:3001/;
   proxy_http_version 1.1;
