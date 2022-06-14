@@ -1,0 +1,54 @@
+/* css styles */
+.description {
+  display: none;
+}
+
+th {
+  text-align: center;
+}
+
+tr:nth-child(even) {
+  background: rgba(233,236,239,.65);
+}
+
+.leaflet-container {
+  margin-bottom: 18px;
+}
+
+img {
+  display: block;
+  margin-left: auto; 
+  margin-right: auto;
+}
+
+img.inline {
+  display: inline-block!important;
+  max-height: 1em;
+  margin: 0!important; 
+}
+
+.repl div:nth-child(1) {
+  margin-bottom: 5px;
+}
+
+.repl div:nth-child(2) {
+  margin-top: 0;
+}
+
+.repl div:nth-child(1) > pre {
+  border-left: 3px solid green;
+}
+
+.repl div:nth-child(2) > pre {
+  border-left: 3px solid red;
+}
+
+kbd {
+  background-color: rgb(227, 230, 232);
+  border: 1px solid rgb(159, 166, 173);
+  border-radius: 3px; 
+  padding: 1.1px 6.6px;
+  margin: 0 1.1px;
+  font-weight: bold;
+  font-size: 85%;
+}

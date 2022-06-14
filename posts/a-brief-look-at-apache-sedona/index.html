@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.393">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chris Hansen">
+<meta name="dcterms.date" content="2021-04-19">
+
+<title>cmhh - A Brief Look at Apache Sedona</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link id="quarto-text-highlighting-styles" href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-banner {
+      background-image: url(../../img/banner-2.jpg);
+background-size: cover;
+    }
+    </style>
+
+
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">cmhh</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">A Brief Look at Apache Sedona</h1>
+                          <div class="quarto-categories">
+                <div class="quarto-category">geospatial</div>
+                <div class="quarto-category">Spark</div>
+                <div class="quarto-category">Sedona</div>
+                <div class="quarto-category">GeoSpark</div>
+                <div class="quarto-category">PostGIS</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+
+
+
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Chris Hansen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 19, 2021</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#environment" id="toc-environment" class="nav-link" data-scroll-target="#environment">Environment</a></li>
+  <li><a href="#example-1---dissolve-meshblock-by-regional-council" id="toc-example-1---dissolve-meshblock-by-regional-council" class="nav-link" data-scroll-target="#example-1---dissolve-meshblock-by-regional-council">Example 1 - Dissolve Meshblock by Regional Council</a>
+  <ul class="collapse">
+  <li><a href="#postgis-1" id="toc-postgis-1" class="nav-link" data-scroll-target="#postgis-1">PostGIS</a></li>
+  <li><a href="#r-sf" id="toc-r-sf" class="nav-link" data-scroll-target="#r-sf">R / <code>sf</code></a></li>
+  <li><a href="#sedona---local" id="toc-sedona---local" class="nav-link" data-scroll-target="#sedona---local">Sedona - Local</a></li>
+  <li><a href="#sedona---elastic-mapreduce" id="toc-sedona---elastic-mapreduce" class="nav-link" data-scroll-target="#sedona---elastic-mapreduce">Sedona - Elastic MapReduce</a></li>
+  </ul></li>
+  <li><a href="#example-2---intersection-of-addresses-and-meshblocks" id="toc-example-2---intersection-of-addresses-and-meshblocks" class="nav-link" data-scroll-target="#example-2---intersection-of-addresses-and-meshblocks">Example 2 - Intersection of Addresses and Meshblocks</a>
+  <ul class="collapse">
+  <li><a href="#postgis-3" id="toc-postgis-3" class="nav-link" data-scroll-target="#postgis-3">PostGIS</a></li>
+  <li><a href="#r-sf-1" id="toc-r-sf-1" class="nav-link" data-scroll-target="#r-sf-1">R / <code>sf</code></a></li>
+  <li><a href="#sedona---local-1" id="toc-sedona---local-1" class="nav-link" data-scroll-target="#sedona---local-1">Sedona - Local</a></li>
+  <li><a href="#sedona---elastic-mapreduce-1" id="toc-sedona---elastic-mapreduce-1" class="nav-link" data-scroll-target="#sedona---elastic-mapreduce-1">Sedona - Elastic MapReduce</a></li>
+  </ul></li>
+  <li><a href="#appendix---getting-a-repl-up-and-running" id="toc-appendix---getting-a-repl-up-and-running" class="nav-link" data-scroll-target="#appendix---getting-a-repl-up-and-running">Appendix - Getting a REPL Up and Running</a>
+  <ul class="collapse">
+  <li><a href="#sbt-console" id="toc-sbt-console" class="nav-link" data-scroll-target="#sbt-console"><code>sbt console</code></a></li>
+  <li><a href="#spark-shell" id="toc-spark-shell" class="nav-link" data-scroll-target="#spark-shell"><code>spark-shell</code></a></li>
+  </ul></li>
+  <li><a href="#appendix---data" id="toc-appendix---data" class="nav-link" data-scroll-target="#appendix---data">Appendix - Data</a></li>
+  </ul>
+</nav>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p><a href="https://sedona.apache.org/">Apache Sedona</a>, formerly GeoSpark, is a library that let’s us make spatial RDDs and DataFrames in Apache Spark, as well as to run spatial queries. Feature classes can get very large, and so being able to run various geoprocessing tasks in a distributed context seems worthwhile. So, in this post, we take a very brief look at Apache Sedona.</p>
+<p>This post is not intended to provide comprehensive coverage of the features provided by Sedona–that would be pretty unrealistic for a short blog post. Rather, we will just run a couple of simple examples which will give some sense of both the overall interface and also <code>performance</code> relative to some other common tools.</p>
+<p>For the purposes of illustration, we consider just two examples:</p>
+<ul>
+<li>dissolve a set of polygons via <code>ST_Union_Aggr</code> / <code>ST_Union</code></li>
+<li>attach polygon attributes to a set of points using <code>ST_Intersects</code></li>
+</ul>
+<p>The polygons we will dissolve are <a href="https://koordinates.com/from/datafinder.stats.govt.nz/layer/105173/">Meshblock Higher Geographies 2021 (high definition)</a> provided by <a href="https://stats.govt.nz">Stats NZ</a>, and the grouping variable used will be Regional Council. For the task of attaching polygon attributes to points, we borrow the meshblock code from the meshblock 2021 feature class above, and we attach it to <a href="https://koordinates.com/from/data.linz.govt.nz/layer/53353/">NZ Street Address</a> provided by <a href="https://www.linz.govt.nz/">Land Information New Zealand (LINZ)</a>.</p>
+<p>Neither of these tasks is <em>massive</em>, with each being comfortably achievable on a single, typically endowed laptop. In this setting, PostGIS is faster than Sedona, but Sedona offers a more scalable solution overall. Sedona can perform as well as PostGIS when using a cluster with several workers, and Sedona should scale to very large problems where vertical scaling of PostGIS would become challenging.</p>
+</section>
+<section id="environment" class="level1">
+<h1>Environment</h1>
+<p>The majority of the examples in this post were executed on a Dell XPS 15 laptop with 16GB of DDR4 RAM @ 2667MHz, and 12 x Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz. In this environment, we run Spark in pseudo-distributed mode. That is, we use multiple workers, but all on a single host, and using an exclusively local filesystem.</p>
+<p>Spark is really intended to be used in a genuinely distributed environment, though, and so for comparison we also run our code using AWS Elastic MapReduce. We use emr-6.2.0, with Hadoop 3.2.1 and Spark 3.0.1, and the instances themselves are m5.xlarge which have 4 virtual cores and 16GiB of RAM. We vary the number of worker nodes, choosing configurations with both 6 and 12 workers. Importantly, in this scenario we also use a distributed filesystem (HDFS).</p>
+</section>
+<section id="example-1---dissolve-meshblock-by-regional-council" class="level1">
+<h1>Example 1 - Dissolve Meshblock by Regional Council</h1>
+<p>As noted, for our first example we take the union of all meshblocks by Regional Council. Visually:</p>
+<p><img src="assets/dissolve01.png" class="img-fluid"></p>
+<p>We discuss each approach in detail below, but a high-level summary is as follows:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">PostGIS</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Sedona</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="sourceCode" id="cb1"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  regc2021_v, </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  ST_Multi(ST_Union(geom)) <span class="kw">as</span> geom</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> </span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  statsnz.meshblock2021</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  regc2021_v</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  regc2021_v</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rc <span class="ot">&lt;-</span> mbhg <span class="sc">%&gt;%</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(REGC2021_V) <span class="sc">%&gt;%</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-3-tab">
+<div class="sourceCode" id="cb3"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> rc <span class="op">=</span> spark<span class="op">.</span><span class="fu">sql</span><span class="op">(</span><span class="st">"""</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT </span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V, </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="st">    ST_Union_Aggr(geometry) </span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="st">      as geometry </span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM </span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="st">    mb </span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">  GROUP BY</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V </span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<p>The run-times are 121, 124, and 152 seconds, respectively, for PostGIS, R, and Sedona. Sedona will scale to some extent–when run on a cluster using Elastic MapReduce (6.2.0), Sedona took 122 seconds with 6 workers, and 108 seconds with 12 workers. Other optimisations are likely possible when tuning various cluster parameters, such as number of workers, driver memory, and so on.</p>
+<section id="postgis-1" class="level2">
+<h2 class="anchored" data-anchor-id="postgis-1">PostGIS</h2>
+<p>Assuming we have stored the meshblock features in a PostGIS table called <code>statsnz.meshblock2021</code>, we can dissolve them by running the following SQL query:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  regc2021_v, ST_Multi(ST_Union(geom)) <span class="kw">as</span> geom</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> </span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  statsnz.meshblock2021</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> </span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  regc2021_v</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="kw">ORDER</span> <span class="kw">BY</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  regc2021_v</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This took 121 seconds.</p>
+</section>
+<section id="r-sf" class="level2">
+<h2 class="anchored" data-anchor-id="r-sf">R / <code>sf</code></h2>
+<p>To import the meshblock data in R, we run:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  mbhg <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"meshblock-higher-geographies-2021-high-definition.shp"</span>)  </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This took 3 seconds, and the resulting data frame occupies 300MB in memory. To dissolve it, we run:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rc <span class="ot">&lt;-</span> mbhg <span class="sc">%&gt;%</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(REGC2021_V) <span class="sc">%&gt;%</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This took around 124 seconds, and the resulting data frame occupies 3.9MB in memory.</p>
+</section>
+<section id="sedona---local" class="level2">
+<h2 class="anchored" data-anchor-id="sedona---local">Sedona - Local</h2>
+<p>We first load our meshblock feature class as follows:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>sedona<span class="op">.</span>core<span class="op">.</span>formatMapper<span class="op">.</span>shapefileParser<span class="op">.</span>ShapefileReader</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> mbrdd <span class="op">=</span> ShapefileReader<span class="op">.</span><span class="fu">readToPolygonRDD</span><span class="op">(</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  sc<span class="op">,</span> <span class="co">// the cluster SparkContext</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"meshblock-higher-geographies-2021-high-definition"</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The type of <code>mbrdd</code> is <code>PolygonRDD</code>, which is-a <code>SpatialRDD</code>. <code>SpatialRDD</code> has a standard <code>RDD</code> under the hood, and has methods for adding indexes, doing spatial joins, and so on. However, we can convert <code>SpatialRDD</code>s to <code>DataFrame</code>s, and then run reasonably standard looking SQL queries on the result. This is probably going to be the most accessible option for those who aren’t terribly familiar with Spark or Java / Scala. To convert to <code>DataFrame</code>:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>sedona<span class="op">.</span>sql<span class="op">.</span>utils<span class="op">.{</span>Adapter<span class="op">,</span> SedonaSQLRegistrator<span class="op">}</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>SedonaSQLRegistrator<span class="op">.</span><span class="fu">registerAll</span><span class="op">(</span>spark<span class="op">)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> mbdf <span class="op">=</span> Adapter</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">toDf</span><span class="op">(</span>mbrdd<span class="op">,</span> spark<span class="op">)</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">repartition</span><span class="op">(</span><span class="dv">32</span><span class="op">)</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>persist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The result is a <code>DataFrame</code> where our geometry is stored as type <code>Geometry</code> in a column called geometry, and calling <code>registerAll(spark)</code> ensures that the <code>Geometry</code> type is understood by Spark. For example, we create a user-defined function which calculates the area of a polygon:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>locationtech<span class="op">.</span>jts<span class="op">.</span>geom<span class="op">.</span>Geometry</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>spark<span class="op">.</span>sql<span class="op">.</span>functions<span class="op">.{</span>col<span class="op">,</span> udf<span class="op">}</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> f<span class="op">:</span> <span class="op">(</span>x<span class="op">:</span> Geometry<span class="op">)</span> <span class="op">=&gt;</span> x<span class="op">.</span>getArea</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and use it to derive an area column:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mbdf</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">withColumn</span><span class="op">(</span><span class="st">"area"</span><span class="op">,</span> <span class="fu">f</span><span class="op">(</span><span class="fu">col</span><span class="op">(</span><span class="st">"geometry"</span><span class="op">)))</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">select</span><span class="op">(</span><span class="st">"MB2021_V1_"</span><span class="op">,</span> <span class="st">"REGC2021_V"</span><span class="op">,</span> <span class="st">"REGC2021_2"</span><span class="op">,</span> <span class="st">"area"</span><span class="op">)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">limit</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>show</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>+----------+----------+------------------+--------------------+</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>|MB2021_V1_|REGC2021_V|        REGC2021_2|                area|</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>+----------+----------+------------------+--------------------+</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>|   0973300|        03|    Waikato Region|   68346.86758174733|</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>|   4002221|        06|Hawke's Bay Region|  42925.980450310104|</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>|   4008822|        13| Canterbury Region|   37448.43920328615|</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>|   2311100|        13| Canterbury Region|3.8148438963027686E7|</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>|   2815503|        13| Canterbury Region|  24410.008602414582|</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>|   0221305|        02|   Auckland Region|    884246.943146247|</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>|   1152900|        03|    Waikato Region| 4.621434800254852E7|</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>|   4011098|        13| Canterbury Region|   8207.470212947434|</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>|   4011489|        13| Canterbury Region|1.0198131361068603E7|</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>|   2830201|        14|      Otago Region|   96059.66604287364|</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>+----------+----------+------------------+--------------------+</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Either way, we now create a view from the <code>DataFrame</code> which we can use from our SQL context:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mbdf<span class="op">.</span><span class="fu">createOrReplaceTempView</span><span class="op">(</span><span class="st">"mb"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and then use to write standard looking spatial SQL queries. For example, we now add an area column in an arguably more straightforward manner:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spark</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">sql</span><span class="op">(</span><span class="st">""" </span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="st">    SELECT </span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st">      MB2021_V1_, </span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st">      REGC2021_V, </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="st">      REGC2021_2, </span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="st">      ST_AREA(geometry) as area</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="st">    FROM</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="st">      mb</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="st">    LIMIT 10</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="st">  """</span><span class="op">)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>show</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>+----------+----------+------------------+--------------------+</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>|MB2021_V1_|REGC2021_V|        REGC2021_2|                area|</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>+----------+----------+------------------+--------------------+</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>|   0973300|        03|    Waikato Region|   68346.86758174733|</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>|   4002221|        06|Hawke's Bay Region|  42925.980450310104|</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>|   4008822|        13| Canterbury Region|   37448.43920328615|</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>|   2311100|        13| Canterbury Region|3.8148438963027686E7|</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>|   2815503|        13| Canterbury Region|  24410.008602414582|</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>|   0221305|        02|   Auckland Region|    884246.943146247|</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>|   1152900|        03|    Waikato Region| 4.621434800254852E7|</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>|   4011098|        13| Canterbury Region|   8207.470212947434|</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>|   4011489|        13| Canterbury Region|1.0198131361068603E7|</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>|   2830201|        14|      Otago Region|   96059.66604287364|</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>+----------+----------+------------------+--------------------+</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>More importantly, we can dissolve the meshblocks by region as desired as follows:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> rc <span class="op">=</span> spark<span class="op">.</span><span class="fu">sql</span><span class="op">(</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"""</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT </span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V, </span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="st">    ST_Union_Aggr(geometry) as geometry </span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM </span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a><span class="st">    mb </span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="st">  GROUP BY</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V </span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a><span class="st">  """</span> </span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Spark SQL execution is lazy, so we need to trigger an action in order to see how long this actually takes. I like to write a little function I can re-use for timing purposes as follows:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> timeit<span class="op">[</span>T<span class="op">](</span>block<span class="op">:</span> <span class="op">=&gt;</span>T<span class="op">):</span> <span class="op">(</span>T<span class="op">,</span> <span class="ex">Double</span><span class="op">)</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> startTime <span class="op">=</span> <span class="ex">System</span><span class="op">.</span>nanoTime</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> res<span class="op">:</span> T <span class="op">=</span> block</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">(</span>res<span class="op">,</span> <span class="op">(</span><span class="ex">System</span><span class="op">.</span>nanoTime <span class="op">-</span> startTime<span class="op">)</span> <span class="op">/</span> <span class="fl">1e9</span><span class="op">)</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>So:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="op">(</span>_<span class="op">,</span> t<span class="op">)</span> <span class="op">=</span> timeit <span class="op">{</span> rc<span class="op">.</span>show <span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>t<span class="op">:</span> <span class="ex">Double</span> <span class="op">=</span> <span class="fl">152.024319529</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>At 152 seconds this is a little slower than PostGIS, but pretty reasonable all the same. However, there is a pretty big caveat here. Spark is pretty sophisticated, and in practice performance will vary a lot depending on how things are configured. We can vary the number of executors, the number of cores each executor can use, driver memory, and so on, and so on. In this case we did not spend any time tuning these parameters, but we did deliberately repartition the input meshblock features into 36 chunks, and this has a dramatic effect on performance. The following chart shows runtime as a function of the number of partitions:</p>
+<p><img src="assets/timings.png" class="img-fluid"></p>
+<p>The machine this task was run on has 12 cores, and the best performance seems to be roughly where there are 3 times as many partitions as cores.</p>
+<p>Note that those familiar with Spark could attempt to do things a bit more… primitively. Looking again at the original object, <code>mbrdd</code>, we can get the underlying <code>RDD</code> as:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>mbrdd<span class="op">.</span>getRawSpatialRDD<span class="op">.</span>rdd</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This is essentially just a collection of objects of type <code>Geometry</code>. We can call a method <code>getUserData</code> on a <code>Geometry</code> object to get the attributes associated with a feature as a single tab-delimited string. The 24th field is the regional council code, and we can use this to create a pair <code>RDD</code>:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> pairrdd <span class="op">=</span> mbrdd</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>getRawSpatialRDD<span class="op">.</span>rdd</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">groupBy</span><span class="op">(</span>x <span class="op">=&gt;</span> x<span class="op">.</span>getUserData<span class="op">.</span>toString<span class="op">.</span><span class="fu">split</span><span class="op">(</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span><span class="op">)(</span><span class="dv">24</span><span class="op">))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can then fold the geometries in each key-value pair naively as follows:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> rc <span class="op">=</span> pairrdd</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">map</span><span class="op">(</span>x <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> y <span class="op">=</span> x<span class="op">.</span>_2</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">(</span>x<span class="op">.</span>_1 <span class="op">-&gt;</span> y<span class="op">.</span>tail<span class="op">.</span><span class="fu">foldLeft</span><span class="op">(</span>y<span class="op">.</span>head<span class="op">)(</span>_<span class="op">.</span><span class="fu">union</span><span class="op">(</span>_<span class="op">)))</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">})</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This does in fact give us what we want, however the approach turns out to be way too naive, taking 45 minutes all up! That said, it would scale if we threw enough workers at it. Still, at times this sort of approach will be useful.</p>
+</section>
+<section id="sedona---elastic-mapreduce" class="level2">
+<h2 class="anchored" data-anchor-id="sedona---elastic-mapreduce">Sedona - Elastic MapReduce</h2>
+<p>When deployed on Elastic MapReduce, the code required is the same, with very minor differences. In this case, we naively set the number of partitions for each input feature class to be the number of cores times the number of workers. In addition, when using EMR we store our source shapefiles in the Hadoop filesystem. A cluster with 6 workers was able to dissolve the features as required in 122 seconds, and a cluster with 12 workers dissolved the features in 108 seconds.</p>
+</section>
+</section>
+<section id="example-2---intersection-of-addresses-and-meshblocks" class="level1">
+<h1>Example 2 - Intersection of Addresses and Meshblocks</h1>
+<p>For the next example, we find the meshblock polygon each of our address points belongs to, and we then borrow attributes from the containing polygon, attaching them directly as attributes of each address point. Visually:</p>
+<p><img src="assets/intersect01.png" class="img-fluid"></p>
+<p>We discuss each approach in detail below, but a high-level summary is as follows:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true">PostGIS</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false">R</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-3" role="tab" aria-controls="tabset-2-3" aria-selected="false">Sedona</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="sourceCode" id="cb22"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  addr.address_id, </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  addr.full_add_1,  </span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  mb.mb2021_v1_, </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  addr.geom </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  linz.address addr, </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  statsnz.meshblock2021 mb </span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> </span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  st_intersects(addr.geom, mb.geom)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="sourceCode" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    addr, ADDRESS_ID, FULL_ADD_1</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  ), </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(mbhg, MB2021_V1_)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-2-3" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-3-tab">
+<div class="sourceCode" id="cb24"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> rc <span class="op">=</span> spark<span class="op">.</span><span class="fu">sql</span><span class="op">(</span><span class="st">"""</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT </span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V, </span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="st">    ST_Union_Aggr(geometry) </span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="st">      as geometry </span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM </span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="st">    mb </span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="st">  GROUP BY</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V </span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="st">  ORDER BY</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="st">    REGC2021_V</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<p>The run-times are 193, 3194, and 268 seconds, respectively, for PostGIS, R, and Sedona. As before, Sedona will scale to some extent–when run on a cluster using Elastic MapReduce (6.2.0), Sedona took 154 seconds with 6 workers, and 110 seconds with 12 workers. Other optimisations are likely possible when tuning various cluster parameters, such as number of workers, driver memory, and so on. R is extremely slow in this case because we do not create and exploit any kind of spatial indexing.</p>
+<section id="postgis-3" class="level2">
+<h2 class="anchored" data-anchor-id="postgis-3">PostGIS</h2>
+<p>Assuming we have address points stored in a PostGIS table called <code>linz.address</code>, and meshblock as before in <code>statsnz.meshblock2021</code>, we can borrow attributes from each address’ enclosing meshblock as follows:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  addr.address_id, </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  addr.full_add_1,  </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  mb.mb2021_v1_, </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  addr.geom </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  linz.address addr, </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  statsnz.meshblock2021 mb </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a><span class="kw">WHERE</span> </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  st_intersects(addr.geom, mb.geom)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This took 193 seconds. Note that to ensure this query can be executed efficiently, it is necessary to ensure spatial indexes are created for both input features ahead of time. For example:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode sql code-with-copy"><code class="sourceCode sql"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> address_geom_idx <span class="kw">ON</span> linz.address <span class="kw">using</span> GIST(geom);</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">INDEX</span> meshblock2021_geom_idx <span class="kw">ON</span> statsnz.meshblock2021 <span class="kw">using</span> GIST(geom);</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="r-sf-1" class="level2">
+<h2 class="anchored" data-anchor-id="r-sf-1">R / <code>sf</code></h2>
+<p>To import the address data in R, we run:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">system.time</span>({</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  addr <span class="ot">&lt;-</span> <span class="fu">st_read</span>(<span class="st">"nz-street-address.shp"</span>)  </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This took 40 seconds, and the resulting data frame occupies 1.5GB in memory. To intersect this with the meshblock feature class:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sf<span class="sc">::</span><span class="fu">st_intersection</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(addr, ADDRESS_ID, FULL_ADD_1), </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(mbhg, MB2021_V1_)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This took 3194 seconds, or 53 minutes. This is slow because there is no way to make use of a spatial index, and to find which meshblock an address is in will require a full scan of the meshblock feature class for each address. Note, though, that it would be easy to parallelise this task simply by breaking the address input into ranges and intersecting each concurrently.</p>
+</section>
+<section id="sedona---local-1" class="level2">
+<h2 class="anchored" data-anchor-id="sedona---local-1">Sedona - Local</h2>
+<p>To create a <code>DataFrame</code> containing addresses, we run:</p>
+<div class="sourceCode" id="cb29"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> addrpath <span class="op">=</span> <span class="st">"shp/linz/nz-street-address"</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> addrrdd <span class="op">=</span> ShapefileReader<span class="op">.</span><span class="fu">readToGeometryRDD</span><span class="op">(</span>sc<span class="op">,</span> addrpath<span class="op">)</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> addr <span class="op">=</span> Adapter<span class="op">.</span><span class="fu">toDf</span><span class="op">(</span>addrrdd<span class="op">,</span> spark<span class="op">).</span><span class="fu">repartition</span><span class="op">(</span><span class="dv">32</span><span class="op">).</span>persist</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>addr<span class="op">.</span><span class="fu">createOrReplaceTempView</span><span class="op">(</span><span class="st">"addr"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And to intersect this with the meshblock <code>DataFrame</code>, we run:</p>
+<div class="sourceCode" id="cb30"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> addrmb <span class="op">=</span> spark</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">sql</span><span class="op">(</span><span class="st">"""</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="st">  SELECT </span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="st">    addr.ADDRESS_ID, </span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="st">    addr.FULL_ADD_1, </span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="st">    mb.MB2021_V1_, </span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="st">    addr.geometry </span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a><span class="st">  FROM </span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a><span class="st">    addr, </span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a><span class="st">    mb  </span></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="st">  WHERE </span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="st">    st_intersects(addr.geometry, bb.geometry)</span></span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="st">  """</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This took 268 seconds. This is reasonable, but still a little slower than using PostGIS. As for the PostGIS query, it is necessary to ensure that spatial indexes are used in order for this query to run efficiently. One way of doing this is to ensure we set the Spark config <code>sedona.global.index</code> to <code>true</code>. Without doing this, the query will run <em>much</em> slower.</p>
+<p>As before, we can get similar results using <code>RDD</code>s directly. For example, we can produce a new pair <code>RDD</code> that contains meshblocks as a key, and all the points within the meshblock as values in the following way:</p>
+<div class="sourceCode" id="cb31"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>sedona<span class="op">.</span>core<span class="op">.</span>enums<span class="op">.</span>IndexType</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>sedona<span class="op">.</span>core<span class="op">.</span>spatialOperator<span class="op">.</span>JoinQuery</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>addrrdd<span class="op">.</span><span class="fu">spatialPartitioning</span><span class="op">(</span>GridType<span class="op">.</span>KDBTREE<span class="op">)</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>mbrdd<span class="op">.</span><span class="fu">spatialPartitioning</span><span class="op">(</span>addrrdd<span class="op">.</span><span class="fu">getPartitioner</span><span class="op">())</span></span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>addrrdd<span class="op">.</span><span class="fu">buildIndex</span><span class="op">(</span>IndexType<span class="op">.</span>QUADTREE<span class="op">,</span> <span class="kw">true</span><span class="op">)</span></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>mbrdd<span class="op">.</span><span class="fu">buildIndex</span><span class="op">(</span>IndexType<span class="op">.</span>QUADTREE<span class="op">,</span> <span class="kw">true</span><span class="op">)</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> result <span class="op">=</span> JoinQuery<span class="op">.</span><span class="fu">SpatialJoinQuery</span><span class="op">(</span>addrrdd<span class="op">,</span> mbrdd<span class="op">,</span> <span class="kw">true</span><span class="op">,</span> <span class="kw">false</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Again, those familiar with Spark already will find objects like this relatively easy to work with. For example, to print a list of meshblock and address ID pairs:</p>
+<div class="sourceCode" id="cb32"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>result<span class="op">.</span>rdd<span class="op">.</span><span class="fu">flatMap</span><span class="op">(</span>x <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> mbid <span class="op">=</span> x<span class="op">.</span>_1<span class="op">.</span>getUserData<span class="op">.</span>toString<span class="op">.</span><span class="fu">split</span><span class="op">(</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span><span class="op">)(</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> addrids <span class="op">=</span> x<span class="op">.</span>_2<span class="op">.</span>asScala<span class="op">.</span><span class="fu">map</span><span class="op">(</span>_<span class="op">.</span>getUserData<span class="op">.</span>toString<span class="op">.</span><span class="fu">split</span><span class="op">(</span><span class="st">"</span><span class="ch">\t</span><span class="st">"</span><span class="op">)(</span><span class="dv">1</span><span class="op">))</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  addrids<span class="op">.</span><span class="fu">map</span><span class="op">((</span>mbid<span class="op">,</span> _<span class="op">))</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="op">}).</span><span class="fu">take</span><span class="op">(</span><span class="dv">10</span><span class="op">).</span><span class="fu">foreach</span><span class="op">(</span>println<span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>(4003499,2099993)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>(4003499,2099992)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>(4003499,2099994)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>(1619000,2099934)</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>(2817502,2010408)</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>(3031002,2099960)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>(4008278,2099958)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>(4007449,2100082)</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>(4006988,2099944)</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>(1618904,2099935)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="sedona---elastic-mapreduce-1" class="level2">
+<h2 class="anchored" data-anchor-id="sedona---elastic-mapreduce-1">Sedona - Elastic MapReduce</h2>
+<p>When deployed on Elastic MapReduce, the code required is the same, with very minor differences. In this case, we again naively set the number of partitions for each input feature class to be the number of cores times the number of workers. A cluster with 6 workers was able to dissolve the features as required in 154 seconds, and a cluster with 12 workers dissolved the features in 110 seconds</p>
+</section>
+</section>
+<section id="appendix---getting-a-repl-up-and-running" class="level1">
+<h1>Appendix - Getting a REPL Up and Running</h1>
+<section id="sbt-console" class="level2">
+<h2 class="anchored" data-anchor-id="sbt-console"><code>sbt console</code></h2>
+<p>One of the easier ways to get running with Spark is to set up a basic sbt project. We can then use the sbt console to run code interactively, or else output a jar file which can be used with <code>spark-shell</code>. To get going, all we need is a <code>build.sbt</code> file with the following content:</p>
+<div class="sourceCode" id="cb34"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>name <span class="op">:=</span> <span class="st">"""sedonatest"""</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>version <span class="op">:=</span> <span class="st">"0.0.1"</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>scalaVersion <span class="op">:=</span> <span class="st">"2.12.13"</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>scalacOptions <span class="op">+=</span> <span class="st">"-Ydelambdafy:inline"</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>libraryDependencies <span class="op">++=</span> <span class="bu">Seq</span><span class="op">(</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.spark"</span> <span class="op">%%</span> <span class="st">"spark-core"</span> <span class="op">%</span> <span class="st">"3.0.1"</span><span class="op">,</span> </span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.spark"</span> <span class="op">%%</span> <span class="st">"spark-sql"</span> <span class="op">%</span> <span class="st">"3.0.1"</span><span class="op">,</span> </span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-core-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-sql-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-viz-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-viz-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.locationtech.jts"</span> <span class="op">%</span> <span class="st">"jts-core"</span> <span class="op">%</span> <span class="st">"1.18.1"</span><span class="op">,</span></span>
+<span id="cb34-15"><a href="#cb34-15" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.geotools"</span> <span class="op">%</span> <span class="st">"gt-main"</span> <span class="op">%</span> <span class="st">"24.0"</span><span class="op">,</span></span>
+<span id="cb34-16"><a href="#cb34-16" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.geotools"</span> <span class="op">%</span> <span class="st">"gt-referencing"</span> <span class="op">%</span> <span class="st">"24.0"</span><span class="op">,</span></span>
+<span id="cb34-17"><a href="#cb34-17" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.geotools"</span> <span class="op">%</span> <span class="st">"gt-epsg-hsql"</span> <span class="op">%</span> <span class="st">"24.0"</span></span>
+<span id="cb34-18"><a href="#cb34-18" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span>
+<span id="cb34-19"><a href="#cb34-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-20"><a href="#cb34-20" aria-hidden="true" tabindex="-1"></a>resolvers <span class="op">++=</span> <span class="bu">Seq</span><span class="op">(</span></span>
+<span id="cb34-21"><a href="#cb34-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Open Source Geospatial Foundation Repository"</span> at <span class="st">"https://repo.osgeo.org/repository/release/"</span><span class="op">,</span></span>
+<span id="cb34-22"><a href="#cb34-22" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Apache Software Foundation Snapshots"</span> at <span class="st">"https://repository.apache.org/content/groups/snapshots"</span><span class="op">,</span></span>
+<span id="cb34-23"><a href="#cb34-23" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Java.net repository"</span> at <span class="st">"https://download.java.net/maven/2"</span></span>
+<span id="cb34-24"><a href="#cb34-24" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>From within the project folder, we first run <code>sbt</code> to get an interactive build shell, and then <code>console</code> to get to the Scala REPL. Run this way, the Spark and Sedona libraries will both be available.</p>
+<p>Unlike <code>spark-shell</code>, <code>sbt console</code> will not provide a <code>SparkSession</code> instance. Assuming we’re running in standalone mode, we can create one as follows:</p>
+<div class="sourceCode" id="cb35"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> spark<span class="op">:</span> SparkSession <span class="op">=</span> SparkSession</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>builder</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">master</span><span class="op">(</span><span class="st">"local[*]"</span><span class="op">)</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">appName</span><span class="op">(</span><span class="st">"sedonatest"</span><span class="op">)</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">config</span><span class="op">(</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>      <span class="st">"spark.serializer"</span><span class="op">,</span> </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>      <span class="st">"org.apache.spark.serializer.KryoSerializer"</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> </span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">config</span><span class="op">(</span></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"spark.kryo.registrator"</span><span class="op">,</span> </span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>      <span class="st">"org.apache.sedona.viz.core.Serde.SedonaVizKryoRegistrator"</span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span> </span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">config</span><span class="op">(</span><span class="st">"sedona.global.index"</span><span class="op">,</span><span class="st">"true"</span><span class="op">)</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>getOrCreate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And, of course, to get a <code>SparkContext</code>:</p>
+<div class="sourceCode" id="cb36"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> sc <span class="op">=</span> spark<span class="op">.</span>sparkContext</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="spark-shell" class="level2">
+<h2 class="anchored" data-anchor-id="spark-shell"><code>spark-shell</code></h2>
+<p>If we have access to a Spark cluster and wish to use <code>spark-shell</code> instead, then we’d modify the dependencies in <code>build.sbt</code> as follows:</p>
+<div class="sourceCode" id="cb37"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>libraryDependencies <span class="op">++=</span> <span class="bu">Seq</span><span class="op">(</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.spark"</span> <span class="op">%%</span> <span class="st">"spark-core"</span> <span class="op">%</span> <span class="st">"3.0.1"</span> <span class="op">%</span> <span class="st">"provided"</span><span class="op">,</span> </span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.spark"</span> <span class="op">%%</span> <span class="st">"spark-sql"</span> <span class="op">%</span> <span class="st">"3.0.1"</span> <span class="op">%</span> <span class="st">"provided"</span><span class="op">,</span> </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-core-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-sql-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-viz-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.apache.sedona"</span> <span class="op">%%</span> <span class="st">"sedona-viz-3.0"</span> <span class="op">%</span> <span class="st">"1.0.0-incubating"</span><span class="op">,</span></span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.locationtech.jts"</span> <span class="op">%</span> <span class="st">"jts-core"</span> <span class="op">%</span> <span class="st">"1.18.1"</span><span class="op">,</span></span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.geotools"</span> <span class="op">%</span> <span class="st">"gt-main"</span> <span class="op">%</span> <span class="st">"24.0"</span><span class="op">,</span></span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.geotools"</span> <span class="op">%</span> <span class="st">"gt-referencing"</span> <span class="op">%</span> <span class="st">"24.0"</span><span class="op">,</span></span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"org.geotools"</span> <span class="op">%</span> <span class="st">"gt-epsg-hsql"</span> <span class="op">%</span> <span class="st">"24.0"</span></span>
+<span id="cb37-12"><a href="#cb37-12" aria-hidden="true" tabindex="-1"></a><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We’d typically make a so-called ‘fat jar’, and adding <code>% "provided"</code> ensures the Spark dependencies, which will be present already, aren’t included in the archive. Note that we’re using Spark 3.0.1 here, so adjust this as required to match whatever is installed in your cluster.</p>
+<p>To make a fat jar, we ensure <code>./project/assembly.sbt</code> is present with the following content:</p>
+<div class="sourceCode" id="cb38"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">addSbtPlugin</span><span class="op">(</span><span class="st">"com.eed3si9n"</span> <span class="op">%</span> <span class="st">"sbt-assembly"</span> <span class="op">%</span> <span class="st">"0.14.10"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can then run <code>sbt assembly</code> from the project root, producing, in this case, <code>./target/scala-2.12/sedonatest-assembly-0.0.1.jar</code>. We then start <code>spark-shell</code> as follows:</p>
+<div class="sourceCode" id="cb39"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="ex">spark-shell</span> <span class="at">--jars</span> sedonatest-assembly-0.0.1.jar</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If we wish the jar file to have a different name, <code>sedonatest.jar</code> for example, we’d add the following to <code>build.sbt</code>:</p>
+<div class="sourceCode" id="cb40"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>assemblyJarName in assembly <span class="op">:=</span> <span class="st">"sedonatest.jar"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that if we get duplicate dependency errors when running <code>assembly</code>, then we can add something like the following to <code>build.sbt</code>:</p>
+<div class="sourceCode" id="cb41"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>assemblyMergeStrategy in assembly <span class="op">:=</span> <span class="op">{</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">PathList</span><span class="op">(</span><span class="st">"META-INF"</span><span class="op">,</span> xs @ _<span class="op">*)</span> <span class="op">=&gt;</span> MergeStrategy<span class="op">.</span>discard </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> x <span class="op">=&gt;</span> MergeStrategy<span class="op">.</span>first</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Elastic MapReduce uses YARN as a resource manager, so we also omit the following line when creating our <code>SparkSession</code>:</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">master</span><span class="op">(</span><span class="st">"local[*]"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="appendix---data" class="level1">
+<h1>Appendix - Data</h1>
+<p><a href="https://koordinates.com/from/datafinder.stats.govt.nz/layer/105173/">Meshblock Higher Geographies 2021 (high definition)</a> is a set of 53596 polygons covering the full extent of New Zealand. It was downloaded in ESRI shapefile format. Zipped, it weighs in at 155MB, and unzipped, 504MB. All other higher geographies maintained by Stats NZ are collections of meshblocks, and the attribute table provided includes concordances.</p>
+<p><a href="https://koordinates.com/from/data.linz.govt.nz/layer/53353/">NZ Street Address</a> is a set of 2107573 address points. Zipped, the shapefile is 178MB, and unzipped it is 2.8GB. The address points are split into 3 different shapefiles when using <a href="https://koordinates.com">Koordinates</a>, which we collapsed into one post-download.</p>
+<p>Note that Sedona seems to require shapefiles to be stored in a certain way. Specifically, that we put shapefiles in a folder which has the same name as the individual components. For the meshblocks, this means:</p>
+<div class="sourceCode" id="cb43"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>meshblock-higher-geographies-2021-high-definition</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>├── meshblock-higher-geographies-2021-high-definition.cpg</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>├── meshblock-higher-geographies-2021-high-definition.dbf</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>├── meshblock-higher-geographies-2021-high-definition.prj</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>├── meshblock-higher-geographies-2021-high-definition.shp</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>├── meshblock-higher-geographies-2021-high-definition.shx</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>├── meshblock-higher-geographies-2021-high-definition.txt</span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>└── meshblock-higher-geographies-2021-high-definition.xml</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Most other systems don’t require us to collect the components in a folder in this way, even if it might be sensible to organise things this way. In R, for example, we’d just refer to the <code>shp</code> component and the rest would be detected for as. For example:</p>
+<div class="sourceCode" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>addr <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_read</span>(<span class="st">"nz-street-address.shp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that when using Elastic MapReduce, we need to copy our input features to the Hadoop filesystem. For example:</p>
+<div class="sourceCode" id="cb45"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="ex">hdfs</span> dfs <span class="at">-copyFromLocal</span> meshblock-higher-geographies-2021-high-definition /user/hadoop/</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

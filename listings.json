@@ -1,0 +1,24 @@
+[
+  {
+    "listing": "/index.html",
+    "items": [
+      "/posts/r-spatial-snowflake/index.html",
+      "/posts/deploying-shiny-apps/index.html",
+      "/posts/serving-postgis-features/index.html",
+      "/posts/too-much-shiny/index.html",
+      "/posts/agent-based-simulations-with-akka/index.html",
+      "/posts/data-services-from-postgres/index.html",
+      "/posts/online-learning-with-akka/index.html",
+      "/posts/online-learning-with-kafka/index.html",
+      "/posts/a-brief-look-at-apache-sedona/index.html",
+      "/posts/working-productively-on-windows-using-wsl2-and-docker/index.html",
+      "/posts/using-postgis-as-a-spatial-backend-for-r/index.html",
+      "/posts/docker-on-windows-with-wsl2/index.html",
+      "/posts/seasonal-adjustment-as-a-service/index.html",
+      "/posts/building-tile-services-on-the-fly-with-geoserver/index.html",
+      "/posts/web-maps-and-tiles-with-qgis/index.html",
+      "/posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html",
+      "/posts/routing-in-r-using-osrm/index.html"
+    ]
+  }
+]

@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.393">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chris Hansen">
+<meta name="dcterms.date" content="2021-07-30">
+<meta name="description" content="Imagine an online learning scenario where we wish to update an existing model using streaming event data, say. Here we consider how we might approach such a problem using Apache Kafka.">
+
+<title>cmhh - Online Learning with Apache Kafka</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link id="quarto-text-highlighting-styles" href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-banner {
+      background-image: url(../../img/banner-2.jpg);
+background-size: cover;
+    }
+    </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">cmhh</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Online Learning with Apache Kafka</h1>
+                          <div class="quarto-categories">
+                <div class="quarto-category">online learning</div>
+                <div class="quarto-category">Scala</div>
+                <div class="quarto-category">Kafka</div>
+                <div class="quarto-category">Deeplearning4j</div>
+              </div>
+                  </div>
+  </div>
+    
+  <div>
+    <div class="description">
+      Imagine an online learning scenario where we wish to update an existing model using streaming event data, say. Here we consider how we might approach such a problem using Apache Kafka.
+    </div>
+  </div>
+
+
+
+
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Chris Hansen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">July 30, 2021</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#problem-description" id="toc-problem-description" class="nav-link" data-scroll-target="#problem-description">Problem Description</a></li>
+  <li><a href="#implementation" id="toc-implementation" class="nav-link" data-scroll-target="#implementation">Implementation</a>
+  <ul class="collapse">
+  <li><a href="#install-and-start-kafka" id="toc-install-and-start-kafka" class="nav-link" data-scroll-target="#install-and-start-kafka">Install and Start Kafka</a></li>
+  <li><a href="#create-a-kafka-topic" id="toc-create-a-kafka-topic" class="nav-link" data-scroll-target="#create-a-kafka-topic">Create a Kafka Topic</a></li>
+  <li><a href="#model-our-messages" id="toc-model-our-messages" class="nav-link" data-scroll-target="#model-our-messages">Model Our Messages</a></li>
+  <li><a href="#serialisation-deserialisation" id="toc-serialisation-deserialisation" class="nav-link" data-scroll-target="#serialisation-deserialisation">Serialisation / Deserialisation</a></li>
+  <li><a href="#producer" id="toc-producer" class="nav-link" data-scroll-target="#producer">Producer</a></li>
+  <li><a href="#consumer" id="toc-consumer" class="nav-link" data-scroll-target="#consumer">Consumer</a></li>
+  <li><a href="#results" id="toc-results" class="nav-link" data-scroll-target="#results">Results</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary">Summary</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>I recently came across a scenario at work that would, like <em>so</em> many things in practice, be particularly well modelled as an ordered set of events. The messages would have a large number of uses in practice, but one would involve using them to train some sort of predictive model. Moreover, the messages would be arriving in real-time, and the patterns underpinning the messages might well change over time. Based on previous research, Kafka seemed like it would be a good fit, though I don’t yet have a huge amount of practical experience using it. So I decided to create a simplified version of my real use case, and then write it up as a post. We’ll use a producer to read messages in a topic, and a consumer will then read those messages and update our model. If nothing else, the exercise should also serve as a reasonably accessible example of the use of Kafka producers and consumers. Let’s get to it…</p>
+</section>
+<section id="problem-description" class="level1">
+<h1>Problem Description</h1>
+<p>We use the popular <a href="http://yann.lecun.com/exdb/mnist/">MNIST database of handwritten digits</a>. The database contains hand-written digits represented as 28x28 pixel arrays with integer values in the range <span class="math inline">\([0,255]\)</span> representing grey-scale colours. The images are split into training and test sets with 60000 and 10000 images, respectively. The following image contains a collage of randomly selected examples:</p>
+<p><img src="assets/random1.png" class="img-fluid" style="width: 100%;"></p>
+<p>Broadly speaking, Kafka consists of <em>topics</em>, effectively partitioned log files. <em>Producers</em> append new messages to topics, and <em>consumers</em> read them. In this demonstration we’ll simply add all the MNIST training images to a Kafka topic, but we’ll throttle the rate at which this is done. At the same time, a consumer will continuously poll the topic and use any messages received to update a simple classifier, and will report model accuracy after each update.</p>
+<p>This isn’t a terribly realistic example, and is intended for demonstrative purposes. We’ll work through just one epoch, but we’ll see that training accuracy is indeed improving as new messages are received. In more realistic set-ups we’d probably start with a pre-trained model, and use real-time data to refine our model. Of course, we can replay a log, and so it would certainly be possible to train our model over many epochs if we wished.</p>
+</section>
+<section id="implementation" class="level1">
+<h1>Implementation</h1>
+<p>The complete application can be found on GitHub at <a href="https://github.com/cmhh/kafkatrain">cmhh/kafkatrain</a>, and the <code>README</code> includes enough information to get up and running. Note that the repository includes the <a href="http://yann.lecun.com/exdb/mnist/">MNIST database</a> since the data is only 12MB all up, and the original source urges users to ‘Please refrain from accessing these files from automated scripts with high frequency. Make copies!’. Either way, in this section we discuss the most important bits in more detail.</p>
+<section id="install-and-start-kafka" class="level2">
+<h2 class="anchored" data-anchor-id="install-and-start-kafka">Install and Start Kafka</h2>
+<p>Even though all the source for this exercise is provided as an sbt project, we still need a running broker. There are a number of ways we can do this, but it will suffice to simply download a pre-compiled bundle from the Kafka website directly. At the time of writing, the most recent version of Kafka is 2.8.0, and it can be downloaded via the following link:</p>
+<p><a href="https://www.apache.org/dyn/closer.cgi?path=/kafka/2.8.0/kafka_2.13-2.8.0.tgz">Kafka 2.8.0 for Scala 2.13</a></p>
+<p>I just downloaded this to the root of the project folder, and unpacked it there, the result being a folder name <code>kafka_2.13-2.8.0</code>. We first start Apache Zookeeper as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./kafka_2.13-2.8.0/bin/zookeeper-server-start.sh</span> <span class="dt">\</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  ./kafka_2.13-2.8.0/config/zookeeper.properties</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Kafka is distributed, and Zookeeper is used to coordinate the nodes. Note that this function will soon be handled natively by Kafka so will not be a requirement much longer. Either way, we then start our Kafka broker by running:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./kafka_2.13-2.8.0/bin/kafka-server-start.sh</span> <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  ./kafka_2.13-2.8.0/config/server.properties</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><a href="https://github.com/obsidiandynamics/kafdrop">Kafdrop</a> is a useful web UI which can be used to monitor Kafka brokers, and we can get this up and running quickly via Docker as follows:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> run <span class="at">-d</span> <span class="at">--rm</span> <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--net</span> host <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-e</span> KAFKA_BROKERCONNECT=localhost:9092 <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-e</span> JVM_OPTS=<span class="st">"-Xms32M -Xmx64M"</span> <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-e</span> SERVER_SERVLET_CONTEXTPATH=<span class="st">"/"</span> <span class="dt">\</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  obsidiandynamics/kafdrop</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The default port is 9000, so we then just visit <code>localhost:9000</code> to see the following UI:</p>
+<p><img src="assets/kafdrop01.png" class="img-fluid"></p>
+</section>
+<section id="create-a-kafka-topic" class="level2">
+<h2 class="anchored" data-anchor-id="create-a-kafka-topic">Create a Kafka Topic</h2>
+<p>Here, our events or messages will just be instances of the <code>MnistRecord</code> case class, so we need to create a topic to hold them. We can do this at the terminal, assuming our Kafka broker is running, as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">./kafka_2.13-2.8.0/bin/kafka-topics.sh</span> <span class="dt">\</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">--bootstrap-server</span> localhost:9092 <span class="dt">\</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--create</span> <span class="at">--partitions</span> 1 <span class="at">--replication-factor</span> 1 <span class="dt">\</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--topic</span> mnist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Topics can also be added and deleted easily enough via the Kafdrop web UI.</p>
+<p><img src="assets/kafdrop02.png" class="img-fluid"></p>
+<p><img src="assets/kafdrop03.png" class="img-fluid"></p>
+</section>
+<section id="model-our-messages" class="level2">
+<h2 class="anchored" data-anchor-id="model-our-messages">Model Our Messages</h2>
+<p>The MNIST database consists of handwritten images of 28x28 pixels, each assigned a label from 0 to 9. The image data is easily read from the provided files as an array of bytes in row-major order, so we define a simple case class as follows (the class has a number of methods, but we omit the details here):</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="ex">Image</span><span class="op">(</span>data<span class="op">:</span> <span class="ex">Array</span><span class="op">[</span><span class="ex">Byte</span><span class="op">],</span> rows<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> cols<span class="op">:</span> <span class="bu">Int</span><span class="op">,</span> byrow<span class="op">:</span> <span class="ex">Boolean</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Note that the <code>byrow</code> parameter is included since I also tested this code with the <a href="https://www.nist.gov/itl/products-and-services/emnist-dataset">EMNIST database</a>. This is a database which is intended to largely be a drop-in replacement for MNIST, but with a larger number of categories. However, while the IDX format is used for both, EMNIST appears to store pixels in column-major order, whereas MNIST is in row-major order. Either way, the labelled images can then be modelled simply, also using a case class, as follows:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">MnistRecord</span><span class="op">(</span>image<span class="op">:</span> <span class="ex">Image</span><span class="op">,</span> label<span class="op">:</span> <span class="bu">Int</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The MNIST data has been bundled as a resource in the provided sbt project, and a basic, single-use iterator is provided also. For example, to read the training data:</p>
+<div class="REPL">
+<div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>scala<span class="op">&gt;</span> <span class="kw">val</span> testIt <span class="op">=</span> <span class="fu">MnistIterator</span><span class="op">(</span>MnistType<span class="op">.</span>TRAIN<span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> testIt<span class="op">:</span> org<span class="op">.</span>cmhh<span class="op">.</span>MnistIterator <span class="op">=</span> <span class="op">&lt;</span>iterator<span class="op">&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="serialisation-deserialisation" class="level2">
+<h2 class="anchored" data-anchor-id="serialisation-deserialisation">Serialisation / Deserialisation</h2>
+<p>Messages are transmitted and stored as sequences of bytes, and so we need the ability to convert our messages to byte arrays (serialisation) and back again (deserialisation). The <code>MnistRecord</code> type is relatively simple–our images are already stored as byte arrays, and we just need to append one more byte to account for the image label.</p>
+<p>To create a serialiser we mix in the <code>Serializer[T]</code> trait, and we must provide a concrete implementation of method <code>serialize</code> with signature:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">serialize</span><span class="op">(</span>topic<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> data<span class="op">:</span> T<span class="op">):</span> <span class="ex">Array</span><span class="op">[</span><span class="ex">Byte</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To create a deserialiser we mix in the <code>Deserialzer[T]</code> trait, and we must provide a concrete implemenation of method <code>deserialize</code> with signature:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">deserialize</span><span class="op">(</span>topic<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> data<span class="op">:</span> <span class="ex">Array</span><span class="op">[</span><span class="ex">Byte</span><span class="op">]):</span> T</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can define everything together in one class, though one needs to take care since the two traits have methods with the same name, so we need to override things just so. The full implementation in this case is:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>kafka<span class="op">.</span>common<span class="op">.</span>serialization<span class="op">.{</span>Serializer<span class="op">,</span> Deserializer<span class="op">,</span> Serde<span class="op">,</span> Serdes<span class="op">}</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="fu">MnistRecordSerde</span><span class="op">()</span> <span class="kw">extends</span> Serde<span class="op">[</span>MnistRecord<span class="op">]</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">with</span> Serializer<span class="op">[</span>MnistRecord<span class="op">]</span> <span class="kw">with</span> Deserializer<span class="op">[</span>MnistRecord<span class="op">]</span> <span class="kw">with</span> <span class="ex">Serializable</span> <span class="op">{</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">serializer</span><span class="op">():</span> Serializer<span class="op">[</span>MnistRecord<span class="op">]</span> <span class="op">=</span> <span class="kw">this</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">deserializer</span><span class="op">():</span> Deserializer<span class="op">[</span>MnistRecord<span class="op">]</span> <span class="op">=</span> <span class="kw">this</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">close</span><span class="op">():</span> <span class="bu">Unit</span> <span class="op">=</span> <span class="op">()</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">configure</span><span class="op">(</span>configs<span class="op">:</span> java<span class="op">.</span>util<span class="op">.</span><span class="ex">Map</span><span class="op">[</span><span class="ex">String</span><span class="op">,</span> _<span class="op">],</span> isKey<span class="op">:</span> <span class="ex">Boolean</span><span class="op">):</span> <span class="bu">Unit</span> <span class="op">=</span> <span class="op">()</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> Serde<span class="op">:</span> Serde<span class="op">[</span>MnistRecord<span class="op">]</span> <span class="op">=</span> Serdes<span class="op">.</span><span class="fu">serdeFrom</span><span class="op">(</span><span class="kw">this</span><span class="op">,</span> <span class="kw">this</span><span class="op">)</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">serialize</span><span class="op">(</span>topic<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> data<span class="op">:</span> MnistRecord<span class="op">):</span> <span class="ex">Array</span><span class="op">[</span><span class="ex">Byte</span><span class="op">]</span> <span class="op">=</span> </span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    data<span class="op">.</span>image<span class="op">.</span>data <span class="op">:+</span> data<span class="op">.</span>label<span class="op">.</span>toByte</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">override</span> <span class="kw">def</span> <span class="fu">deserialize</span><span class="op">(</span>topic<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> data<span class="op">:</span> <span class="ex">Array</span><span class="op">[</span><span class="ex">Byte</span><span class="op">]):</span> MnistRecord <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> m <span class="op">=</span> data<span class="op">.</span>size <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> n <span class="op">=</span> math<span class="op">.</span><span class="fu">sqrt</span><span class="op">(</span>m<span class="op">).</span>toInt</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>n <span class="op">*</span> n <span class="op">!=</span> m<span class="op">)</span> sys<span class="op">.</span><span class="fu">error</span><span class="op">(</span><span class="st">"oops."</span><span class="op">)</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">MnistRecord</span><span class="op">(</span></span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>      <span class="ex">Image</span><span class="op">(</span>data<span class="op">.</span><span class="fu">take</span><span class="op">(</span>m<span class="op">),</span> n<span class="op">,</span> n<span class="op">,</span> <span class="kw">true</span><span class="op">),</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">data</span><span class="op">(</span>m<span class="op">).</span>toInt</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="producer" class="level2">
+<h2 class="anchored" data-anchor-id="producer">Producer</h2>
+<p>Our producer is very simple. In this case it is a standard driver program, and the complete program is as follows:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> org<span class="op">.</span>cmhh</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>kafka<span class="op">.</span>clients<span class="op">.</span>producer<span class="op">.</span>_</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>kafka<span class="op">.</span>common<span class="op">.</span>serialization<span class="op">.</span>_</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>jdk<span class="op">.</span>CollectionConverters<span class="op">.</span>_</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>duration<span class="op">.</span><span class="ex">Duration</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.{</span>Await<span class="op">,</span> <span class="ex">Future</span><span class="op">}</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>ExecutionContext<span class="op">.</span>Implicits<span class="op">.</span>global</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>util<span class="op">.{</span>Success<span class="op">,</span> Failure<span class="op">}</span></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> java<span class="op">.</span>util<span class="op">.</span><span class="ex">Properties</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> ProducerApp <span class="kw">extends</span> App <span class="op">{</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> delay <span class="op">=</span> <span class="cf">if</span> <span class="op">(</span>args<span class="op">.</span>size <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="fu">args</span><span class="op">(</span><span class="dv">0</span><span class="op">).</span>toInt <span class="cf">else</span> <span class="dv">0</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> trainIt<span class="op">:</span> MnistIterator <span class="op">=</span> <span class="fu">MnistIterator</span><span class="op">(</span>MnistType<span class="op">.</span>TRAIN<span class="op">)</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> n <span class="op">=</span> trainIt<span class="op">.</span>size</span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> props <span class="op">=</span> <span class="kw">new</span> <span class="ex">Properties</span><span class="op">()</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>  props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"bootstrap.servers"</span><span class="op">,</span> <span class="st">"localhost:9092"</span><span class="op">)</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>  props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"key.serializer"</span><span class="op">,</span> <span class="st">"org.apache.kafka.common.serialization.StringSerializer"</span><span class="op">)</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>  props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"value.serializer"</span><span class="op">,</span> <span class="st">"org.cmhh.MnistRecordSerde"</span><span class="op">)</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> producer <span class="op">=</span> <span class="kw">new</span> KafkaProducer<span class="op">[</span><span class="ex">String</span><span class="op">,</span> MnistRecord<span class="op">](</span>props<span class="op">)</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span><span class="op">(</span><span class="st">"</span><span class="ch">\n\n</span><span class="st">Sending messages...</span><span class="ch">\n\n</span><span class="st">0.0%..."</span><span class="op">)</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> res <span class="op">=</span> <span class="ex">Future</span><span class="op">.</span><span class="fu">sequence</span><span class="op">(</span>trainIt<span class="op">.</span>zipWithIndex<span class="op">.</span><span class="fu">map</span><span class="op">(</span>rec <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> msg <span class="op">=</span> <span class="kw">new</span> ProducerRecord<span class="op">[</span><span class="ex">String</span><span class="op">,</span> MnistRecord<span class="op">](</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>      <span class="st">"mnist"</span><span class="op">,</span> </span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>      <span class="ss">s"</span><span class="st">%05d</span><span class="ss">"</span><span class="op">.</span><span class="fu">format</span><span class="op">(</span>rec<span class="op">.</span>_2<span class="op">),</span> </span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>      rec<span class="op">.</span>_1</span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">((</span>rec<span class="op">.</span>_2 <span class="op">+</span> <span class="dv">1</span><span class="op">)</span> <span class="op">%</span> <span class="op">(</span>n <span class="op">/</span> <span class="dv">10</span><span class="op">)</span> <span class="op">==</span> <span class="dv">0</span><span class="op">)</span> </span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>      <span class="fu">print</span><span class="op">(</span><span class="ss">s"${</span><span class="op">(</span>rec<span class="op">.</span>_2 <span class="op">+</span> <span class="dv">1</span><span class="op">).</span>toDouble <span class="op">/</span> n <span class="op">*</span> <span class="dv">100</span><span class="ss">}</span><span class="st">%... </span><span class="ss">"</span><span class="op">)</span></span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>delay <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="ex">Thread</span><span class="op">.</span><span class="fu">sleep</span><span class="op">(</span>delay<span class="op">)</span></span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>    <span class="ex">Future</span> <span class="op">{</span> producer<span class="op">.</span><span class="fu">send</span><span class="op">(</span>msg<span class="op">).</span>get <span class="op">}</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>  <span class="op">}))</span></span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>  Await<span class="op">.</span><span class="fu">ready</span><span class="op">(</span>res<span class="op">,</span> <span class="ex">Duration</span><span class="op">.</span>Inf<span class="op">)</span></span>
+<span id="cb12-41"><a href="#cb12-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-42"><a href="#cb12-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span><span class="op">(</span><span class="st">"</span><span class="ch">\n\n</span><span class="st">Done.</span><span class="ch">\n\n</span><span class="st">"</span><span class="op">)</span></span>
+<span id="cb12-43"><a href="#cb12-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We first create an instance of <code>KafkaProducer</code>, which is responsible for publishing our messages. This client object requires a configuration in order to be initialised, in this case an instance of <code>Properties</code>. Our properties include the address of our broker, as well as the serialisation classes for our keys and for our messages. In this case, our message keys will be the strings <code>00001</code> through <code>60000</code>, and they’ll be serialised via <code>StringSerializer</code>. Our messages are, of course, <code>MnistRecord</code>, and they’ll be serialised using the custom serialiser <code>MnistRecordSerde</code>. Otherwise, the driver program simply iterates over the training set, sending each, and then waiting some amount of time in milliseconds before moving on to the next, and we are notified on standard output how far we are through the full set in 10 percentage point increments. Messages are published by calling the <code>send</code> method of our <code>KafkaProducer</code>. This is asynchronous, and returns a Java-style <code>Future</code>, which we then convert to a Scala <code>Future</code> for slightly more idiomatic use.</p>
+</section>
+<section id="consumer" class="level2">
+<h2 class="anchored" data-anchor-id="consumer">Consumer</h2>
+<p>Our consumer is a little more complicated. First, we initialise a simple neural network using the Deeplearning4j library. The complete setup is as follows:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">cnn</span><span class="op">(</span>learningRate<span class="op">:</span> <span class="ex">Double</span> <span class="op">=</span> <span class="fl">0.01</span><span class="op">,</span> seed<span class="op">:</span> <span class="bu">Int</span> <span class="op">=</span> <span class="dv">1234</span><span class="op">):</span> MultiLayerNetwork <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> architecture <span class="op">=</span> <span class="kw">new</span> NeuralNetConfiguration<span class="op">.</span><span class="fu">Builder</span><span class="op">()</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">seed</span><span class="op">(</span>seed<span class="op">)</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">updater</span><span class="op">(</span><span class="kw">new</span> <span class="fu">Sgd</span><span class="op">(</span>learningRate<span class="op">))</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">weightInit</span><span class="op">(</span>WeightInit<span class="op">.</span>XAVIER<span class="op">)</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">l2</span><span class="op">(</span><span class="fl">1e-4</span><span class="op">)</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">list</span><span class="op">()</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">layer</span><span class="op">(</span><span class="dv">0</span><span class="op">,</span> <span class="kw">new</span> ConvolutionLayer<span class="op">.</span><span class="fu">Builder</span><span class="op">(</span><span class="dv">3</span><span class="op">,</span> <span class="dv">3</span><span class="op">)</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">stride</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span><span class="dv">2</span><span class="op">)</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">padding</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">nOut</span><span class="op">(</span><span class="dv">32</span><span class="op">)</span></span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">activation</span><span class="op">(</span>Activation<span class="op">.</span>RELU<span class="op">)</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">build</span><span class="op">()</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">layer</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span> <span class="kw">new</span> SubsamplingLayer<span class="op">.</span><span class="fu">Builder</span><span class="op">(</span>SubsamplingLayer<span class="op">.</span>PoolingType<span class="op">.</span>MAX<span class="op">)</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">kernelSize</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span><span class="dv">2</span><span class="op">)</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">stride</span><span class="op">(</span><span class="dv">1</span><span class="op">,</span><span class="dv">1</span><span class="op">)</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">build</span><span class="op">()</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">layer</span><span class="op">(</span><span class="dv">2</span><span class="op">,</span> <span class="kw">new</span> DenseLayer<span class="op">.</span><span class="fu">Builder</span><span class="op">()</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">nOut</span><span class="op">(</span><span class="dv">100</span><span class="op">)</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">activation</span><span class="op">(</span>Activation<span class="op">.</span>RELU<span class="op">)</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">build</span><span class="op">()</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">layer</span><span class="op">(</span><span class="dv">3</span><span class="op">,</span> <span class="kw">new</span> OutputLayer<span class="op">.</span><span class="fu">Builder</span><span class="op">(</span>LossFunctions<span class="op">.</span>LossFunction<span class="op">.</span>MCXENT<span class="op">)</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">nOut</span><span class="op">(</span><span class="dv">10</span><span class="op">)</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">activation</span><span class="op">(</span>Activation<span class="op">.</span>SOFTMAX<span class="op">)</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">build</span><span class="op">()</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span><span class="fu">setInputType</span><span class="op">(</span>InputType<span class="op">.</span><span class="fu">convolutionalFlat</span><span class="op">(</span><span class="dv">28</span><span class="op">,</span> <span class="dv">28</span><span class="op">,</span> <span class="dv">1</span><span class="op">))</span></span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="op">.</span>build</span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> network <span class="op">=</span> <span class="kw">new</span> <span class="fu">MultiLayerNetwork</span><span class="op">(</span>architecture<span class="op">)</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>  network<span class="op">.</span><span class="fu">init</span><span class="op">()</span></span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>  network</span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We’re not aiming for best-in-breed here–just something that we can train reasonably quickly, and which shows increasing accuracy as more of the topic is consumed. The full consumer application then looks as follows:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> org<span class="op">.</span>cmhh</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>kafka<span class="op">.</span>clients<span class="op">.</span>consumer<span class="op">.</span>_</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>apache<span class="op">.</span>kafka<span class="op">.</span>common<span class="op">.</span>serialization<span class="op">.</span>_</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>jdk<span class="op">.</span>CollectionConverters<span class="op">.</span>_</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>duration<span class="op">.</span><span class="ex">Duration</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.{</span>Await<span class="op">,</span> <span class="ex">Future</span><span class="op">}</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>concurrent<span class="op">.</span>ExecutionContext<span class="op">.</span>Implicits<span class="op">.</span>global</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>util<span class="op">.{</span>Success<span class="op">,</span> Failure<span class="op">}</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> java<span class="op">.</span>util<span class="op">.</span><span class="ex">Properties</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> java<span class="op">.</span>time<span class="op">.{</span><span class="ex">Duration</span> <span class="op">=&gt;</span> JDuration<span class="op">}</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>nd4j<span class="op">.</span>evaluation<span class="op">.</span>classification<span class="op">.</span>Evaluation</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> ConsumerApp <span class="kw">extends</span> App <span class="op">{</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> t <span class="op">=</span> <span class="kw">new</span> <span class="ex">Thread</span> <span class="op">{</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">override</span> <span class="kw">def</span> run<span class="op">:</span> <span class="bu">Unit</span> <span class="op">=</span> <span class="cf">try</span> <span class="op">{</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>      <span class="kw">val</span> props <span class="op">=</span> <span class="kw">new</span> <span class="ex">Properties</span><span class="op">()</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>      props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"bootstrap.servers"</span><span class="op">,</span> <span class="st">"localhost:9092"</span><span class="op">)</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>      props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"key.deserializer"</span><span class="op">,</span> <span class="st">"org.apache.kafka.common.serialization.StringDeserializer"</span><span class="op">)</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>      props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"value.deserializer"</span><span class="op">,</span> <span class="st">"org.cmhh.MnistRecordSerde"</span><span class="op">)</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>      props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"group.id"</span><span class="op">,</span> <span class="st">"mnist-train"</span><span class="op">)</span></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>      props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"auto.offset.reset"</span><span class="op">,</span> <span class="st">"earliest"</span><span class="op">)</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>      props<span class="op">.</span><span class="fu">put</span><span class="op">(</span><span class="st">"enable.auto.commit"</span><span class="op">,</span> <span class="kw">false</span><span class="op">)</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>      <span class="kw">val</span> consumer <span class="op">=</span> <span class="kw">new</span> KafkaConsumer<span class="op">[</span><span class="ex">String</span><span class="op">,</span> MnistRecord<span class="op">](</span>props<span class="op">)</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>      consumer<span class="op">.</span><span class="fu">subscribe</span><span class="op">(</span>java<span class="op">.</span>util<span class="op">.</span><span class="ex">Collections</span><span class="op">.</span><span class="fu">singletonList</span><span class="op">(</span><span class="st">"mnist"</span><span class="op">))</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>      </span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>      <span class="kw">val</span> network <span class="op">=</span> model<span class="op">.</span><span class="fu">ann</span><span class="op">()</span> </span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      <span class="kw">val</span> mnistTest <span class="op">=</span> <span class="kw">new</span> <span class="fu">MnistDataSetIterator</span><span class="op">(</span><span class="dv">100</span><span class="op">,</span> MnistType<span class="op">.</span>TEST<span class="op">)</span></span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>      <span class="cf">while</span> <span class="op">(</span><span class="kw">true</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> recs <span class="op">=</span> consumer<span class="op">.</span><span class="fu">poll</span><span class="op">(</span>JDuration<span class="op">.</span><span class="fu">ofMillis</span><span class="op">(</span><span class="dv">1000</span><span class="op">))</span></span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>recs<span class="op">.</span><span class="fu">count</span><span class="op">()</span> <span class="op">&gt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>          <span class="kw">val</span> it <span class="op">=</span> recs<span class="op">.</span>iterator</span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a>          <span class="cf">while</span><span class="op">(</span>it<span class="op">.</span>hasNext<span class="op">)</span> <span class="op">{</span> </span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>            <span class="kw">val</span> im <span class="op">=</span> it<span class="op">.</span><span class="fu">next</span><span class="op">().</span>value<span class="op">.</span>toNd4j</span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>            network<span class="op">.</span><span class="fu">fit</span><span class="op">(</span>im<span class="op">.</span>_1<span class="op">,</span> im<span class="op">.</span>_2<span class="op">)</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>          <span class="op">}</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a>          <span class="kw">val</span> eval <span class="op">=</span> network<span class="op">.</span>evaluate<span class="op">[</span>Evaluation<span class="op">](</span>mnistTest<span class="op">)</span></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>          <span class="fu">println</span><span class="op">(</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>            <span class="ss">f"</span><span class="st">number read: %%d, accuracy: %%1.4f</span><span class="ss">"</span><span class="op">.</span><span class="fu">format</span><span class="op">(</span>recs<span class="op">.</span><span class="fu">count</span><span class="op">(),</span> eval<span class="op">.</span>accuracy<span class="op">)</span></span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>          <span class="op">)</span></span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span> <span class="cf">catch</span> <span class="op">{</span></span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>        <span class="cf">case</span> e<span class="op">:</span> <span class="ex">Throwable</span> <span class="op">=&gt;</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>          <span class="fu">println</span><span class="op">(</span><span class="st">"Program terminated.</span><span class="ch">\n\n</span><span class="st">"</span><span class="op">)</span></span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>          <span class="fu">println</span><span class="op">(</span>e<span class="op">.</span><span class="fu">getMessage</span><span class="op">())</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  t<span class="op">.</span>start</span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a>  scala<span class="op">.</span>io<span class="op">.</span>StdIn<span class="op">.</span><span class="fu">readLine</span><span class="op">(</span><span class="st">"</span><span class="ch">\n\n</span><span class="st">Press ENTER to stop...</span><span class="ch">\n\n</span><span class="st">"</span><span class="op">)</span></span>
+<span id="cb14-55"><a href="#cb14-55" aria-hidden="true" tabindex="-1"></a>  t<span class="op">.</span><span class="fu">interrupt</span><span class="op">()</span></span>
+<span id="cb14-56"><a href="#cb14-56" aria-hidden="true" tabindex="-1"></a>  t<span class="op">.</span><span class="fu">join</span><span class="op">()</span></span>
+<span id="cb14-57"><a href="#cb14-57" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To retrieve messages from a topic, we need a <code>KafkaConsumer</code> object. We pass a basic configuration on instantiation which includes the address of our Kafka broker, the deserialisers for our keys and messages (which are of type <code>MnistRecord</code>), and we also ensure we read the topic from the start. Once the <code>KafkaConsumer</code>, <code>consumer</code>, is created, we subscribe to the <code>mnist</code> topic. Then, we poll the topic continuously for 1 second at a time, and use all the messages retrieved in that time to update our neural network. At the end of each loop, we report how many cases were retrieved, and how the model accuracy has changed as a result. We place the whole loop on a separate thread, mostly so we can wait for users to terminate the program by pressing ENTER.</p>
+<p>Note that Deeplearning4j does provide iterators for the MNIST database, but here we’ve rolled our own simple version. In part this is because Deeplearning4j is but one choice we could have made for the machine learning component, but also because it’s instructive to see how one goes about creating such iterators using the traits provided–in useful real-world scenarios, our data won’t be pre-bundled, and we’ll have no choice.</p>
+<p>Note also that while our neural network is simple enough, we run our test set through the model frequently, and without a GPU back-end this will be quite slow. On my machine I have an NVIDIA GeForce GTX 1650 Mobile / Max-Q GPU with 4GB of memory, and an Intel i7-9750H (12) @ 4.500GHz CPU. The training set of 10,000 images takes around 100 seconds to evaluate using the CPU back-end, but about 1.3 seconds using the GPU. At the very least one should probably change the settings so more messages are consumed on each iteration if using CPU–or simply don’t evaluate the test accuracy at all.</p>
+</section>
+<section id="results" class="level2">
+<h2 class="anchored" data-anchor-id="results">Results</h2>
+<p>To demonstrate the application, we start the consumer and producer applications each in separate terminals. In the first case, we send a new record to our topic every 10 milliseconds or so. Once the topic has records in it, our consumer starts printing out the learning progress. The rate at which we add new messages dictates our consumer processes about 20 or so new images for each 100 millisecond iteration.</p>
+<p><img src="assets/kafkatrain01.webp" class="img-fluid"></p>
+<p>If we just load all the images into our topic as fast as we can, we find our consumer processes 500 records for every 100 millisecond iteration. This is because the consumer configuration parameter <code>max.poll.records</code> has a default value of 500, and we have not changed it.</p>
+<p><img src="assets/kafkatrain02.webp" class="img-fluid"></p>
+</section>
+<section id="summary" class="level2">
+<h2 class="anchored" data-anchor-id="summary">Summary</h2>
+<p>In this post we demonstrated the basic usage of a producers and consumers when working with Kafka, including important considerations such as serialisation and deserialisation of our message types. The specific use-case for our consumer here, while not a great example of a useful real-world scenario, was to continuously update a classifier in real-time as new messages were received. There are a number of extensions that one could consider to make this more interesting, of course–we could develop web interfaces for creating new messages and append them to our topic, we could serialise our classifier for offline use, and so on. In an upcoming post we’ll replicate most of what was done in this post, but using Akka actors rather than Kafka.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
