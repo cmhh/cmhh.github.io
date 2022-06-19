@@ -52,3 +52,11 @@ kbd {
   font-weight: bold;
   font-size: 85%;
 }
+
+.nav-link code {
+  text-transform: none;
+}
+
+.no-head thead {
+  display: none;
+}

@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-0.9.393">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chris Hansen">
+<meta name="dcterms.date" content="2022-06-19">
+<meta name="description" content="In this post we look at how we create an Azure Function in Scala by making small changes to a basic Java function.">
+
+<title>cmhh - Azure Functions with Scala using the Java Handler</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link id="quarto-text-highlighting-styles" href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-banner {
+      background-image: url(../../img/banner-2.jpg);
+background-size: cover;
+    }
+    </style>
+
+
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">cmhh</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Azure Functions with Scala using the Java Handler</h1>
+                          <div class="quarto-categories">
+                <div class="quarto-category">Azure Functions</div>
+                <div class="quarto-category">Scala</div>
+              </div>
+                  </div>
+  </div>
+    
+  <div>
+    <div class="description">
+      In this post we look at how we create an Azure Function in Scala by making small changes to a basic Java function.
+    </div>
+  </div>
+
+
+
+
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Chris Hansen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 19, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#prerequisites" id="toc-prerequisites" class="nav-link active" data-scroll-target="#prerequisites">Prerequisites</a></li>
+  <li><a href="#a-simple-java-function" id="toc-a-simple-java-function" class="nav-link" data-scroll-target="#a-simple-java-function">A Simple Java Function</a></li>
+  <li><a href="#a-simple-scala-function" id="toc-a-simple-scala-function" class="nav-link" data-scroll-target="#a-simple-scala-function">A Simple Scala Function</a></li>
+  </ul>
+</nav>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<p><a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-overview">Azure Functions</a> is a serverless solution that lets you run code in the cloud. First-class support is provided for several languages, including C#, Java, JavaScript, PowerShell, Python, and TypeScript. This set will have a good number of people covered (though I’d love to know how many people out there are writing web services using PowerShell), though not everybody. One option is to write Functions in Scala (and, I imagine, Kotlin) using the Java handler, since Java and Scala are largely interoperable, and that is the focus of this post. Another possibility is to use a <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-custom-handlers">custom handler</a>, in which case we can use pretty much <em>any</em> other language, and the is the focus of a <a href="../../posts/azure-functions-scala-2">different post</a>.</p>
+<section id="prerequisites" class="level1">
+<h1>Prerequisites</h1>
+<p>We can develop Azure Functions entirely locally using <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local">Azure Functions Core Tools</a> (though you’ll need <a href="https://docs.microsoft.com/en-us/cli/azure/install-azure-cli">Azure CLI</a> to publish your apps). At the time this post was written, I was running Ubuntu 22.04, and Microsoft had not released a version of the core tools that I could use. So, I decided to put all the required tools in a Docker container, but I would argue that’s a good way to work anyway. So, we create a <code>Dockerfile</code> with companion <code>docker-compose.yml</code> file as follows:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true"><code>Dockerfile</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false"><code>docker-compose.yml</code></a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="sourceCode" id="cb1"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> ubuntu:20.04</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> DEBIAN_FRONTEND=noninteractive</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="kw">ARG</span> NODE_VERSION=16.15.1</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="kw">ARG</span> SBT_VERSION=1.6.2</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> dist-upgrade <span class="at">-y</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="at">--no-install-recommends</span> <span class="dt">\</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    gpg curl lsb-release maven openjdk-8-jdk openjdk-11-jdk openssh-server xz-utils <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">curl</span> <span class="at">-sL</span> https://aka.ms/InstallAzureCLIDeb <span class="kw">|</span> <span class="fu">bash</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="ex">curl</span> <span class="at">-s</span> https://packages.microsoft.com/keys/microsoft.asc <span class="kw">|</span> <span class="ex">gpg</span> <span class="at">--dearmor</span> <span class="op">&gt;</span> microsoft.gpg <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mv</span> microsoft.gpg /etc/apt/trusted.gpg.d/microsoft.gpg <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sh</span> <span class="at">-c</span> <span class="st">'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-$(lsb_release -cs)-prod $(lsb_release -cs) main" &gt; /etc/apt/sources.list.d/dotnetdev.list'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="at">--no-install-recommends</span> <span class="dt">\</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    azure-functions-core-tools-4 azure-cli dotnet-sdk-3.1 <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mkdir</span> <span class="at">-p</span> /usr/local/node <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  <span class="ex">curl</span> <span class="at">-sL</span> https://nodejs.org/dist/v<span class="va">${NODE_VERSION}</span>/node-v<span class="va">${NODE_VERSION}</span>-linux-x64.tar.xz <span class="kw">|</span> <span class="dt">\</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tar</span> xJvf <span class="at">-</span> <span class="at">--strip-components</span><span class="op">=</span>1 <span class="at">-C</span> /usr/local/node <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">"export PATH=</span><span class="dt">\$</span><span class="st">PATH:/usr/local/node/bin"</span> <span class="op">&gt;&gt;</span> /etc/profile <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>  <span class="va">PATH</span><span class="op">=</span><span class="va">$PATH</span>:/usr/local/node/bin <span class="ex">npm</span> install <span class="at">--location</span><span class="op">=</span>global azurite <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">"export JAVA_HOME=/usr"</span> <span class="op">&gt;&gt;</span> /etc/profile</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPOSE</span> 22</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a><span class="kw">CMD</span> <span class="fu">mkdir</span> <span class="at">-p</span> /root/.ssh <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  <span class="bu">echo</span> <span class="st">"</span><span class="va">$PUB_KEY</span><span class="st">"</span> <span class="op">&gt;&gt;</span> /root/.ssh/authorized_keys <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">chmod</span> 700 /root/.ssh <span class="kw">&amp;&amp;</span> <span class="fu">chmod</span> 600 /root/.ssh/<span class="pp">*</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>  <span class="ex">service</span> ssh start <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tail</span> <span class="at">-f</span> /dev/null</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="sourceCode" id="cb2"><pre class="sourceCode yaml code-with-copy"><code class="sourceCode yaml"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">version</span><span class="kw">:</span><span class="at"> </span><span class="st">"3.8"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">services</span><span class="kw">:</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">development</span><span class="kw">:</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">image</span><span class="kw">:</span><span class="at"> azure</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">build</span><span class="kw">:</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">context</span><span class="kw">:</span><span class="at"> ./</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="fu">dockerfile</span><span class="kw">:</span><span class="at"> Dockerfile</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">ports</span><span class="kw">:</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"24:22"</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">environment</span><span class="kw">:</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> </span><span class="st">"PUB_KEY=${PUB_KEY}"</span><span class="at"> </span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="at">    </span><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> azuredev-azfct:/root/.azure-functions-core-tools</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> azuredev-cache:/root/.cache</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> azuredev-mvn:/root/.m2</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> azuredev-vscode:/root/.vscode-server</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> azuredev-npm:/root/.npm</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="at">      </span><span class="kw">-</span><span class="at"> ./work:/root/work</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="fu">volumes</span><span class="kw">:</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">azuredev-azfct</span><span class="kw">:</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">azuredev-cache</span><span class="kw">:</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">azuredev-mvn</span><span class="kw">:</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">azuredev-vscode</span><span class="kw">:</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">azuredev-npm</span><span class="kw">:</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<p>This provides a single container with the following components:</p>
+<ul>
+<li><strong>Azure Functions Core Tools</strong> for local development</li>
+<li><strong>Azure CLI</strong> to deoploy to Azure</li>
+<li><strong>Azurite</strong> for local simulation of cloud storage: event queue, BLOB, and table storage</li>
+<li><strong>Java development kit</strong> for compilation of Java (and Scala) code</li>
+<li><strong>Maven</strong> to manage projects</li>
+<li><strong>OpenSSH sever</strong> to allow us to connect to running containers via SSH</li>
+</ul>
+<p>To run an instance (and build the image if it doesn’t already exist):</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> compose up <span class="at">-d</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I typically add an entry to my SSH config and then access the running container via the <a href="https://code.visualstudio.com/docs/remote/ssh">remote extension</a>. That is, I add something like the following to <code>~/config</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Host azuredev</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  HostName localhost</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  Port 24</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  User root</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><video src="assets/azuredev.m4v" class="img-fluid" controls=""><a href="assets/azuredev.m4v">Video</a></video></p>
+</section>
+<section id="a-simple-java-function" class="level1">
+<h1>A Simple Java Function</h1>
+<p>To create a basic Java function, run the following command:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mvn</span> archetype:generate <span class="dt">\</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-DarchetypeGroupId</span><span class="op">=</span>com.microsoft.azure <span class="dt">\</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-DarchetypeArtifactId</span><span class="op">=</span>azure-functions-archetype <span class="dt">\</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-DjavaVersion</span><span class="op">=</span>8</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>When doing this, users will be prompted to provide values for several parameters. In this example, we provide values as follows:</p>
+<table class="table">
+<thead>
+<tr class="header">
+<th>parameter</th>
+<th>value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>groupId</code></td>
+<td><code>org.example</code></td>
+</tr>
+<tr class="even">
+<td><code>artifactId</code></td>
+<td><code>hellojava</code></td>
+</tr>
+<tr class="odd">
+<td><code>version</code></td>
+<td><code>1.0-SNAPSHOT</code></td>
+</tr>
+<tr class="even">
+<td><code>package</code></td>
+<td><code>org.example</code></td>
+</tr>
+</tbody>
+</table>
+<p>After doing this, a folder named <code>hellojava</code> is created, with the following layout:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>hellojava</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>├── host.json</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>├── local.settings.json</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>├── pom.xml</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>└── src</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    ├── main</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    │   └── java</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    │       └── org</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    │           └── example</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    │               └── Function.java</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    └── test</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        └── java</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            └── org</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                └── example</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                    ├── FunctionTest.java</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                    └── HttpResponseMessageMock.java</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The most important files here are <code>Function.java</code> and <code>pom.xml</code>. <code>Function.java</code> contains the logic for our function, and <code>pom.xml</code> lists all the dependencies and other metadata Maven needs to build and run our project.</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true"><code>Function.java</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false"><code>pom.xml</code></a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="sourceCode" id="cb7"><pre class="sourceCode java code-with-copy"><code class="sourceCode java"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span><span class="im"> org</span><span class="op">.</span><span class="im">cmhh</span><span class="op">;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">ExecutionContext</span><span class="op">;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">HttpMethod</span><span class="op">;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">HttpRequestMessage</span><span class="op">;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">HttpResponseMessage</span><span class="op">;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">HttpStatus</span><span class="op">;</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">annotation</span><span class="op">.</span><span class="im">AuthorizationLevel</span><span class="op">;</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">annotation</span><span class="op">.</span><span class="im">FunctionName</span><span class="op">;</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">com</span><span class="op">.</span><span class="im">microsoft</span><span class="op">.</span><span class="im">azure</span><span class="op">.</span><span class="im">functions</span><span class="op">.</span><span class="im">annotation</span><span class="op">.</span><span class="im">HttpTrigger</span><span class="op">;</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> <span class="im">java</span><span class="op">.</span><span class="im">util</span><span class="op">.</span><span class="im">Optional</span><span class="op">;</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Azure Functions with HTTP Trigger<span class="co">.</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a><span class="kw">public</span> <span class="kw">class</span> Function <span class="op">{</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">/**</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>     <span class="co">*</span> This function listens at endpoint <span class="co">"/</span>api<span class="co">/</span>HttpExample<span class="co">". </span>Two ways to invoke it using <span class="co">"</span>curl<span class="co">"</span> command in bash<span class="co">:</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>     <span class="co">*</span> <span class="co">1.</span> curl <span class="co">-</span>d <span class="co">"</span>HTTP Body<span class="co">"</span> <span class="co">{</span>your host<span class="co">}/</span>api<span class="co">/</span>HttpExample</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>     <span class="co">*</span> <span class="co">2.</span> curl <span class="co">"{</span>your host<span class="co">}/</span>api<span class="co">/</span>HttpExample<span class="co">?</span>name<span class="co">=</span>HTTP<span class="co">%20Query"</span></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>     <span class="co">*/</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">@FunctionName</span><span class="op">(</span><span class="st">"HttpExample"</span><span class="op">)</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">public</span> HttpResponseMessage <span class="fu">run</span><span class="op">(</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>            <span class="at">@HttpTrigger</span><span class="op">(</span></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>                name <span class="op">=</span> <span class="st">"req"</span><span class="op">,</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>                methods <span class="op">=</span> <span class="op">{</span>HttpMethod<span class="op">.</span><span class="fu">GET</span><span class="op">,</span> HttpMethod<span class="op">.</span><span class="fu">POST</span><span class="op">},</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>                authLevel <span class="op">=</span> AuthorizationLevel<span class="op">.</span><span class="fu">ANONYMOUS</span><span class="op">)</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>                HttpRequestMessage<span class="op">&lt;</span>Optional<span class="op">&lt;</span><span class="bu">String</span><span class="op">&gt;&gt;</span> request<span class="op">,</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>            <span class="dt">final</span> ExecutionContext context<span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>        context<span class="op">.</span><span class="fu">getLogger</span><span class="op">().</span><span class="fu">info</span><span class="op">(</span><span class="st">"Java HTTP trigger processed a request."</span><span class="op">);</span></span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>        <span class="co">// Parse query parameter</span></span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">final</span> <span class="bu">String</span> query <span class="op">=</span> request<span class="op">.</span><span class="fu">getQueryParameters</span><span class="op">().</span><span class="fu">get</span><span class="op">(</span><span class="st">"name"</span><span class="op">);</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">final</span> <span class="bu">String</span> name <span class="op">=</span> request<span class="op">.</span><span class="fu">getBody</span><span class="op">().</span><span class="fu">orElse</span><span class="op">(</span>query<span class="op">);</span></span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="op">(</span>name <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> request<span class="op">.</span><span class="fu">createResponseBuilder</span><span class="op">(</span>HttpStatus<span class="op">.</span><span class="fu">BAD_REQUEST</span><span class="op">).</span><span class="fu">body</span><span class="op">(</span><span class="st">"Please pass a name on the query string or in the request body"</span><span class="op">).</span><span class="fu">build</span><span class="op">();</span></span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span> <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> request<span class="op">.</span><span class="fu">createResponseBuilder</span><span class="op">(</span>HttpStatus<span class="op">.</span><span class="fu">OK</span><span class="op">).</span><span class="fu">body</span><span class="op">(</span><span class="st">"Hello, "</span> <span class="op">+</span> name<span class="op">).</span><span class="fu">build</span><span class="op">();</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="sourceCode" id="cb8"><pre class="sourceCode xml code-with-copy"><code class="sourceCode xml"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;?xml</span><span class="ot"> version=</span><span class="st">"1.0"</span><span class="ot"> encoding=</span><span class="st">"UTF-8"</span> <span class="fu">?&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">project</span><span class="ot"> xmlns=</span><span class="st">"http://maven.apache.org/POM/4.0.0"</span><span class="ot"> xmlns:xsi=</span><span class="st">"http://www.w3.org/2001/XMLSchema-instance"</span><span class="ot"> xsi:schemaLocation=</span><span class="st">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span>&gt;</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">modelVersion</span>&gt;4.0.0&lt;/<span class="kw">modelVersion</span>&gt;</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">groupId</span>&gt;org.cmhh&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">artifactId</span>&gt;hellojava&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">version</span>&gt;1.0-SNAPSHOT&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">packaging</span>&gt;jar&lt;/<span class="kw">packaging</span>&gt;</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">name</span>&gt;Azure Java Functions&lt;/<span class="kw">name</span>&gt;</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">properties</span>&gt;</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">project.build.sourceEncoding</span>&gt;UTF-8&lt;/<span class="kw">project.build.sourceEncoding</span>&gt;</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">java.version</span>&gt;1.8&lt;/<span class="kw">java.version</span>&gt;</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">azure.functions.maven.plugin.version</span>&gt;1.18.0&lt;/<span class="kw">azure.functions.maven.plugin.version</span>&gt;</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">azure.functions.java.library.version</span>&gt;2.0.0&lt;/<span class="kw">azure.functions.java.library.version</span>&gt;</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">functionAppName</span>&gt;org-20220618002424789&lt;/<span class="kw">functionAppName</span>&gt;</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">properties</span>&gt;</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">dependencies</span>&gt;</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">groupId</span>&gt;com.microsoft.azure.functions&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">artifactId</span>&gt;azure-functions-java-library&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">version</span>&gt;${azure.functions.java.library.version}&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>        <span class="co">&lt;!-- Test --&gt;</span></span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">groupId</span>&gt;org.junit.jupiter&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">artifactId</span>&gt;junit-jupiter&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">version</span>&gt;5.4.2&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">scope</span>&gt;test&lt;/<span class="kw">scope</span>&gt;</span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb8-34"><a href="#cb8-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-35"><a href="#cb8-35" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb8-36"><a href="#cb8-36" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">groupId</span>&gt;org.mockito&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb8-37"><a href="#cb8-37" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">artifactId</span>&gt;mockito-core&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb8-38"><a href="#cb8-38" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">version</span>&gt;2.23.4&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb8-39"><a href="#cb8-39" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">scope</span>&gt;test&lt;/<span class="kw">scope</span>&gt;</span>
+<span id="cb8-40"><a href="#cb8-40" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb8-41"><a href="#cb8-41" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">dependencies</span>&gt;</span>
+<span id="cb8-42"><a href="#cb8-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-43"><a href="#cb8-43" aria-hidden="true" tabindex="-1"></a>    &lt;<span class="kw">build</span>&gt;</span>
+<span id="cb8-44"><a href="#cb8-44" aria-hidden="true" tabindex="-1"></a>        &lt;<span class="kw">plugins</span>&gt;</span>
+<span id="cb8-45"><a href="#cb8-45" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">plugin</span>&gt;</span>
+<span id="cb8-46"><a href="#cb8-46" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">groupId</span>&gt;org.apache.maven.plugins&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb8-47"><a href="#cb8-47" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">artifactId</span>&gt;maven-compiler-plugin&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb8-48"><a href="#cb8-48" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">version</span>&gt;3.8.1&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb8-49"><a href="#cb8-49" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">configuration</span>&gt;</span>
+<span id="cb8-50"><a href="#cb8-50" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">source</span>&gt;${java.version}&lt;/<span class="kw">source</span>&gt;</span>
+<span id="cb8-51"><a href="#cb8-51" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">target</span>&gt;${java.version}&lt;/<span class="kw">target</span>&gt;</span>
+<span id="cb8-52"><a href="#cb8-52" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">encoding</span>&gt;${project.build.sourceEncoding}&lt;/<span class="kw">encoding</span>&gt;</span>
+<span id="cb8-53"><a href="#cb8-53" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">configuration</span>&gt;</span>
+<span id="cb8-54"><a href="#cb8-54" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">plugin</span>&gt;</span>
+<span id="cb8-55"><a href="#cb8-55" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">plugin</span>&gt;</span>
+<span id="cb8-56"><a href="#cb8-56" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">groupId</span>&gt;com.microsoft.azure&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb8-57"><a href="#cb8-57" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">artifactId</span>&gt;azure-functions-maven-plugin&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb8-58"><a href="#cb8-58" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">version</span>&gt;${azure.functions.maven.plugin.version}&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb8-59"><a href="#cb8-59" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">configuration</span>&gt;</span>
+<span id="cb8-60"><a href="#cb8-60" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- function app name --&gt;</span></span>
+<span id="cb8-61"><a href="#cb8-61" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">appName</span>&gt;${functionAppName}&lt;/<span class="kw">appName</span>&gt;</span>
+<span id="cb8-62"><a href="#cb8-62" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- function app resource group --&gt;</span></span>
+<span id="cb8-63"><a href="#cb8-63" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">resourceGroup</span>&gt;java-functions-group&lt;/<span class="kw">resourceGroup</span>&gt;</span>
+<span id="cb8-64"><a href="#cb8-64" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- function app service plan name --&gt;</span></span>
+<span id="cb8-65"><a href="#cb8-65" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">appServicePlanName</span>&gt;java-functions-app-service-plan&lt;/<span class="kw">appServicePlanName</span>&gt;</span>
+<span id="cb8-66"><a href="#cb8-66" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- function app region--&gt;</span></span>
+<span id="cb8-67"><a href="#cb8-67" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- refers https://github.com/microsoft/azure-maven-plugins/wiki/Azure-Functions:-Configuration-Details#supported-regions for all valid values --&gt;</span></span>
+<span id="cb8-68"><a href="#cb8-68" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">region</span>&gt;westus&lt;/<span class="kw">region</span>&gt;</span>
+<span id="cb8-69"><a href="#cb8-69" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- function pricingTier, default to be consumption if not specified --&gt;</span></span>
+<span id="cb8-70"><a href="#cb8-70" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- refers https://github.com/microsoft/azure-maven-plugins/wiki/Azure-Functions:-Configuration-Details#supported-pricing-tiers for all valid values --&gt;</span></span>
+<span id="cb8-71"><a href="#cb8-71" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- &lt;pricingTier&gt;&lt;/pricingTier&gt; --&gt;</span></span>
+<span id="cb8-72"><a href="#cb8-72" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- Whether to disable application insights, default is false --&gt;</span></span>
+<span id="cb8-73"><a href="#cb8-73" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- refers https://github.com/microsoft/azure-maven-plugins/wiki/Azure-Functions:-Configuration-Details for all valid configurations for application insights--&gt;</span></span>
+<span id="cb8-74"><a href="#cb8-74" aria-hidden="true" tabindex="-1"></a>                    <span class="co">&lt;!-- &lt;disableAppInsights&gt;&lt;/disableAppInsights&gt; --&gt;</span></span>
+<span id="cb8-75"><a href="#cb8-75" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">runtime</span>&gt;</span>
+<span id="cb8-76"><a href="#cb8-76" aria-hidden="true" tabindex="-1"></a>                        <span class="co">&lt;!-- runtime os, could be windows, linux or docker--&gt;</span></span>
+<span id="cb8-77"><a href="#cb8-77" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">os</span>&gt;windows&lt;/<span class="kw">os</span>&gt;</span>
+<span id="cb8-78"><a href="#cb8-78" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">javaVersion</span>&gt;8&lt;/<span class="kw">javaVersion</span>&gt;</span>
+<span id="cb8-79"><a href="#cb8-79" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">runtime</span>&gt;</span>
+<span id="cb8-80"><a href="#cb8-80" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">appSettings</span>&gt;</span>
+<span id="cb8-81"><a href="#cb8-81" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">property</span>&gt;</span>
+<span id="cb8-82"><a href="#cb8-82" aria-hidden="true" tabindex="-1"></a>                            &lt;<span class="kw">name</span>&gt;FUNCTIONS_EXTENSION_VERSION&lt;/<span class="kw">name</span>&gt;</span>
+<span id="cb8-83"><a href="#cb8-83" aria-hidden="true" tabindex="-1"></a>                            &lt;<span class="kw">value</span>&gt;~4&lt;/<span class="kw">value</span>&gt;</span>
+<span id="cb8-84"><a href="#cb8-84" aria-hidden="true" tabindex="-1"></a>                        &lt;/<span class="kw">property</span>&gt;</span>
+<span id="cb8-85"><a href="#cb8-85" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">appSettings</span>&gt;</span>
+<span id="cb8-86"><a href="#cb8-86" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">configuration</span>&gt;</span>
+<span id="cb8-87"><a href="#cb8-87" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">executions</span>&gt;</span>
+<span id="cb8-88"><a href="#cb8-88" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">execution</span>&gt;</span>
+<span id="cb8-89"><a href="#cb8-89" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">id</span>&gt;package-functions&lt;/<span class="kw">id</span>&gt;</span>
+<span id="cb8-90"><a href="#cb8-90" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">goals</span>&gt;</span>
+<span id="cb8-91"><a href="#cb8-91" aria-hidden="true" tabindex="-1"></a>                            &lt;<span class="kw">goal</span>&gt;package&lt;/<span class="kw">goal</span>&gt;</span>
+<span id="cb8-92"><a href="#cb8-92" aria-hidden="true" tabindex="-1"></a>                        &lt;/<span class="kw">goals</span>&gt;</span>
+<span id="cb8-93"><a href="#cb8-93" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">execution</span>&gt;</span>
+<span id="cb8-94"><a href="#cb8-94" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">executions</span>&gt;</span>
+<span id="cb8-95"><a href="#cb8-95" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">plugin</span>&gt;</span>
+<span id="cb8-96"><a href="#cb8-96" aria-hidden="true" tabindex="-1"></a>            <span class="co">&lt;!--Remove obj folder generated by .NET SDK in maven clean--&gt;</span></span>
+<span id="cb8-97"><a href="#cb8-97" aria-hidden="true" tabindex="-1"></a>            &lt;<span class="kw">plugin</span>&gt;</span>
+<span id="cb8-98"><a href="#cb8-98" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">artifactId</span>&gt;maven-clean-plugin&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb8-99"><a href="#cb8-99" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">version</span>&gt;3.1.0&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb8-100"><a href="#cb8-100" aria-hidden="true" tabindex="-1"></a>                &lt;<span class="kw">configuration</span>&gt;</span>
+<span id="cb8-101"><a href="#cb8-101" aria-hidden="true" tabindex="-1"></a>                    &lt;<span class="kw">filesets</span>&gt;</span>
+<span id="cb8-102"><a href="#cb8-102" aria-hidden="true" tabindex="-1"></a>                        &lt;<span class="kw">fileset</span>&gt;</span>
+<span id="cb8-103"><a href="#cb8-103" aria-hidden="true" tabindex="-1"></a>                            &lt;<span class="kw">directory</span>&gt;obj&lt;/<span class="kw">directory</span>&gt;</span>
+<span id="cb8-104"><a href="#cb8-104" aria-hidden="true" tabindex="-1"></a>                        &lt;/<span class="kw">fileset</span>&gt;</span>
+<span id="cb8-105"><a href="#cb8-105" aria-hidden="true" tabindex="-1"></a>                    &lt;/<span class="kw">filesets</span>&gt;</span>
+<span id="cb8-106"><a href="#cb8-106" aria-hidden="true" tabindex="-1"></a>                &lt;/<span class="kw">configuration</span>&gt;</span>
+<span id="cb8-107"><a href="#cb8-107" aria-hidden="true" tabindex="-1"></a>            &lt;/<span class="kw">plugin</span>&gt;</span>
+<span id="cb8-108"><a href="#cb8-108" aria-hidden="true" tabindex="-1"></a>        &lt;/<span class="kw">plugins</span>&gt;</span>
+<span id="cb8-109"><a href="#cb8-109" aria-hidden="true" tabindex="-1"></a>    &lt;/<span class="kw">build</span>&gt;</span>
+<span id="cb8-110"><a href="#cb8-110" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">project</span>&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+<p>We can build and run our function locally by running:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> mvn clean package</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> mvn azure-functions:run</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>All going well, your app will now be running, most likely on port 7071. Visiting <code>http://localhost:7071</code> we should see:</p>
+<p><img src="assets/function01.png" class="img-fluid"></p>
+<p><code>Function.java</code> provides a single function, and the <code>@FunctionName</code> annotation tells us that the name is <code>HttpExample</code>. The signature of the <code>run</code> method tells us that this is an <code>HttpTrigger</code> (meaning it runs every time we make an HTTP request), and that it expects a single parameter called <code>name</code>, an optional string. We can call the function by GETting or POSTing:</p>
+<div class="repl">
+<div class="sourceCode" id="cb10"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> http://localhost:7071/api/HttpExample<span class="pp">?</span>name=Java!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Hello, Java!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>or</p>
+<div class="repl">
+<div class="sourceCode" id="cb12"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="at">-d</span> <span class="st">"Java!"</span> http://localhost:7071/api/HttpExample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>Hello, Java!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="a-simple-scala-function" class="level1">
+<h1>A Simple Scala Function</h1>
+<p>We can convert our simple Java function by adding Scala as a dependecy to <code>pom.xml</code>, as well as the Scala Maven plugin; and by replacing <code>src/main/java/org/example/Function.java</code> with <code>src/main/scala/org/example/Function.java</code>. These two files are as follows:</p>
+<div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true"><code>Function.scala</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false"><code>pom.xml</code></a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<div class="sourceCode" id="cb14"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">package</span> org<span class="op">.</span>cmhh</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> com<span class="op">.</span>microsoft<span class="op">.</span>azure<span class="op">.</span>functions<span class="op">.{</span>ExecutionContext<span class="op">,</span> HttpMethod<span class="op">,</span> HttpRequestMessage<span class="op">,</span> HttpResponseMessage<span class="op">,</span> HttpStatus<span class="op">}</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> com<span class="op">.</span>microsoft<span class="op">.</span>azure<span class="op">.</span>functions<span class="op">.</span>annotation<span class="op">.{</span>AuthorizationLevel<span class="op">,</span> FunctionName<span class="op">,</span> HttpTrigger<span class="op">}</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> java<span class="op">.</span>util<span class="op">.</span>Optional</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Convert java Optional to Scala Option</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="kw">object</span> utils <span class="op">{</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> toOption<span class="op">[</span>T<span class="op">](</span>x<span class="op">:</span> Optional<span class="op">[</span>T<span class="op">]):</span> <span class="ex">Option</span><span class="op">[</span>T<span class="op">]</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="op">(</span>x<span class="op">.</span>isPresent<span class="op">)</span> <span class="ex">Option</span><span class="op">(</span>x<span class="op">.</span><span class="fu">get</span><span class="op">())</span> <span class="cf">else</span> <span class="bu">None</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a><span class="co">/**</span></span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a> <span class="co">*</span> Azure Functions with HTTP Trigger<span class="co">.</span></span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a> <span class="co">*/</span></span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> <span class="bu">Function</span> <span class="op">{</span></span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>  <span class="co">/**</span></span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a>  <span class="co">*</span> curl <span class="co">-</span>d <span class="co">"</span>HTTP Body<span class="co">"</span> <span class="co">{</span>your host<span class="co">}/</span>api<span class="co">/</span>HttpExample</span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a>  <span class="co">*</span> curl <span class="co">"{</span>your host<span class="co">}/</span>api<span class="co">/</span>HttpExample<span class="co">?</span>name<span class="co">=</span>HTTP<span class="co">%20Query"</span></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>  <span class="co">*/</span></span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>  @<span class="fu">FunctionName</span><span class="op">(</span><span class="st">"HttpExample"</span><span class="op">)</span></span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> <span class="fu">run</span><span class="op">(</span></span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a>    @<span class="fu">HttpTrigger</span><span class="op">(</span></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a>      name <span class="op">=</span> <span class="st">"req"</span><span class="op">,</span></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>      methods <span class="op">=</span> <span class="ex">Array</span><span class="op">(</span>HttpMethod<span class="op">.</span>GET<span class="op">,</span> HttpMethod<span class="op">.</span>POST<span class="op">),</span></span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>      authLevel <span class="op">=</span> AuthorizationLevel<span class="op">.</span>ANONYMOUS</span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">)</span></span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a>    request<span class="op">:</span> HttpRequestMessage<span class="op">[</span>Optional<span class="op">[</span><span class="ex">String</span><span class="op">]],</span></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a>    context<span class="op">:</span> ExecutionContext</span>
+<span id="cb14-33"><a href="#cb14-33" aria-hidden="true" tabindex="-1"></a>  <span class="op">):</span> HttpResponseMessage <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb14-34"><a href="#cb14-34" aria-hidden="true" tabindex="-1"></a>    context<span class="op">.</span><span class="fu">getLogger</span><span class="op">().</span><span class="fu">info</span><span class="op">(</span><span class="st">"Scala HTTP trigger processed a request."</span><span class="op">)</span></span>
+<span id="cb14-35"><a href="#cb14-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-36"><a href="#cb14-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> name<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> utils<span class="op">.</span><span class="fu">toOption</span><span class="op">(</span>request<span class="op">.</span><span class="fu">getBody</span><span class="op">())</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb14-37"><a href="#cb14-37" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="bu">None</span> <span class="op">=&gt;</span> <span class="ex">Option</span><span class="op">(</span>request<span class="op">.</span><span class="fu">getQueryParameters</span><span class="op">().</span><span class="fu">get</span><span class="op">(</span><span class="st">"name"</span><span class="op">))</span></span>
+<span id="cb14-38"><a href="#cb14-38" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="bu">Some</span><span class="op">(</span>s<span class="op">)</span> <span class="op">=&gt;</span> <span class="bu">Some</span><span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb14-39"><a href="#cb14-39" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-40"><a href="#cb14-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-41"><a href="#cb14-41" aria-hidden="true" tabindex="-1"></a>    name <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb14-42"><a href="#cb14-42" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="bu">None</span> <span class="op">=&gt;</span> </span>
+<span id="cb14-43"><a href="#cb14-43" aria-hidden="true" tabindex="-1"></a>        request</span>
+<span id="cb14-44"><a href="#cb14-44" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">createResponseBuilder</span><span class="op">(</span>HttpStatus<span class="op">.</span>BAD_REQUEST<span class="op">)</span></span>
+<span id="cb14-45"><a href="#cb14-45" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">body</span><span class="op">(</span><span class="st">"Please pass a name on the query string or in the request body"</span><span class="op">)</span></span>
+<span id="cb14-46"><a href="#cb14-46" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span>build</span>
+<span id="cb14-47"><a href="#cb14-47" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="bu">Some</span><span class="op">(</span>s<span class="op">)</span> <span class="op">=&gt;</span></span>
+<span id="cb14-48"><a href="#cb14-48" aria-hidden="true" tabindex="-1"></a>        request</span>
+<span id="cb14-49"><a href="#cb14-49" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">createResponseBuilder</span><span class="op">(</span>HttpStatus<span class="op">.</span>OK<span class="op">)</span></span>
+<span id="cb14-50"><a href="#cb14-50" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">body</span><span class="op">(</span><span class="ss">s"</span><span class="st">Hello, </span><span class="ss">$s"</span><span class="op">)</span></span>
+<span id="cb14-51"><a href="#cb14-51" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span>build</span>
+<span id="cb14-52"><a href="#cb14-52" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb14-53"><a href="#cb14-53" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb14-54"><a href="#cb14-54" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<style>
+  .scala-pom span:nth-child(42),
+  .scala-pom span:nth-child(43),
+  .scala-pom span:nth-child(44),
+  .scala-pom span:nth-child(45),
+  .scala-pom span:nth-child(46),
+  .scala-pom span:nth-child(101),
+  .scala-pom span:nth-child(102),
+  .scala-pom span:nth-child(103),
+  .scala-pom span:nth-child(104),
+  .scala-pom span:nth-child(105),
+  .scala-pom span:nth-child(106),
+  .scala-pom span:nth-child(107),
+  .scala-pom span:nth-child(108),
+  .scala-pom span:nth-child(109),
+  .scala-pom span:nth-child(110),
+  .scala-pom span:nth-child(111),
+  .scala-pom span:nth-child(112),
+  .scala-pom span:nth-child(113) {
+    font-weight: bold;
+    color: red;
+  }
+</style>
+<div class="scala-pom">
+<div class="sourceCode" id="cb15"><pre class="sourceCode numberSource xml number-lines code-with-copy"><code class="sourceCode xml"><span id="cb15-1"><a href="#cb15-1"></a><span class="fu">&lt;?xml</span><span class="ot"> version=</span><span class="st">"1.0"</span><span class="ot"> encoding=</span><span class="st">"UTF-8"</span> <span class="fu">?&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>&lt;<span class="kw">project</span> </span>
+<span id="cb15-3"><a href="#cb15-3"></a><span class="ot">  xmlns=</span><span class="st">"http://maven.apache.org/POM/4.0.0"</span> </span>
+<span id="cb15-4"><a href="#cb15-4"></a><span class="ot">  xmlns:xsi=</span><span class="st">"http://www.w3.org/2001/XMLSchema-instance"</span> </span>
+<span id="cb15-5"><a href="#cb15-5"></a><span class="ot">  xsi:schemaLocation=</span><span class="st">"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"</span></span>
+<span id="cb15-6"><a href="#cb15-6"></a>&gt;</span>
+<span id="cb15-7"><a href="#cb15-7"></a>  &lt;<span class="kw">modelVersion</span>&gt;4.0.0&lt;/<span class="kw">modelVersion</span>&gt;</span>
+<span id="cb15-8"><a href="#cb15-8"></a></span>
+<span id="cb15-9"><a href="#cb15-9"></a>  &lt;<span class="kw">groupId</span>&gt;org.cmhh&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-10"><a href="#cb15-10"></a>  &lt;<span class="kw">artifactId</span>&gt;helloscala&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-11"><a href="#cb15-11"></a>  &lt;<span class="kw">version</span>&gt;1.0-SNAPSHOT&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-12"><a href="#cb15-12"></a>  &lt;<span class="kw">packaging</span>&gt;jar&lt;/<span class="kw">packaging</span>&gt;</span>
+<span id="cb15-13"><a href="#cb15-13"></a></span>
+<span id="cb15-14"><a href="#cb15-14"></a>  &lt;<span class="kw">name</span>&gt;Azure Scala Functions&lt;/<span class="kw">name</span>&gt;</span>
+<span id="cb15-15"><a href="#cb15-15"></a></span>
+<span id="cb15-16"><a href="#cb15-16"></a>  &lt;<span class="kw">properties</span>&gt;</span>
+<span id="cb15-17"><a href="#cb15-17"></a>    &lt;<span class="kw">project.build.sourceEncoding</span>&gt;UTF-8&lt;/<span class="kw">project.build.sourceEncoding</span>&gt;</span>
+<span id="cb15-18"><a href="#cb15-18"></a>    &lt;<span class="kw">java.version</span>&gt;1.8&lt;/<span class="kw">java.version</span>&gt;</span>
+<span id="cb15-19"><a href="#cb15-19"></a>    &lt;<span class="kw">azure.functions.maven.plugin.version</span>&gt;1.18.0&lt;/<span class="kw">azure.functions.maven.plugin.version</span>&gt;</span>
+<span id="cb15-20"><a href="#cb15-20"></a>    &lt;<span class="kw">azure.functions.java.library.version</span>&gt;2.0.0&lt;/<span class="kw">azure.functions.java.library.version</span>&gt;</span>
+<span id="cb15-21"><a href="#cb15-21"></a>    &lt;<span class="kw">functionAppName</span>&gt;org-20220618002424789&lt;/<span class="kw">functionAppName</span>&gt;</span>
+<span id="cb15-22"><a href="#cb15-22"></a>  &lt;/<span class="kw">properties</span>&gt;</span>
+<span id="cb15-23"><a href="#cb15-23"></a>  &lt;<span class="kw">dependencies</span>&gt;</span>
+<span id="cb15-24"><a href="#cb15-24"></a>    &lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-25"><a href="#cb15-25"></a>      &lt;<span class="kw">groupId</span>&gt;com.microsoft.azure.functions&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-26"><a href="#cb15-26"></a>      &lt;<span class="kw">artifactId</span>&gt;azure-functions-java-library&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-27"><a href="#cb15-27"></a>      &lt;<span class="kw">version</span>&gt;${azure.functions.java.library.version}&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-28"><a href="#cb15-28"></a>    &lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-29"><a href="#cb15-29"></a>    <span class="co">&lt;!-- Test --&gt;</span></span>
+<span id="cb15-30"><a href="#cb15-30"></a>    &lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-31"><a href="#cb15-31"></a>      &lt;<span class="kw">groupId</span>&gt;org.junit.jupiter&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-32"><a href="#cb15-32"></a>      &lt;<span class="kw">artifactId</span>&gt;junit-jupiter&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-33"><a href="#cb15-33"></a>      &lt;<span class="kw">version</span>&gt;5.4.2&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-34"><a href="#cb15-34"></a>      &lt;<span class="kw">scope</span>&gt;test&lt;/<span class="kw">scope</span>&gt;</span>
+<span id="cb15-35"><a href="#cb15-35"></a>    &lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-36"><a href="#cb15-36"></a>    &lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-37"><a href="#cb15-37"></a>      &lt;<span class="kw">groupId</span>&gt;org.mockito&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-38"><a href="#cb15-38"></a>      &lt;<span class="kw">artifactId</span>&gt;mockito-core&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-39"><a href="#cb15-39"></a>      &lt;<span class="kw">version</span>&gt;2.23.4&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-40"><a href="#cb15-40"></a>      &lt;<span class="kw">scope</span>&gt;test&lt;/<span class="kw">scope</span>&gt;</span>
+<span id="cb15-41"><a href="#cb15-41"></a>    &lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-42"><a href="#cb15-42"></a>    &lt;<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-43"><a href="#cb15-43"></a>      &lt;<span class="kw">groupId</span>&gt;org.scala-lang&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-44"><a href="#cb15-44"></a>      &lt;<span class="kw">artifactId</span>&gt;scala-library&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-45"><a href="#cb15-45"></a>      &lt;<span class="kw">version</span>&gt;2.13.8&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-46"><a href="#cb15-46"></a>    &lt;/<span class="kw">dependency</span>&gt;</span>
+<span id="cb15-47"><a href="#cb15-47"></a>  &lt;/<span class="kw">dependencies</span>&gt;</span>
+<span id="cb15-48"><a href="#cb15-48"></a>  &lt;<span class="kw">build</span>&gt;</span>
+<span id="cb15-49"><a href="#cb15-49"></a>    &lt;<span class="kw">plugins</span>&gt;</span>
+<span id="cb15-50"><a href="#cb15-50"></a>      &lt;<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-51"><a href="#cb15-51"></a>        &lt;<span class="kw">groupId</span>&gt;org.apache.maven.plugins&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-52"><a href="#cb15-52"></a>        &lt;<span class="kw">artifactId</span>&gt;maven-compiler-plugin&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-53"><a href="#cb15-53"></a>        &lt;<span class="kw">version</span>&gt;3.8.1&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-54"><a href="#cb15-54"></a>        &lt;<span class="kw">configuration</span>&gt;</span>
+<span id="cb15-55"><a href="#cb15-55"></a>          &lt;<span class="kw">source</span>&gt;${java.version}&lt;/<span class="kw">source</span>&gt;</span>
+<span id="cb15-56"><a href="#cb15-56"></a>          &lt;<span class="kw">target</span>&gt;${java.version}&lt;/<span class="kw">target</span>&gt;</span>
+<span id="cb15-57"><a href="#cb15-57"></a>          &lt;<span class="kw">encoding</span>&gt;${project.build.sourceEncoding}&lt;/<span class="kw">encoding</span>&gt;</span>
+<span id="cb15-58"><a href="#cb15-58"></a>        &lt;/<span class="kw">configuration</span>&gt;</span>
+<span id="cb15-59"><a href="#cb15-59"></a>      &lt;/<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-60"><a href="#cb15-60"></a>      &lt;<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-61"><a href="#cb15-61"></a>        &lt;<span class="kw">groupId</span>&gt;com.microsoft.azure&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-62"><a href="#cb15-62"></a>        &lt;<span class="kw">artifactId</span>&gt;azure-functions-maven-plugin&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-63"><a href="#cb15-63"></a>        &lt;<span class="kw">version</span>&gt;${azure.functions.maven.plugin.version}&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-64"><a href="#cb15-64"></a>        &lt;<span class="kw">configuration</span>&gt;</span>
+<span id="cb15-65"><a href="#cb15-65"></a>          &lt;<span class="kw">appName</span>&gt;${functionAppName}&lt;/<span class="kw">appName</span>&gt;</span>
+<span id="cb15-66"><a href="#cb15-66"></a>          &lt;<span class="kw">resourceGroup</span>&gt;java-functions-group&lt;/<span class="kw">resourceGroup</span>&gt;</span>
+<span id="cb15-67"><a href="#cb15-67"></a>          &lt;<span class="kw">appServicePlanName</span>&gt;java-functions-app-service-plan&lt;/<span class="kw">appServicePlanName</span>&gt;</span>
+<span id="cb15-68"><a href="#cb15-68"></a>          &lt;<span class="kw">region</span>&gt;westus&lt;/<span class="kw">region</span>&gt;</span>
+<span id="cb15-69"><a href="#cb15-69"></a>          &lt;<span class="kw">runtime</span>&gt;</span>
+<span id="cb15-70"><a href="#cb15-70"></a>            &lt;<span class="kw">os</span>&gt;linux&lt;/<span class="kw">os</span>&gt;</span>
+<span id="cb15-71"><a href="#cb15-71"></a>            &lt;<span class="kw">javaVersion</span>&gt;8&lt;/<span class="kw">javaVersion</span>&gt;</span>
+<span id="cb15-72"><a href="#cb15-72"></a>          &lt;/<span class="kw">runtime</span>&gt;</span>
+<span id="cb15-73"><a href="#cb15-73"></a>          &lt;<span class="kw">appSettings</span>&gt;</span>
+<span id="cb15-74"><a href="#cb15-74"></a>              &lt;<span class="kw">property</span>&gt;</span>
+<span id="cb15-75"><a href="#cb15-75"></a>                &lt;<span class="kw">name</span>&gt;FUNCTIONS_EXTENSION_VERSION&lt;/<span class="kw">name</span>&gt;</span>
+<span id="cb15-76"><a href="#cb15-76"></a>                &lt;<span class="kw">value</span>&gt;~4&lt;/<span class="kw">value</span>&gt;</span>
+<span id="cb15-77"><a href="#cb15-77"></a>              &lt;/<span class="kw">property</span>&gt;</span>
+<span id="cb15-78"><a href="#cb15-78"></a>          &lt;/<span class="kw">appSettings</span>&gt;</span>
+<span id="cb15-79"><a href="#cb15-79"></a>        &lt;/<span class="kw">configuration</span>&gt;</span>
+<span id="cb15-80"><a href="#cb15-80"></a>        &lt;<span class="kw">executions</span>&gt;</span>
+<span id="cb15-81"><a href="#cb15-81"></a>          &lt;<span class="kw">execution</span>&gt;</span>
+<span id="cb15-82"><a href="#cb15-82"></a>            &lt;<span class="kw">id</span>&gt;package-functions&lt;/<span class="kw">id</span>&gt;</span>
+<span id="cb15-83"><a href="#cb15-83"></a>            &lt;<span class="kw">goals</span>&gt;</span>
+<span id="cb15-84"><a href="#cb15-84"></a>              &lt;<span class="kw">goal</span>&gt;package&lt;/<span class="kw">goal</span>&gt;</span>
+<span id="cb15-85"><a href="#cb15-85"></a>            &lt;/<span class="kw">goals</span>&gt;</span>
+<span id="cb15-86"><a href="#cb15-86"></a>          &lt;/<span class="kw">execution</span>&gt;</span>
+<span id="cb15-87"><a href="#cb15-87"></a>        &lt;/<span class="kw">executions</span>&gt;</span>
+<span id="cb15-88"><a href="#cb15-88"></a>      &lt;/<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-89"><a href="#cb15-89"></a>      <span class="co">&lt;!--Remove obj folder generated by .NET SDK in maven clean--&gt;</span></span>
+<span id="cb15-90"><a href="#cb15-90"></a>      &lt;<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-91"><a href="#cb15-91"></a>        &lt;<span class="kw">artifactId</span>&gt;maven-clean-plugin&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-92"><a href="#cb15-92"></a>        &lt;<span class="kw">version</span>&gt;3.1.0&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-93"><a href="#cb15-93"></a>        &lt;<span class="kw">configuration</span>&gt;</span>
+<span id="cb15-94"><a href="#cb15-94"></a>          &lt;<span class="kw">filesets</span>&gt;</span>
+<span id="cb15-95"><a href="#cb15-95"></a>            &lt;<span class="kw">fileset</span>&gt;</span>
+<span id="cb15-96"><a href="#cb15-96"></a>              &lt;<span class="kw">directory</span>&gt;obj&lt;/<span class="kw">directory</span>&gt;</span>
+<span id="cb15-97"><a href="#cb15-97"></a>            &lt;/<span class="kw">fileset</span>&gt;</span>
+<span id="cb15-98"><a href="#cb15-98"></a>          &lt;/<span class="kw">filesets</span>&gt;</span>
+<span id="cb15-99"><a href="#cb15-99"></a>        &lt;/<span class="kw">configuration</span>&gt;</span>
+<span id="cb15-100"><a href="#cb15-100"></a>      &lt;/<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-101"><a href="#cb15-101"></a>      &lt;<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-102"><a href="#cb15-102"></a>        &lt;<span class="kw">groupId</span>&gt;net.alchim31.maven&lt;/<span class="kw">groupId</span>&gt;</span>
+<span id="cb15-103"><a href="#cb15-103"></a>        &lt;<span class="kw">artifactId</span>&gt;scala-maven-plugin&lt;/<span class="kw">artifactId</span>&gt;</span>
+<span id="cb15-104"><a href="#cb15-104"></a>        &lt;<span class="kw">version</span>&gt;4.6.3&lt;/<span class="kw">version</span>&gt;</span>
+<span id="cb15-105"><a href="#cb15-105"></a>        &lt;<span class="kw">executions</span>&gt;</span>
+<span id="cb15-106"><a href="#cb15-106"></a>          &lt;<span class="kw">execution</span>&gt;</span>
+<span id="cb15-107"><a href="#cb15-107"></a>            &lt;<span class="kw">goals</span>&gt;</span>
+<span id="cb15-108"><a href="#cb15-108"></a>              &lt;<span class="kw">goal</span>&gt;compile&lt;/<span class="kw">goal</span>&gt;</span>
+<span id="cb15-109"><a href="#cb15-109"></a>              &lt;<span class="kw">goal</span>&gt;testCompile&lt;/<span class="kw">goal</span>&gt;</span>
+<span id="cb15-110"><a href="#cb15-110"></a>            &lt;/<span class="kw">goals</span>&gt;</span>
+<span id="cb15-111"><a href="#cb15-111"></a>          &lt;/<span class="kw">execution</span>&gt;</span>
+<span id="cb15-112"><a href="#cb15-112"></a>        &lt;/<span class="kw">executions</span>&gt;</span>
+<span id="cb15-113"><a href="#cb15-113"></a>      &lt;/<span class="kw">plugin</span>&gt;</span>
+<span id="cb15-114"><a href="#cb15-114"></a>    &lt;/<span class="kw">plugins</span>&gt;</span>
+<span id="cb15-115"><a href="#cb15-115"></a>  &lt;/<span class="kw">build</span>&gt;</span>
+<span id="cb15-116"><a href="#cb15-116"></a>&lt;/<span class="kw">project</span>&gt;</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</div>
+</div>
+<p>We build and run the function exactly as before but, crucially, we can now write all our code in Scala, as we would for any other Scala project. Cool.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
