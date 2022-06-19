@@ -209,7 +209,7 @@ background-size: cover;
   </ul></li>
   <li><a href="#bonus-hello-r" id="toc-bonus-hello-r" class="nav-link" data-scroll-target="#bonus-hello-r">Bonus: Hello, R!</a>
   <ul class="collapse">
-  <li><a href="#a-scala-service-1" id="toc-a-scala-service-1" class="nav-link" data-scroll-target="#a-scala-service-1">A Scala Service…</a></li>
+  <li><a href="#an-r-service" id="toc-an-r-service" class="nav-link" data-scroll-target="#an-r-service">An R Service…</a></li>
   <li><a href="#as-a-custom-handler-1" id="toc-as-a-custom-handler-1" class="nav-link" data-scroll-target="#as-a-custom-handler-1">…As a Custom Handler</a></li>
   </ul></li>
   </ul>
@@ -347,7 +347,7 @@ background-size: cover;
 </section>
 <section id="as-a-custom-handler" class="level2">
 <h2 class="anchored" data-anchor-id="as-a-custom-handler">…As a Custom Handler</h2>
-<p>We create a folder called <code>HelloScalaHandler</code>, and we copy the <code>helloscala.jar</code> file we created into it (of course, in an enterprise setting, we could automate the build and copy of <code>helloscala.jar</code>, but it’s not important for this demonstration). We create a handful of supporting files, with the layout of the <code>HelloScalaHandler</code> then as follows:</p>
+<p>We create a folder called <code>HelloScalaHandler</code>, and we copy the <code>helloscala.jar</code> file we created into it (of course, in an enterprise setting, we could automate the build and copy of <code>helloscala.jar</code>, but it’s not important for this demonstration). We create a handful of supporting files, so the layout of the <code>HelloScalaHandler</code> folder is then as follows:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>/HelloScalaHandler</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>├── Hello</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>│   └── function.json</span>
@@ -429,8 +429,8 @@ background-size: cover;
 <section id="bonus-hello-r" class="level1">
 <h1>Bonus: Hello, R!</h1>
 <p>To demonstrate the general nature of this approach, let’s choose one other language without an official handler–R. Again, we create a single end-point, <code>/api/Hello</code>, which expects a single query parameter named <code>name</code>, and returns the string <code>Hello, ${name}!</code>.</p>
-<section id="a-scala-service-1" class="level2">
-<h2 class="anchored" data-anchor-id="a-scala-service-1">A Scala Service…</h2>
+<section id="an-r-service" class="level2">
+<h2 class="anchored" data-anchor-id="an-r-service">An R Service…</h2>
 <p>In R, the <a href="https://www.rplumber.io/">Plumber</a> package lets us easily create web services simply by annotating functions in an R script. In this case, our service consists of just the following files:</p>
 <div class="panel-tabset">
 <ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true"><code>service.R</code></a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false"><code>run_service.R</code></a></li></ul>
