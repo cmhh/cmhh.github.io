@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chris Hansen">
+<meta name="dcterms.date" content="2020-06-01">
+<meta name="description" content="X13-ARIMA-SEATS is a widely used seasonal adjustment program developed by the U.S. Census Bureau. Here we look at how one might go wrapping this program as a web service for remote execution.">
+
+<title>cmhh - Seasonal Adjustment as a Service</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-block .quarto-title-banner {
+      background-image: url(../../img/banner-2.jpg);
+background-size: cover;
+    }
+    </style>
+
+
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">cmhh</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Seasonal Adjustment as a Service</h1>
+                  <div>
+        <div class="description">
+          X13-ARIMA-SEATS is a widely used seasonal adjustment program developed by the U.S. Census Bureau. Here we look at how one might go wrapping this program as a web service for remote execution.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">X13-ARIMA-SEATS</div>
+                <div class="quarto-category">Akka</div>
+                <div class="quarto-category">Akka HTTP</div>
+                <div class="quarto-category">Vue.js</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Chris Hansen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">June 1, 2020</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#a-simple-example" id="toc-a-simple-example" class="nav-link" data-scroll-target="#a-simple-example">A Simple Example…</a></li>
+  <li><a href="#as-a-service" id="toc-as-a-service" class="nav-link" data-scroll-target="#as-a-service">…as a Service</a></li>
+  <li><a href="#a-basic-javascript-client" id="toc-a-basic-javascript-client" class="nav-link" data-scroll-target="#a-basic-javascript-client">A Basic JavaScript ‘Client’</a></li>
+  </ul>
+</nav>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p><a href="https://www.census.gov/srd/www/x13as/">X13-ARIMA-SEATS</a> is a widely used seasonal adjustment program developed by the <a href="https://www.census.gov/">United States Census Bureau</a>. It’s a command-line tool, and I’ve wondered whether it would be useful to run as a web service–where I work, the standard security model makes running command-line tools a little problematic, so running a single service that could be accessed by any other client remotely would seem, on the face of it, a useful proposition.</p>
+</section>
+<section id="a-simple-example" class="level1">
+<h1>A Simple Example…</h1>
+<p>The X13 binary ships with a relatively simple example using the famous Box and Jenkins air passengers data. That is, a simple specification is provided in a file called <code>testairline.spc</code>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>series{</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  title="International Airline Passengers Data from Box and Jenkins"</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  start=1949.01</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  data=(</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    112 118 132 129 121 135 148 148 136 119 104 118</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    115 126 141 135 125 149 170 170 158 133 114 140</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    145 150 178 163 172 178 199 199 184 162 146 166</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    171 180 193 181 183 218 230 242 209 191 172 194</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    196 196 236 235 229 243 264 272 237 211 180 201</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    204 188 235 227 234 264 302 293 259 229 203 229</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    242 233 267 269 270 315 364 347 312 274 237 278</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    284 277 317 313 318 374 413 405 355 306 271 306</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    315 301 356 348 355 422 465 467 404 347 305 336</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    340 318 362 348 363 435 491 505 404 359 310 337</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    360 342 406 396 420 472 548 559 463 407 362 405</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    417 391 419 461 472 535 622 606 508 461 390 432)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  span=(1952.01, )</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>spectrum{</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  savelog=peaks </span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>transform{</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  function=auto</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  savelog=autotransform  </span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>regression{</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>  aictest=(td easter)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  savelog=aictest  </span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>automdl{  </span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>  savelog=automodel  </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>outlier{ }</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>x11{}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>One could adjust this at the command line by running something like (there are a number of ways the program can be invoked):</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">x13ashtml</span> testairline <span class="at">-g</span> g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Adding the <code>g</code> flag with value <code>g</code> tells X13 we wish to save output to subdirectory <code>g</code>, and we will end up with a number of text files matching the pattern <code>g/testairline.*</code>. For example, a range of diagnostics will be written as key-value pairs in a file called <code>g/testairline.udg</code>, the first few lines of which would look similar to:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>date: Jun  1, 2020  </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>time: 14.19.08 </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>version: 1.1</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>build: 39</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>output: html</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>srstit: International Airline Passengers Data from Box and Jenkins</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>srsnam: testairline                                                     </span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>freq:    12</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>span:  1st month,1952 to 12th month,1960</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>nobs:   108</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>constant:     0.0000000000E+00</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>transform: Automatic selection</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The seasonally adjusted and trend series would be saved as <code>g/testairline.d11</code> and <code>g/tsairline.d12</code>, respectively, and the first few rows of the D11 table would look as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>date    testairline.d11</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>------  -----------------------</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>195201  +0.192925972176234E+03</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>195202  +0.198588812698691E+03</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>195203  +0.185791217572829E+03</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>195204  +0.185841707777349E+03</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>195205  +0.186173988743725E+03</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>195206  +0.192599054707605E+03</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>195207  +0.187601439031062E+03</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>195208  +0.200184926772685E+03</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>...</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="as-a-service" class="level1">
+<h1>…as a Service</h1>
+<p>I created a <a href="https://github.com/cmhh/seasadj">basic library</a> which can be used to run X13 programmatically on the JVM (the library is written in Scala), and also as a web service (the web service itself is written using Akka HTTP). The above test specification would be converted to JSON in somewhat obvious fashion as follows:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"airpassengers"</span><span class="fu">:{</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"series"</span><span class="fu">:{</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"title"</span><span class="fu">:</span><span class="st">"International Airline Passengers Data from Box and Jenkins"</span><span class="fu">,</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"start"</span><span class="fu">:</span><span class="st">"1949.01"</span><span class="fu">,</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"data"</span><span class="fu">:</span><span class="ot">[</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="dv">112</span><span class="ot">,</span> <span class="dv">118</span><span class="ot">,</span> <span class="dv">132</span><span class="ot">,</span> <span class="dv">129</span><span class="ot">,</span> <span class="dv">121</span><span class="ot">,</span> <span class="dv">135</span><span class="ot">,</span> <span class="dv">148</span><span class="ot">,</span> <span class="dv">148</span><span class="ot">,</span> <span class="dv">136</span><span class="ot">,</span> <span class="dv">119</span><span class="ot">,</span> <span class="dv">104</span><span class="ot">,</span> <span class="dv">118</span><span class="ot">,</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="dv">115</span><span class="ot">,</span> <span class="dv">126</span><span class="ot">,</span> <span class="dv">141</span><span class="ot">,</span> <span class="dv">135</span><span class="ot">,</span> <span class="dv">125</span><span class="ot">,</span> <span class="dv">149</span><span class="ot">,</span> <span class="dv">170</span><span class="ot">,</span> <span class="dv">170</span><span class="ot">,</span> <span class="dv">158</span><span class="ot">,</span> <span class="dv">133</span><span class="ot">,</span> <span class="dv">114</span><span class="ot">,</span> <span class="dv">140</span><span class="ot">,</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="dv">145</span><span class="ot">,</span> <span class="dv">150</span><span class="ot">,</span> <span class="dv">178</span><span class="ot">,</span> <span class="dv">163</span><span class="ot">,</span> <span class="dv">172</span><span class="ot">,</span> <span class="dv">178</span><span class="ot">,</span> <span class="dv">199</span><span class="ot">,</span> <span class="dv">199</span><span class="ot">,</span> <span class="dv">184</span><span class="ot">,</span> <span class="dv">162</span><span class="ot">,</span> <span class="dv">146</span><span class="ot">,</span> <span class="dv">166</span><span class="ot">,</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="dv">171</span><span class="ot">,</span> <span class="dv">180</span><span class="ot">,</span> <span class="dv">193</span><span class="ot">,</span> <span class="dv">181</span><span class="ot">,</span> <span class="dv">183</span><span class="ot">,</span> <span class="dv">218</span><span class="ot">,</span> <span class="dv">230</span><span class="ot">,</span> <span class="dv">242</span><span class="ot">,</span> <span class="dv">209</span><span class="ot">,</span> <span class="dv">191</span><span class="ot">,</span> <span class="dv">172</span><span class="ot">,</span> <span class="dv">194</span><span class="ot">,</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="dv">196</span><span class="ot">,</span> <span class="dv">196</span><span class="ot">,</span> <span class="dv">236</span><span class="ot">,</span> <span class="dv">235</span><span class="ot">,</span> <span class="dv">229</span><span class="ot">,</span> <span class="dv">243</span><span class="ot">,</span> <span class="dv">264</span><span class="ot">,</span> <span class="dv">272</span><span class="ot">,</span> <span class="dv">237</span><span class="ot">,</span> <span class="dv">211</span><span class="ot">,</span> <span class="dv">180</span><span class="ot">,</span> <span class="dv">201</span><span class="ot">,</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        <span class="dv">204</span><span class="ot">,</span> <span class="dv">188</span><span class="ot">,</span> <span class="dv">235</span><span class="ot">,</span> <span class="dv">227</span><span class="ot">,</span> <span class="dv">234</span><span class="ot">,</span> <span class="dv">264</span><span class="ot">,</span> <span class="dv">302</span><span class="ot">,</span> <span class="dv">293</span><span class="ot">,</span> <span class="dv">259</span><span class="ot">,</span> <span class="dv">229</span><span class="ot">,</span> <span class="dv">203</span><span class="ot">,</span> <span class="dv">229</span><span class="ot">,</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="dv">242</span><span class="ot">,</span> <span class="dv">233</span><span class="ot">,</span> <span class="dv">267</span><span class="ot">,</span> <span class="dv">269</span><span class="ot">,</span> <span class="dv">270</span><span class="ot">,</span> <span class="dv">315</span><span class="ot">,</span> <span class="dv">364</span><span class="ot">,</span> <span class="dv">347</span><span class="ot">,</span> <span class="dv">312</span><span class="ot">,</span> <span class="dv">274</span><span class="ot">,</span> <span class="dv">237</span><span class="ot">,</span> <span class="dv">278</span><span class="ot">,</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>        <span class="dv">284</span><span class="ot">,</span> <span class="dv">277</span><span class="ot">,</span> <span class="dv">317</span><span class="ot">,</span> <span class="dv">313</span><span class="ot">,</span> <span class="dv">318</span><span class="ot">,</span> <span class="dv">374</span><span class="ot">,</span> <span class="dv">413</span><span class="ot">,</span> <span class="dv">405</span><span class="ot">,</span> <span class="dv">355</span><span class="ot">,</span> <span class="dv">306</span><span class="ot">,</span> <span class="dv">271</span><span class="ot">,</span> <span class="dv">306</span><span class="ot">,</span></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>        <span class="dv">315</span><span class="ot">,</span> <span class="dv">301</span><span class="ot">,</span> <span class="dv">356</span><span class="ot">,</span> <span class="dv">348</span><span class="ot">,</span> <span class="dv">355</span><span class="ot">,</span> <span class="dv">422</span><span class="ot">,</span> <span class="dv">465</span><span class="ot">,</span> <span class="dv">467</span><span class="ot">,</span> <span class="dv">404</span><span class="ot">,</span> <span class="dv">347</span><span class="ot">,</span> <span class="dv">305</span><span class="ot">,</span> <span class="dv">336</span><span class="ot">,</span></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="dv">340</span><span class="ot">,</span> <span class="dv">318</span><span class="ot">,</span> <span class="dv">362</span><span class="ot">,</span> <span class="dv">348</span><span class="ot">,</span> <span class="dv">363</span><span class="ot">,</span> <span class="dv">435</span><span class="ot">,</span> <span class="dv">491</span><span class="ot">,</span> <span class="dv">505</span><span class="ot">,</span> <span class="dv">404</span><span class="ot">,</span> <span class="dv">359</span><span class="ot">,</span> <span class="dv">310</span><span class="ot">,</span> <span class="dv">337</span><span class="ot">,</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="dv">360</span><span class="ot">,</span> <span class="dv">342</span><span class="ot">,</span> <span class="dv">406</span><span class="ot">,</span> <span class="dv">396</span><span class="ot">,</span> <span class="dv">420</span><span class="ot">,</span> <span class="dv">472</span><span class="ot">,</span> <span class="dv">548</span><span class="ot">,</span> <span class="dv">559</span><span class="ot">,</span> <span class="dv">463</span><span class="ot">,</span> <span class="dv">407</span><span class="ot">,</span> <span class="dv">362</span><span class="ot">,</span> <span class="dv">405</span><span class="ot">,</span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        <span class="dv">417</span><span class="ot">,</span> <span class="dv">391</span><span class="ot">,</span> <span class="dv">419</span><span class="ot">,</span> <span class="dv">461</span><span class="ot">,</span> <span class="dv">472</span><span class="ot">,</span> <span class="dv">535</span><span class="ot">,</span> <span class="dv">622</span><span class="ot">,</span> <span class="dv">606</span><span class="ot">,</span> <span class="dv">508</span><span class="ot">,</span> <span class="dv">461</span><span class="ot">,</span> <span class="dv">390</span><span class="ot">,</span> <span class="dv">432</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>      <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"span"</span><span class="fu">:</span><span class="ot">[</span><span class="st">"1952.01"</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">]</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"spectrum"</span><span class="fu">:{</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"savelog"</span><span class="fu">:</span><span class="st">"peaks"</span></span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"transform"</span><span class="fu">:{</span></span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"function"</span><span class="fu">:</span><span class="st">"auto"</span><span class="fu">,</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"savelog"</span><span class="fu">:</span><span class="st">"autotransform"</span></span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"regression"</span><span class="fu">:{</span></span>
+<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"aictest"</span><span class="fu">:</span><span class="ot">[</span><span class="st">"td"</span><span class="ot">,</span> <span class="st">"easter"</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"savelog"</span><span class="fu">:</span><span class="st">"aictest"</span>  </span>
+<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"automdl"</span><span class="fu">:{</span></span>
+<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a>      <span class="dt">"savelog"</span><span class="fu">:</span><span class="st">"automodel"</span></span>
+<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"outlier"</span><span class="fu">:</span><span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"x11"</span><span class="fu">:</span><span class="kw">null</span></span>
+<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If this was saved as <code>testairline.json</code>, and a service instance was running at <code>localhost:9001</code>, then the adjustment could be run via curl, say, as follows:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="dt">\</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Content-Type: application/json"</span> <span class="dt">\</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> @testairline.json <span class="dt">\</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  localhost:9001/seasadj/adjust <span class="dt">\</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">--compressed</span> <span class="at">--output</span> testairline_output.json</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The resulting JSON file contains most of the X13 output where files that can be imported as time series are saved in an array called <code>series</code>, and the diagnostics are parsed into an array called <code>diagnostics</code>.</p>
+<p><img src="assets/postman01.png" class="img-fluid"></p>
+<p>Note that more than a single series can be included in a single JSON file / string in a fairly obvious way, and the use of composites is permitted. Moreover, because the full set of results can get somewhat large, it is possible to edit the results. For example, if we only wished to keep the seasonally adjusted and trend time series output we could append the query parameter <code>save=sa,trn</code>; and if we wanted to suppress all the dates and just include the start date and frequency we could append <code>allDates=false</code>.</p>
+</section>
+<section id="a-basic-javascript-client" class="level1">
+<h1>A Basic JavaScript ‘Client’</h1>
+<p>Of course, once we have a web service, we can call it from any language or tool that has the ability to POST and parse JSON, which is pretty much everything. Client libraries could then be written for various target languages, if required, allowing users to use the service easily, and in an idiomatic way. One fun example involves calling the service in the browser using JavaScript. I like the idea of making component libraries using a framework such as <a href="https://vuejs.org/">Vue.js</a>, and this could be done here. In the following example we create a simple Vue.js component which knows how to fetch an unadjusted time series by ID using a <a href="https://github.com/cmhh/snzts">service I created earlier</a>, adjust the result, and then populate a <a href="https://www.highcharts.com/">highchart</a>:</p>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
+
+<div class="framed"><div id="app"></div></div>
+<script>
+Vue.component('snzseasadjchart', {
+  props: {
+    name: {required: true},
+    code: { required: true }
+  },
+  data: function() {
+    return {
+      tsdata: {}
+    }
+  },
+  mounted() {
+    this.$_update(this.code);
+  },
+  watch: {
+    code() {
+      this.$_update(this.code);
+    },
+    tsdata() {
+      Highcharts.chart(this.name, {
+        title: {
+          text: this.tsdata.title,
+          useHTML: true
+        },
+        yAxis: {
+          title: {
+            text: this.tsdata.units
+          }
+        },
+        xAxis: {
+          categories: this.tsdata.period
+        },
+        series: [
+          {
+            name: "unadjusted",
+            data: this.tsdata.ori
+          },
+          {
+            name: "seasonally adjusted",
+            data: this.tsdata.sa
+          },
+          {
+            name: "trend",
+            data: this.tsdata.trn
+          }
+        ],
+        chart: {
+          type: 'line',
+          zoomType: 'xy',
+          height: null
+        },
+        plotOptions: {
+          series: {
+            allowPointSelect: true,
+            marker: {
+              enabled: false
+            }
+          }
+        },
+        credits: {
+          enabled: true,
+          href: "https://www.stats.govt.nz/large-datasets/csv-files-for-download/",
+          text: "Stats NZ"
+        }
+      });
+    }
+  },
+  methods: {
+    $_update(seriesCode) {
+      let context = this;
+      axios
+        .get(`https://cmhh.hopto.org/snzts/v1/series?format=json&seriesCode=${this.code}`)
+        .then(response => {
+          let actual = response.data[0];
+          let title = actual.outcomes.join(", ");
+          let start = actual.period[0];
+          let data = actual.value.toString();
+          let period = 12 / actual.interval;
+          let units = actual.units;
+          let magnitude = actual.magnitude;
+          let request = 
+            `{"x":{"series":{"title":"${title}","start":"${start}",` +
+            `"period":${period},"data":[${data}]},"x11":null}}`;
+          axios
+            .post("https://cmhh.hopto.org/seasadj/adjust?save=ori,sa,trn", request)
+            .then(response => {
+              let res = response.data.x;
+              context.tsdata = {
+                title:title,
+                units:units,
+                magnitude:magnitude,
+                period:res.series.ori.date,
+                ori:res.series.ori.value,
+                sa:res.series.sa.value,
+                trn:res.series.trn.value
+              };
+            });
+        });
+    }
+  },
+  template: `<div class="snztschart" v-bind:id="name"></div>`
+});
+</script>
+<script>
+let app = new Vue({
+  el: '#app',
+  data() {
+    return {
+      code: "HLFQ.SAA3AZ"
+    }
+  },
+  template:`
+    <div>
+      <label for="cars">Choose a series:</label>
+      <select v-model="code">
+        <option value="HLFQ.SAA3AZ" selected>total employed</option>
+        <option value="HLFQ.SAB3AZ">total unemployed</option>
+        <option value="HLFQ.SAC3AZ">not in labour force</option>
+        <option value="HLFQ.SAE3AZ">labour force participation rate</option>
+        <option value="HLFQ.SAH3AZ">employment rate</option>
+        <option value="HLFQ.SAF3AZ">unemployment rate</option>
+        <option value="HLFQ.SAD3AZ">working-age population</option>
+      </select>
+      <hr>
+      <snzseasadjchart v-bind:code="code" name=ts02></snzseasadjchart>
+    </div>
+  `
+});
+</script>
+<p>For those interested, the full source of this ‘application’ is as follows:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;script</span> <span class="er">src</span><span class="ot">=</span><span class="st">"https://unpkg.com/axios/dist/axios.min.js"</span><span class="kw">&gt;&lt;/script&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;script</span> <span class="er">src</span><span class="ot">=</span><span class="st">"https://cdn.jsdelivr.net/npm/vue@2.6.11"</span><span class="kw">&gt;&lt;/script&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;script</span> <span class="er">src</span><span class="ot">=</span><span class="st">"https://code.highcharts.com/highcharts.src.js"</span><span class="kw">&gt;&lt;/script&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="er">id</span><span class="ot">=</span><span class="st">app</span><span class="kw">&gt;&lt;/div&gt;</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;script&gt;</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>Vue<span class="op">.</span><span class="fu">component</span>(<span class="st">'snzseasadjchart'</span><span class="op">,</span> {</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">props</span><span class="op">:</span> {</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">name</span><span class="op">:</span> {<span class="dt">required</span><span class="op">:</span> <span class="kw">true</span>}<span class="op">,</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">code</span><span class="op">:</span> { <span class="dt">required</span><span class="op">:</span> <span class="kw">true</span> }</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">data</span><span class="op">:</span> <span class="kw">function</span>() {</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">tsdata</span><span class="op">:</span> {}</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mounted</span>() {</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">this</span><span class="op">.</span><span class="fu">$_update</span>(<span class="kw">this</span><span class="op">.</span><span class="at">code</span>)<span class="op">;</span></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">watch</span><span class="op">:</span> {</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">code</span>() {</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>      <span class="kw">this</span><span class="op">.</span><span class="fu">$_update</span>(<span class="kw">this</span><span class="op">.</span><span class="at">code</span>)<span class="op">;</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    }<span class="op">,</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tsdata</span>() {</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>      Highcharts<span class="op">.</span><span class="fu">chart</span>(<span class="kw">this</span><span class="op">.</span><span class="at">name</span><span class="op">,</span> {</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>        <span class="dt">title</span><span class="op">:</span> {</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>          <span class="dt">text</span><span class="op">:</span> <span class="kw">this</span><span class="op">.</span><span class="at">tsdata</span><span class="op">.</span><span class="at">title</span><span class="op">,</span></span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>          <span class="dt">useHTML</span><span class="op">:</span> <span class="kw">true</span></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>        <span class="dt">yAxis</span><span class="op">:</span> {</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a>          <span class="dt">title</span><span class="op">:</span> {</span>
+<span id="cb7-32"><a href="#cb7-32" aria-hidden="true" tabindex="-1"></a>            <span class="dt">text</span><span class="op">:</span> <span class="kw">this</span><span class="op">.</span><span class="at">tsdata</span><span class="op">.</span><span class="at">units</span></span>
+<span id="cb7-33"><a href="#cb7-33" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb7-34"><a href="#cb7-34" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
+<span id="cb7-35"><a href="#cb7-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">xAxis</span><span class="op">:</span> {</span>
+<span id="cb7-36"><a href="#cb7-36" aria-hidden="true" tabindex="-1"></a>          <span class="dt">categories</span><span class="op">:</span> <span class="kw">this</span><span class="op">.</span><span class="at">tsdata</span><span class="op">.</span><span class="at">period</span></span>
+<span id="cb7-37"><a href="#cb7-37" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
+<span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>        <span class="dt">series</span><span class="op">:</span> [</span>
+<span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>            <span class="dt">name</span><span class="op">:</span> <span class="st">"unadjusted"</span><span class="op">,</span></span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>            <span class="dt">data</span><span class="op">:</span> <span class="kw">this</span><span class="op">.</span><span class="at">tsdata</span><span class="op">.</span><span class="at">ori</span></span>
+<span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a>          }<span class="op">,</span></span>
+<span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb7-44"><a href="#cb7-44" aria-hidden="true" tabindex="-1"></a>            <span class="dt">name</span><span class="op">:</span> <span class="st">"seasonally adjusted"</span><span class="op">,</span></span>
+<span id="cb7-45"><a href="#cb7-45" aria-hidden="true" tabindex="-1"></a>            <span class="dt">data</span><span class="op">:</span> <span class="kw">this</span><span class="op">.</span><span class="at">tsdata</span><span class="op">.</span><span class="at">sa</span></span>
+<span id="cb7-46"><a href="#cb7-46" aria-hidden="true" tabindex="-1"></a>          }<span class="op">,</span></span>
+<span id="cb7-47"><a href="#cb7-47" aria-hidden="true" tabindex="-1"></a>          {</span>
+<span id="cb7-48"><a href="#cb7-48" aria-hidden="true" tabindex="-1"></a>            <span class="dt">name</span><span class="op">:</span> <span class="st">"trend"</span><span class="op">,</span></span>
+<span id="cb7-49"><a href="#cb7-49" aria-hidden="true" tabindex="-1"></a>            <span class="dt">data</span><span class="op">:</span> <span class="kw">this</span><span class="op">.</span><span class="at">tsdata</span><span class="op">.</span><span class="at">trn</span></span>
+<span id="cb7-50"><a href="#cb7-50" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb7-51"><a href="#cb7-51" aria-hidden="true" tabindex="-1"></a>        ]<span class="op">,</span></span>
+<span id="cb7-52"><a href="#cb7-52" aria-hidden="true" tabindex="-1"></a>        <span class="dt">chart</span><span class="op">:</span> {</span>
+<span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>          <span class="dt">type</span><span class="op">:</span> <span class="st">'line'</span><span class="op">,</span></span>
+<span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>          <span class="dt">zoomType</span><span class="op">:</span> <span class="st">'xy'</span><span class="op">,</span></span>
+<span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>          <span class="dt">height</span><span class="op">:</span> <span class="kw">null</span></span>
+<span id="cb7-56"><a href="#cb7-56" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
+<span id="cb7-57"><a href="#cb7-57" aria-hidden="true" tabindex="-1"></a>        <span class="dt">plotOptions</span><span class="op">:</span> {</span>
+<span id="cb7-58"><a href="#cb7-58" aria-hidden="true" tabindex="-1"></a>          <span class="dt">series</span><span class="op">:</span> {</span>
+<span id="cb7-59"><a href="#cb7-59" aria-hidden="true" tabindex="-1"></a>            <span class="dt">allowPointSelect</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb7-60"><a href="#cb7-60" aria-hidden="true" tabindex="-1"></a>            <span class="dt">marker</span><span class="op">:</span> {</span>
+<span id="cb7-61"><a href="#cb7-61" aria-hidden="true" tabindex="-1"></a>              <span class="dt">enabled</span><span class="op">:</span> <span class="kw">false</span></span>
+<span id="cb7-62"><a href="#cb7-62" aria-hidden="true" tabindex="-1"></a>            }</span>
+<span id="cb7-63"><a href="#cb7-63" aria-hidden="true" tabindex="-1"></a>          }</span>
+<span id="cb7-64"><a href="#cb7-64" aria-hidden="true" tabindex="-1"></a>        }<span class="op">,</span></span>
+<span id="cb7-65"><a href="#cb7-65" aria-hidden="true" tabindex="-1"></a>        <span class="dt">credits</span><span class="op">:</span> {</span>
+<span id="cb7-66"><a href="#cb7-66" aria-hidden="true" tabindex="-1"></a>          <span class="dt">enabled</span><span class="op">:</span> <span class="kw">true</span><span class="op">,</span></span>
+<span id="cb7-67"><a href="#cb7-67" aria-hidden="true" tabindex="-1"></a>          <span class="dt">href</span><span class="op">:</span> <span class="st">"https://www.stats.govt.nz/large-datasets/csv-files-for-download/"</span><span class="op">,</span></span>
+<span id="cb7-68"><a href="#cb7-68" aria-hidden="true" tabindex="-1"></a>          <span class="dt">text</span><span class="op">:</span> <span class="st">"Stats NZ"</span></span>
+<span id="cb7-69"><a href="#cb7-69" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb7-70"><a href="#cb7-70" aria-hidden="true" tabindex="-1"></a>      })<span class="op">;</span></span>
+<span id="cb7-71"><a href="#cb7-71" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-72"><a href="#cb7-72" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb7-73"><a href="#cb7-73" aria-hidden="true" tabindex="-1"></a>  <span class="dt">methods</span><span class="op">:</span> {</span>
+<span id="cb7-74"><a href="#cb7-74" aria-hidden="true" tabindex="-1"></a>    <span class="fu">$_update</span>(seriesCode) {</span>
+<span id="cb7-75"><a href="#cb7-75" aria-hidden="true" tabindex="-1"></a>      <span class="kw">let</span> context <span class="op">=</span> <span class="kw">this</span><span class="op">;</span></span>
+<span id="cb7-76"><a href="#cb7-76" aria-hidden="true" tabindex="-1"></a>      axios</span>
+<span id="cb7-77"><a href="#cb7-77" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">get</span>(<span class="vs">`https://cmhh.hopto.org/snzts/v1/series?format=json&amp;seriesCode=</span><span class="sc">${</span><span class="kw">this</span><span class="op">.</span><span class="at">code</span><span class="sc">}</span><span class="vs">`</span>)</span>
+<span id="cb7-78"><a href="#cb7-78" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">then</span>(response <span class="kw">=&gt;</span> {</span>
+<span id="cb7-79"><a href="#cb7-79" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> actual <span class="op">=</span> response<span class="op">.</span><span class="at">data</span>[<span class="dv">0</span>]<span class="op">;</span></span>
+<span id="cb7-80"><a href="#cb7-80" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> title <span class="op">=</span> actual<span class="op">.</span><span class="at">outcomes</span><span class="op">.</span><span class="fu">join</span>(<span class="st">", "</span>)<span class="op">;</span></span>
+<span id="cb7-81"><a href="#cb7-81" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> start <span class="op">=</span> actual<span class="op">.</span><span class="at">period</span>[<span class="dv">0</span>]<span class="op">;</span></span>
+<span id="cb7-82"><a href="#cb7-82" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> data <span class="op">=</span> actual<span class="op">.</span><span class="at">value</span><span class="op">.</span><span class="fu">toString</span>()<span class="op">;</span></span>
+<span id="cb7-83"><a href="#cb7-83" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> period <span class="op">=</span> <span class="dv">12</span> <span class="op">/</span> actual<span class="op">.</span><span class="at">interval</span><span class="op">;</span></span>
+<span id="cb7-84"><a href="#cb7-84" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> units <span class="op">=</span> actual<span class="op">.</span><span class="at">units</span><span class="op">;</span></span>
+<span id="cb7-85"><a href="#cb7-85" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> magnitude <span class="op">=</span> actual<span class="op">.</span><span class="at">magnitude</span><span class="op">;</span></span>
+<span id="cb7-86"><a href="#cb7-86" aria-hidden="true" tabindex="-1"></a>          <span class="kw">let</span> request <span class="op">=</span> </span>
+<span id="cb7-87"><a href="#cb7-87" aria-hidden="true" tabindex="-1"></a>            <span class="vs">`{"x":{"series":{"title":"</span><span class="sc">${</span>title<span class="sc">}</span><span class="vs">","start":"</span><span class="sc">${</span>start<span class="sc">}</span><span class="vs">",`</span> <span class="op">+</span></span>
+<span id="cb7-88"><a href="#cb7-88" aria-hidden="true" tabindex="-1"></a>            <span class="vs">`"period":</span><span class="sc">${</span>period<span class="sc">}</span><span class="vs">,"data":[</span><span class="sc">${</span>data<span class="sc">}</span><span class="vs">]},"x11":null}}`</span><span class="op">;</span></span>
+<span id="cb7-89"><a href="#cb7-89" aria-hidden="true" tabindex="-1"></a>          axios</span>
+<span id="cb7-90"><a href="#cb7-90" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span><span class="fu">post</span>(<span class="st">"https://cmhh.hopto.org/seasadj/adjust?save=ori,sa,trn"</span><span class="op">,</span> request)</span>
+<span id="cb7-91"><a href="#cb7-91" aria-hidden="true" tabindex="-1"></a>            <span class="op">.</span><span class="fu">then</span>(response <span class="kw">=&gt;</span> {</span>
+<span id="cb7-92"><a href="#cb7-92" aria-hidden="true" tabindex="-1"></a>              <span class="kw">let</span> res <span class="op">=</span> response<span class="op">.</span><span class="at">data</span><span class="op">.</span><span class="at">x</span><span class="op">;</span></span>
+<span id="cb7-93"><a href="#cb7-93" aria-hidden="true" tabindex="-1"></a>              context<span class="op">.</span><span class="at">tsdata</span> <span class="op">=</span> {</span>
+<span id="cb7-94"><a href="#cb7-94" aria-hidden="true" tabindex="-1"></a>                <span class="dt">title</span><span class="op">:</span>title<span class="op">,</span></span>
+<span id="cb7-95"><a href="#cb7-95" aria-hidden="true" tabindex="-1"></a>                <span class="dt">units</span><span class="op">:</span>units<span class="op">,</span></span>
+<span id="cb7-96"><a href="#cb7-96" aria-hidden="true" tabindex="-1"></a>                <span class="dt">magnitude</span><span class="op">:</span>magnitude<span class="op">,</span></span>
+<span id="cb7-97"><a href="#cb7-97" aria-hidden="true" tabindex="-1"></a>                <span class="dt">period</span><span class="op">:</span>res<span class="op">.</span><span class="at">series</span><span class="op">.</span><span class="at">ori</span><span class="op">.</span><span class="at">date</span><span class="op">,</span></span>
+<span id="cb7-98"><a href="#cb7-98" aria-hidden="true" tabindex="-1"></a>                <span class="dt">ori</span><span class="op">:</span>res<span class="op">.</span><span class="at">series</span><span class="op">.</span><span class="at">ori</span><span class="op">.</span><span class="at">value</span><span class="op">,</span></span>
+<span id="cb7-99"><a href="#cb7-99" aria-hidden="true" tabindex="-1"></a>                <span class="dt">sa</span><span class="op">:</span>res<span class="op">.</span><span class="at">series</span><span class="op">.</span><span class="at">sa</span><span class="op">.</span><span class="at">value</span><span class="op">,</span></span>
+<span id="cb7-100"><a href="#cb7-100" aria-hidden="true" tabindex="-1"></a>                <span class="dt">trn</span><span class="op">:</span>res<span class="op">.</span><span class="at">series</span><span class="op">.</span><span class="at">trn</span><span class="op">.</span><span class="at">value</span></span>
+<span id="cb7-101"><a href="#cb7-101" aria-hidden="true" tabindex="-1"></a>              }<span class="op">;</span></span>
+<span id="cb7-102"><a href="#cb7-102" aria-hidden="true" tabindex="-1"></a>            })<span class="op">;</span></span>
+<span id="cb7-103"><a href="#cb7-103" aria-hidden="true" tabindex="-1"></a>        })<span class="op">;</span></span>
+<span id="cb7-104"><a href="#cb7-104" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-105"><a href="#cb7-105" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb7-106"><a href="#cb7-106" aria-hidden="true" tabindex="-1"></a>  <span class="dt">template</span><span class="op">:</span> <span class="vs">`&lt;div class="snztschart" v-bind:id="name"&gt;&lt;/div&gt;`</span></span>
+<span id="cb7-107"><a href="#cb7-107" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb7-108"><a href="#cb7-108" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/script&gt;</span></span>
+<span id="cb7-109"><a href="#cb7-109" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;script&gt;</span></span>
+<span id="cb7-110"><a href="#cb7-110" aria-hidden="true" tabindex="-1"></a><span class="kw">let</span> app <span class="op">=</span> <span class="kw">new</span> <span class="fu">Vue</span>({</span>
+<span id="cb7-111"><a href="#cb7-111" aria-hidden="true" tabindex="-1"></a>  <span class="dt">el</span><span class="op">:</span> <span class="st">'#app'</span><span class="op">,</span></span>
+<span id="cb7-112"><a href="#cb7-112" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data</span>() {</span>
+<span id="cb7-113"><a href="#cb7-113" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {</span>
+<span id="cb7-114"><a href="#cb7-114" aria-hidden="true" tabindex="-1"></a>      <span class="dt">code</span><span class="op">:</span> <span class="st">"HLFQ.SAA3AZ"</span></span>
+<span id="cb7-115"><a href="#cb7-115" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-116"><a href="#cb7-116" aria-hidden="true" tabindex="-1"></a>  }<span class="op">,</span></span>
+<span id="cb7-117"><a href="#cb7-117" aria-hidden="true" tabindex="-1"></a>  <span class="dt">template</span><span class="op">:</span><span class="vs">`</span></span>
+<span id="cb7-118"><a href="#cb7-118" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;div&gt;</span></span>
+<span id="cb7-119"><a href="#cb7-119" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;label for="cars"&gt;Choose a series:&lt;/label&gt;</span></span>
+<span id="cb7-120"><a href="#cb7-120" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;select v-model="code"&gt;</span></span>
+<span id="cb7-121"><a href="#cb7-121" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;option value="HLFQ.SAA3AZ" selected&gt;total employed&lt;/option&gt;</span></span>
+<span id="cb7-122"><a href="#cb7-122" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;option value="HLFQ.SAB3AZ"&gt;total unemployed&lt;/option&gt;</span></span>
+<span id="cb7-123"><a href="#cb7-123" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;option value="HLFQ.SAC3AZ"&gt;not in labour force&lt;/option&gt;</span></span>
+<span id="cb7-124"><a href="#cb7-124" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;option value="HLFQ.SAE3AZ"&gt;labour force participation rate&lt;/option&gt;</span></span>
+<span id="cb7-125"><a href="#cb7-125" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;option value="HLFQ.SAH3AZ"&gt;employment rate&lt;/option&gt;</span></span>
+<span id="cb7-126"><a href="#cb7-126" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;option value="HLFQ.SAF3AZ"&gt;unemployment rate&lt;/option&gt;</span></span>
+<span id="cb7-127"><a href="#cb7-127" aria-hidden="true" tabindex="-1"></a><span class="vs">        &lt;option value="HLFQ.SAD3AZ"&gt;working-age population&lt;/option&gt;</span></span>
+<span id="cb7-128"><a href="#cb7-128" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;/select&gt;</span></span>
+<span id="cb7-129"><a href="#cb7-129" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;hr&gt;</span></span>
+<span id="cb7-130"><a href="#cb7-130" aria-hidden="true" tabindex="-1"></a><span class="vs">      &lt;snzseasadjchart v-bind:code="code" name=ts02&gt;&lt;/snzseasadjchart&gt;</span></span>
+<span id="cb7-131"><a href="#cb7-131" aria-hidden="true" tabindex="-1"></a><span class="vs">    &lt;/div&gt;</span></span>
+<span id="cb7-132"><a href="#cb7-132" aria-hidden="true" tabindex="-1"></a><span class="vs">  `</span></span>
+<span id="cb7-133"><a href="#cb7-133" aria-hidden="true" tabindex="-1"></a>})<span class="op">;</span></span>
+<span id="cb7-134"><a href="#cb7-134" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/script&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
