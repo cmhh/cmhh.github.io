@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/guitar-chord-transitions/index.html",
       "/posts/azure-functions-scala-2/index.html",
       "/posts/azure-functions-scala-1/index.html",
       "/posts/r-spatial-snowflake/index.html",
