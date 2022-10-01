@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chris Hansen">
+<meta name="dcterms.date" content="2022-02-25">
+<meta name="description" content="Does it bother you when you’re forced to fetch features via an API, instead of just downloading a file from a file server? Same! As a solution of sorts, I wondered how easily we could make a service which could used to download features directly in a requested format.">
+
+<title>cmhh - Serving PostGIS Features Over HTTP</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-block .quarto-title-banner {
+      background-image: url(../../img/banner-2.jpg);
+background-size: cover;
+    }
+    </style>
+
+
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">cmhh</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Serving PostGIS Features Over HTTP</h1>
+                  <div>
+        <div class="description">
+          Does it bother you when you’re forced to fetch features via an API, instead of just downloading a file from a file server? Same! As a solution of sorts, I wondered how easily we could make a service which could used to download features directly in a requested format.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">geospatial</div>
+                <div class="quarto-category">PostGIS</div>
+                <div class="quarto-category">Akka HTTP</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Chris Hansen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">February 25, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#postgis-via-http" id="toc-postgis-via-http" class="nav-link" data-scroll-target="#postgis-via-http">PostGIS via HTTP</a>
+  <ul class="collapse">
+  <li><a href="#a-quick-demo" id="toc-a-quick-demo" class="nav-link" data-scroll-target="#a-quick-demo">A Quick Demo</a></li>
+  <li><a href="#get-some-data" id="toc-get-some-data" class="nav-link" data-scroll-target="#get-some-data">Get some data</a></li>
+  <li><a href="#get-a-running-postgis-instance" id="toc-get-a-running-postgis-instance" class="nav-link" data-scroll-target="#get-a-running-postgis-instance">Get a running PostGIS instance</a></li>
+  <li><a href="#save-postgis-table-as-files-on-disk" id="toc-save-postgis-table-as-files-on-disk" class="nav-link" data-scroll-target="#save-postgis-table-as-files-on-disk">Save PostGIS table as ‘files’ on disk</a></li>
+  <li><a href="#stream-files-to-clients" id="toc-stream-files-to-clients" class="nav-link" data-scroll-target="#stream-files-to-clients">Stream ‘files’ to clients</a></li>
+  <li><a href="#issues" id="toc-issues" class="nav-link" data-scroll-target="#issues">Issues</a></li>
+  </ul></li>
+  </ul>
+</nav>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>I love spatial data, and I use it a LOT. My typical use case mostly involves downloading a feature class from some online source, and then using it entirely locally. If I just want to look at it, I’ll drop it in <a href="https://qgis.org/en/site/">QGIS</a>, but oftentimes I’ll load the features into a (containerised) <a href="https://postgis.net/">PostGIS</a>-enabled database. Unfortunately, many of the features I’m interested in are harder to download than I’d like. Take the <a href="https://datafinder.stats.govt.nz/">Stats NZ Geographic Data Service</a>, for example. Let’s say we simply wish to get a local copy of the <a href="https://datafinder.stats.govt.nz/layer/106667-regional-council-2022-clipped-generalised/">Regional Council 2022 Clipped (generalised)</a> feature class. We can’t download this directly (or include a link in a blog-post or tutorial)–instead we:</p>
+<ul>
+<li>create an account if we don’t have one already</li>
+<li>ensure we have logged in</li>
+<li>select the feature class</li>
+<li>click a download link</li>
+<li>select the output format and coordinate reference in a dialog</li>
+<li>click ‘accept terms and create download’ link</li>
+<li>wait (sometimes for a <em>long</em> time) for our download to be created</li>
+<li>download feature class via the returned link</li>
+</ul>
+<p>There is a programmatic interface, but this is even less accessible, and requires the following steps:</p>
+<ul>
+<li>create an account if we don’t have one already</li>
+<li>create an API key (making sure it has the right functionality selected, also)</li>
+<li>create a download via the <code>exports/layers</code> endpoint</li>
+<li>poll the returned endpoint until the state becomes <code>complete</code></li>
+<li>download feature class via the embedded download link</li>
+</ul>
+<p>Such services are useful for less straightforward applications, such as providing WMTS layers which can be used in leaflet or openlayers. But in the situation outlined, it would be more convenient to simply be able to download the data without fanfare via a direct link. For example, it would be extremely easy (and cheap) to simply dump the more popular features classes in an S3 bucket in a handful of common formats. But we could still make features available directly, in the preferred format, via a web service…</p>
+</section>
+<section id="postgis-via-http" class="level1">
+<h1>PostGIS via HTTP</h1>
+<p>PostGIS is awesome, we can all agree, and surely every provider of spatial data is using it, right? So I thought I’d see how easy it might be to stand up a service that can serve features stored in PostGIS to users in their preferred format. I <a href="https://github.com/cmhh/featureserver">made something</a> that is probably not all that robust, but it was easy, and quite fun, so I thought I’d describe it. It certainly wouldn’t be that hard to enhance if somebody was motivated, so…</p>
+<p>The basic process is actually very simple. We simply use <a href="https://gdal.org/">GDAL</a>, via the <a href="https://gdal.org/programs/ogr2ogr.html"><code>ogr2ogr</code></a> command-line tool, to convert a PostGIS table to a feature class, and then we use <a href="https://doc.akka.io/docs/akka-http/current/index.html">Akka HTTP</a> to stream the resulting file to users. <code>ogr2ogr</code> is run as an external process, which is a bit clunky, but serviceable. GDAL does have <a href="https://gdal.org/api/java/index.html">Java bindings</a>, but the <a href="https://github.com/OSGeo/gdal/blob/master/swig/java/apps/ogr2ogr.java">Java version of <code>ogr2ogr</code></a> I found online was 1718 lines of code, and I didn’t have the energy to replicate something similar in Scala (we don’t need a full ogr2ogr implementation since we’re only using PostGIS as source, and only exporting to a handful of possible formats). Note that we use Scala throughout.</p>
+<section id="a-quick-demo" class="level2">
+<h2 class="anchored" data-anchor-id="a-quick-demo">A Quick Demo</h2>
+<p>A containerised version of the service can be started by running the following (note that <a href="https://git-lfs.github.com/">Git large file storage</a> is required in order to fetch the example feature classes, and <a href="https://www.scala-sbt.org/download.html">sbt</a> is required to build the service itself):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> git lfs clone git@github.com:cmhh/featureserver.git</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> cd featureserver</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> sbt assembly</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> docker-compose up <span class="at">-d</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The server will be running on <code>localhost:9002</code>. To list available features, we <code>GET</code> <code>localhost:9002/featureserver/listFeatures</code>:</p>
+<p><img src="assets/listFeatures.png" class="img-fluid"></p>
+<p>Then, for example, to download <code>regional_council_2022</code> as a GeoPackage file we’d <code>GET</code>:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>http://localhost:9002/featureserver/getFeatureClass?catalog=gis&amp;schema=statsnz&amp;name=regional_council_2022</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This will result in a file named <code>regional_council_2022.gpkg.zip</code> which can be unzipped locally, or happily used directly in QGIS:</p>
+<p><video src="assets/getFeatureClass.mp4" class="img-fluid" controls=""><a href="assets/getFeatureClass.mp4">Video</a></video></p>
+<p>Now lets look in a <em>little</em> more detail (again, full source <a href="https://github.com/cmhh/featureserver">here</a>)…</p>
+</section>
+<section id="get-some-data" class="level2">
+<h2 class="anchored" data-anchor-id="get-some-data">Get some data</h2>
+<p>I downloaded a number of feature classes from <a href="https://datafinder.stats.govt.nz/">Stats NZ Geographic Data Service</a> as GeoPackages, and loaded them to a <a href="https://github.com/cmhh/featureserver/tree/main/data">https://github.com/cmhh/featureserver/tree/main/data</a> repository:</p>
+
+<style scoped="">
+  .table a {
+    /* text-decoration: none; */
+    color: inherit;
+    font-size: 95%;
+  }
+</style>
+<table class="table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 67%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>file</th>
+<th>original source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/communityboard2022.gpkg">communityboard2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106696-community-board-2022-clipped-generalised/">Community Board 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/constituency2022.gpkg">constituency2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106660-constituency-2022-clipped-generalised/">Constituency 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/maoriconstituency2022.gpkg">maoriconstituency2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106664-maori-constituency-2022-clipped-generalised/">Māori Constituency 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/maoriward2022.gpkg">maoriward2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106700-maori-ward-2022-clipped-generalised/">Māori Ward 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/meshblock2022.gpkg">meshblock2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106723-meshblock-2022-clipped-generalised/">Meshblock 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/regionalcouncil2022.gpkg">regionalcouncil2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106667-regional-council-2022-clipped-generalised/">Regional Council 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/statisticalarea12022.gpkg">statisticalarea12022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106709-statistical-area-1-2022-clipped-generalised/">Statistical Area 1 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/statisticalarea22022.gpkg">statisticalarea22022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106706-statistical-area-2-2022-clipped-generalised/">Statistical Area 2 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/subdivision2022.gpkg">subdivision2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106672-subdivision-2022-clipped-generalised/">Territorial Authority 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/ta2022.gpkg">ta2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106669-territorial-authority-2022-clipped-generalised/">Territorial Authority 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/talb2022.gpkg">talb2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106694-territorial-authority-local-board-2022-clipped-generalised/">Territorial Authority Local Board 2022 Clipped (generalised)</a></td>
+</tr>
+<tr class="even">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/urbanrural2022.gpkg">urbanrural2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106703-urban-rural-2022-clipped-generalised/">Urban Rural 2022 Clipped (Generalised)</a></td>
+</tr>
+<tr class="odd">
+<td><a href="https://github.com/cmhh/featureserver/raw/main/data/ward2022.gpkg">ward2022.gpkg</a></td>
+<td><a href="https://datafinder.stats.govt.nz/layer/106698-ward-2022-clipped-generalised/">Ward 2022 Clipped (Generalised)</a></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="get-a-running-postgis-instance" class="level2">
+<h2 class="anchored" data-anchor-id="get-a-running-postgis-instance">Get a running PostGIS instance</h2>
+<p>As noted, I like to run PostGIS on-demand in a Docker container. We can do this easily enough by creating <code>Dockerfile</code> with the following content:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> ubuntu:20.04</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> DEBIAN_FRONTEND=noninteractive</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> <span class="kw">SHELL</span>=/bin/bash</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span>  <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="ex">apt-get</span> <span class="at">-y</span> dist-upgrade <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="at">--no-install-recommends</span> <span class="dt">\</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    wget gnupg2 ca-certificates gdal-bin sudo vim <span class="dt">\</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    libgdal-dev libgeos-dev libproj-dev libsqlite3-dev libudunits2-dev <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sh</span> <span class="at">-c</span> <span class="st">'echo "deb http://apt.postgresql.org/pub/repos/apt focal-pgdg main" &gt; /etc/apt/sources.list.d/pgdg.list'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wget</span> <span class="at">--quiet</span> <span class="at">-O</span> <span class="at">-</span> https://www.postgresql.org/media/keys/ACCC4CF8.asc <span class="kw">|</span> <span class="ex">apt-key</span> add <span class="at">-</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="at">--no-install-recommends</span> postgresql-14 postgresql-14-postgis-3 postgis <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sed</span> <span class="at">-i</span> <span class="at">-e</span> <span class="st">'s/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/'</span> /etc/locale.gen <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="ex">dpkg-reconfigure</span> <span class="at">--frontend</span><span class="op">=</span>noninteractive locales <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="ex">update-locale</span> LANG=en_US.UTF-8 <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rm</span> <span class="at">-rf</span> /var/lib/apt/lists/<span class="pp">*</span> </span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">service</span> postgresql start <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">'create database gis;'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-d</span> gis <span class="at">-c</span> <span class="st">'create extension postgis;'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-d</span> gis <span class="at">-c</span> <span class="st">'create extension postgis_raster;'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-d</span> gis <span class="at">-c</span> <span class="st">'create extension postgis_sfcgal;'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-d</span> gis <span class="at">-c</span> <span class="st">'create extension postgis_topology;'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-d</span> gis <span class="at">-c</span> <span class="st">"SET postgis.gdal_enabled_drivers = 'ENABLE_ALL';"</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">'create user gisuser;'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">"alter user gisuser with encrypted password 'gisuser';"</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sudo</span> <span class="at">-u</span> postgres psql <span class="at">-c</span> <span class="st">'grant all privileges on database gis to gisuser;'</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span> <span class="st">"\tlisten_addresses='*'\t"</span> <span class="op">&gt;&gt;</span> /etc/postgresql/14/main/postgresql.conf <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sed</span> <span class="at">-i</span> <span class="at">-E</span> <span class="st">'/local +all +all +peer/ s/peer/md5/'</span> /etc/postgresql/14/main/pg_hba.conf <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sed</span> <span class="at">-i</span> <span class="at">-E</span> <span class="st">'/host +all +all +127.0.0.1\/32 +scram-sha-256/ s/127.0.0.1\/32/0.0.0.0\/0   /'</span> /etc/postgresql/14/main/pg_hba.conf <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sed</span> <span class="at">-i</span> <span class="at">-E</span> <span class="st">'/host +all +all +::1\/128 +scram-sha-256/ s/::1\/128/::0\/0  /'</span> /etc/postgresql/14/main/pg_hba.conf <span class="kw">&amp;&amp;</span><span class="dt">\</span></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="bu">printf</span> <span class="st">"localhost:5432:gis:gisuser:gisuser"</span> <span class="op">&gt;&gt;</span> /root/.pgpass <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">chmod</span> 0600 /root/.pgpass</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">adduser</span> <span class="at">--disabled-password</span> <span class="at">--gecos</span> <span class="st">""</span> gisuser <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  <span class="ex">usermod</span> <span class="at">--password</span> <span class="va">$(</span><span class="ex">openssl</span> passwd <span class="at">-1</span> gisuser<span class="va">)</span> gisuser <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  <span class="ex">usermod</span> <span class="at">-aG</span> sudo gisuser</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPOSE</span> 5432</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a><span class="kw">ENTRYPOINT</span> <span class="ex">service</span> postgresql start <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tail</span> <span class="at">-f</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We build this and run an instance as follows:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> docker build <span class="at">-t</span> postgis <span class="op">&lt;</span>path to Dockerfile<span class="op">&gt;</span>/.</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> docker run <span class="at">-d</span> <span class="at">--rm</span> <span class="at">--name</span> postgis <span class="at">-v</span> data:/data <span class="at">-p</span> 5433:5432 postgis</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We deliberately mount the <code>data</code> folder holding each of our GeoPackages, and the we run commands along the lines of:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="va">PGPASSWORD</span><span class="op">=</span>gisuser <span class="ex">psql</span> <span class="at">-U</span> gisuser <span class="at">-d</span> gis <span class="at">-c</span> <span class="st">'create schema statsnz;'</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">ogr2ogr</span> <span class="dt">\</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-f</span> PostgreSQL PG:<span class="st">"dbname='gis' user='gisuser' password='gisuser'"</span> <span class="dt">\</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  regionalcouncil2022.gpkg <span class="dt">\</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-nln</span> statsnz.regional_council_2022</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="ex">ogr2ogr</span> <span class="dt">\</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">-f</span> PostgreSQL PG:<span class="st">"dbname='gis' user='gisuser' password='gisuser'"</span> <span class="dt">\</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  maoriconstituency2022.gpkg <span class="dt">\</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">-nln</span> statsnz.maori_constituency_2022</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We can automate this further (and, obviously be safer with passwords and root priviliges), but this is good for illustration.</p>
+</section>
+<section id="save-postgis-table-as-files-on-disk" class="level2">
+<h2 class="anchored" data-anchor-id="save-postgis-table-as-files-on-disk">Save PostGIS table as ‘files’ on disk</h2>
+<p>We first write a function with the following signature:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">command</span><span class="op">(</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  catalog<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> schema<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> table<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  path<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> format<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">Format</span><span class="op">],</span> epsg<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">],</span> simplify<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="op">):</span> <span class="ex">Result</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p><code>Result</code> is a simple custom type, similar to <code>Try</code>, except that the happy path is further differentiated into <code>Empty</code> and <code>NonEmpty</code>, and we do this so that we can send different HTTP codes in each case (while still using pattern matching). The <code>command</code> function first confirms the requested feature class exists, returning a valid <code>ogr2ogr</code> command inside a <code>NonEmpty</code> <code>Result</code> if it does, and an <code>Empty</code> <code>Result</code> if not. If the PostGIS database is unreachable, the result will be a <code>Throwable</code> inside an <code>Error</code> <code>Result</code>. But, as an example (the output isn’t as pretty–I added some line breaks!):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>utils<span class="op">.</span><span class="fu">command</span><span class="op">(</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"gis"</span><span class="op">,</span> <span class="st">"statsnz"</span><span class="op">,</span> <span class="st">"regional_council_2022"</span><span class="op">,</span> </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"blah"</span><span class="op">,</span> <span class="st">"geopackage"</span><span class="op">,</span> <span class="bu">Some</span><span class="op">(</span><span class="dv">4326</span><span class="op">),</span> <span class="bu">Some</span><span class="op">(</span><span class="dv">100</span><span class="op">)</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="cf">match</span> <span class="op">{</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> <span class="fu">NonEmpty</span><span class="op">(</span>cmd<span class="op">)</span> <span class="op">=&gt;</span> <span class="fu">println</span><span class="op">(</span>cmd<span class="op">)</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">case</span> _ <span class="op">=&gt;</span> <span class="op">()</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">ogr2ogr</span> <span class="at">-f</span> <span class="st">"GPKG"</span> <span class="st">"blah/regional_council_2022.gpkg"</span> <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  PG:<span class="st">"host=localhost port=5433 user=gisuser password=gisuser dbname=gis"</span> <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"statsnz.regional_council_2022"</span> <span class="dt">\</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-t_srs</span> <span class="st">"EPSG:4326"</span> <span class="at">-simplify</span> 100.0 <span class="at">-nlt</span> MULTIPOLYGON <span class="dt">\</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-nln</span> <span class="st">"regional_council_2022"</span> <span class="at">-overwrite</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This command can be run as a process easily enough:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> sys<span class="op">.</span>process<span class="op">.</span>_</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> p <span class="op">=</span> <span class="ex">Process</span><span class="op">(</span><span class="ss">s"""$cmd"""</span><span class="op">)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>p<span class="op">.!!</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We then zip the results using the <code>java.util.zip</code> library using the following function:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> java<span class="op">.</span>nio<span class="op">.</span>file<span class="op">.</span>Files</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> java<span class="op">.</span>io<span class="op">.{</span><span class="ex">File</span><span class="op">,</span> <span class="ex">FileInputStream</span><span class="op">,</span> <span class="ex">FileOutputStream</span><span class="op">}</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> java<span class="op">.</span>util<span class="op">.</span>zip<span class="op">.{</span><span class="ex">ZipEntry</span><span class="op">,</span> <span class="ex">ZipOutputStream</span><span class="op">}</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> com<span class="op">.</span>typesafe<span class="op">.</span>config<span class="op">.{</span>Config<span class="op">,</span> ConfigFactory<span class="op">}</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> scala<span class="op">.</span>util<span class="op">.</span>Try</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">zip</span><span class="op">(</span>folder<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> outfile<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> Try<span class="op">[</span><span class="ex">String</span><span class="op">]</span> <span class="op">=</span> Try <span class="op">{</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> dir<span class="op">:</span> <span class="ex">File</span> <span class="op">=</span> <span class="kw">new</span> <span class="ex">File</span><span class="op">(</span>folder<span class="op">)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> files <span class="op">=</span> dir<span class="op">.</span><span class="fu">listFiles</span><span class="op">().</span>toList</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> fos<span class="op">:</span> <span class="ex">FileOutputStream</span> <span class="op">=</span> <span class="kw">new</span> <span class="ex">FileOutputStream</span><span class="op">(</span>outfile<span class="op">)</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> zos<span class="op">:</span> <span class="ex">ZipOutputStream</span> <span class="op">=</span> <span class="kw">new</span> <span class="ex">ZipOutputStream</span><span class="op">(</span>fos<span class="op">)</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  files<span class="op">.</span><span class="fu">foreach</span><span class="op">(</span>f <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> fis <span class="op">=</span> <span class="kw">new</span> <span class="ex">FileInputStream</span><span class="op">(</span>f<span class="op">)</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> entry <span class="op">=</span> <span class="kw">new</span> <span class="ex">ZipEntry</span><span class="op">(</span>f<span class="op">.</span><span class="fu">getName</span><span class="op">())</span></span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    zos<span class="op">.</span><span class="fu">putNextEntry</span><span class="op">(</span>entry<span class="op">)</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">val</span> buff <span class="op">=</span> <span class="ex">Array</span><span class="op">.</span>fill<span class="op">[</span><span class="ex">Byte</span><span class="op">](</span><span class="dv">1024</span><span class="op">)(</span><span class="dv">0</span><span class="op">)</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">loop</span><span class="op">(</span>s<span class="op">:</span> <span class="ex">FileInputStream</span><span class="op">):</span> <span class="bu">Unit</span> <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>      <span class="kw">val</span> n <span class="op">=</span> s<span class="op">.</span><span class="fu">read</span><span class="op">(</span>buff<span class="op">)</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>      <span class="cf">if</span> <span class="op">(</span>n <span class="op">&lt;</span> <span class="dv">0</span><span class="op">)</span> <span class="op">()</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">else</span> <span class="op">{</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>        zos<span class="op">.</span><span class="fu">write</span><span class="op">(</span>buff<span class="op">,</span> <span class="dv">0</span><span class="op">,</span> n<span class="op">)</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>        <span class="fu">loop</span><span class="op">(</span>s<span class="op">)</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>      <span class="op">}</span></span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">loop</span><span class="op">(</span>fis<span class="op">)</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    fis<span class="op">.</span><span class="fu">close</span><span class="op">()</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    f<span class="op">.</span><span class="fu">delete</span><span class="op">()</span></span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="op">})</span></span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>  zos<span class="op">.</span><span class="fu">close</span><span class="op">()</span></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>  fos<span class="op">.</span><span class="fu">close</span><span class="op">()</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>  outfile</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Actually, we combine all the steps into a single function with the following signature:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">exportAndZip</span><span class="op">(</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  catalog<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> schema<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> table<span class="op">:</span> <span class="ex">String</span><span class="op">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  format<span class="op">:</span> <span class="ex">String</span><span class="op">,</span> epsg<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="bu">Int</span><span class="op">],</span> simplify<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">Double</span><span class="op">]</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="op">):</span> <span class="ex">Result</span><span class="op">[(</span><span class="ex">String</span><span class="op">,</span> <span class="ex">String</span><span class="op">)]</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The resulting tuple contains the folder where the ouptput is stored, and the name of the compressed archive. The output folder will be a temporary folder, and later it will be deleted after it has been streamed to the client–so many side-effects!</p>
+</section>
+<section id="stream-files-to-clients" class="level2">
+<h2 class="anchored" data-anchor-id="stream-files-to-clients">Stream ‘files’ to clients</h2>
+<p>Clients will be able to <code>GET</code> a feature class via the <code>/getFeatureClass</code> endpoint. The logic for this is:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> getFeatureClass <span class="op">=</span> <span class="fu">path</span><span class="op">(</span><span class="st">"getFeatureClass"</span><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">parameters</span><span class="op">(</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"catalog"</span><span class="op">,</span> <span class="st">"schema"</span><span class="op">,</span> <span class="st">"name"</span><span class="op">,</span> <span class="st">"format"</span><span class="op">.</span><span class="fu">withDefault</span><span class="op">(</span><span class="st">"gpkg"</span><span class="op">),</span> <span class="st">"epsg"</span><span class="op">.</span>as<span class="op">[</span><span class="bu">Int</span><span class="op">].?,</span> <span class="st">"simplify"</span><span class="op">.</span>as<span class="op">[</span><span class="ex">Double</span><span class="op">].?</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">){</span> <span class="op">(</span>catalog<span class="op">,</span> schema<span class="op">,</span> name<span class="op">,</span> format<span class="op">,</span> epsg<span class="op">,</span> simplify<span class="op">)</span> <span class="op">=&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    utils<span class="op">.</span><span class="fu">exportAndZip</span><span class="op">(</span>catalog<span class="op">,</span> schema<span class="op">,</span> name<span class="op">,</span> format<span class="op">,</span> epsg<span class="op">,</span> simplify<span class="op">)</span> <span class="cf">match</span> <span class="op">{</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="fu">NonEmpty</span><span class="op">(</span>res<span class="op">)</span> <span class="op">=&gt;</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> d <span class="op">=</span> <span class="kw">new</span> java<span class="op">.</span>io<span class="op">.</span><span class="ex">File</span><span class="op">(</span>res<span class="op">.</span>_1<span class="op">)</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> f <span class="op">=</span> <span class="kw">new</span> java<span class="op">.</span>io<span class="op">.</span><span class="ex">File</span><span class="op">(</span>res<span class="op">.</span>_2<span class="op">)</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>        <span class="kw">val</span> source <span class="op">=</span> FileIO</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">fromPath</span><span class="op">(</span>f<span class="op">.</span>toPath<span class="op">)</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>          <span class="op">.</span><span class="fu">watchTermination</span><span class="op">()</span> <span class="op">{</span> <span class="cf">case</span> <span class="op">(</span>_<span class="op">,</span> result<span class="op">)</span> <span class="op">=&gt;</span> </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>            result<span class="op">.</span><span class="fu">onComplete</span><span class="op">(</span>_ <span class="op">=&gt;</span> <span class="op">{</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>              f<span class="op">.</span><span class="fu">delete</span><span class="op">()</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>              d<span class="op">.</span><span class="fu">delete</span><span class="op">()</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            <span class="op">})</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>          <span class="op">}</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>        <span class="fu">respondWithHeader</span><span class="op">(</span>`Content<span class="op">-</span>Disposition`<span class="op">(</span>attachment<span class="op">,</span> <span class="ex">Map</span><span class="op">(</span><span class="st">"filename"</span> <span class="op">-&gt;</span> f<span class="op">.</span><span class="fu">getName</span><span class="op">())))</span> <span class="op">{</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>          <span class="fu">complete</span><span class="op">(</span><span class="fu">HttpEntity</span><span class="op">(</span>ContentTypes<span class="op">.</span>`application<span class="op">/</span>octet<span class="op">-</span>stream`<span class="op">,</span> source<span class="op">))</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>        <span class="op">}</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> Empty <span class="op">=&gt;</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">complete</span><span class="op">(</span><span class="fu">HttpResponse</span><span class="op">(</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>          StatusCodes<span class="op">.</span>NoContent</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>        <span class="op">))</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>      <span class="cf">case</span> <span class="ex">Error</span><span class="op">(</span>e<span class="op">)</span> <span class="op">=&gt;</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        <span class="fu">complete</span><span class="op">(</span><span class="fu">HttpResponse</span><span class="op">(</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>          StatusCodes<span class="op">.</span>InternalServerError<span class="op">,</span> </span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>          entity <span class="op">=</span> <span class="fu">HttpEntity</span><span class="op">(</span>ContentTypes<span class="op">.</span>`application<span class="op">/</span>json`<span class="op">,</span> <span class="ss">s"""</span><span class="st">"</span><span class="ss">${</span>e<span class="op">.</span><span class="fu">getMessage</span><span class="op">()</span><span class="ss">}</span><span class="st">"</span><span class="ss">"""</span><span class="op">)</span></span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">))</span></span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  <span class="op">}</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Neat!</p>
+</section>
+<section id="issues" class="level2">
+<h2 class="anchored" data-anchor-id="issues">Issues</h2>
+<p>The server <em>works</em> as it is. We can use it to download PostGIS features. We can reproject and simplify our data, and we can export to GeoPackage, shapefile, or GeoJSON. It’s likely the server will stop responding if several people simultaneously download a large feature class, but who knows! Also, there isn’t much in the way of feedback–if a client requests a large feature class that takes a while to prepare (the <code>meshblock_2022</code> dataset is the biggest here, at around 90MB, and takes about 10 seconds to finish streaming, with no re-projection or simplifying) they won’t have any way of checking progress. Also, we delete objects after streaming, while it might make more sense to cache them for some period of time in the event they could be recycled.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

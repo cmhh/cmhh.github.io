@@ -1,0 +1,57 @@
+---
+title: Functional Programming for the Frontend
+author: Chris Hansen
+date: '2022-08-14'
+categories: [purescript]
+tags: [purescript]
+draft: true
+---
+
+<link rel="stylesheet" href="assets/css/vue-slider-component.min.css">
+<script src="assets/js/vue@2.6.14.js"></script>
+<script src='assets/js/plotly-2.8.3.min.js'></script>
+
+# Overview
+
+In an [earlier post](../too-much-shiny) we looked at [Shiny](https://shiny.rstudio.com/), a framework for making web applications using R.  Shiny applications (along and similar approaches such as [Dash](https://dash.plotly.com/) or [Streamlit](https://streamlit.io/)) typically offload some computational load to a remote server, and can also require the remote server to maintain session state in some way.  We argued that at least some of the applications deployed using something like Shiny could be rewritten as client-side applications using a framework such as [Vue.js](https://vuejs.org/), thus obviating the need for us to maintain a server for the purpose of remote execution, and simplifying our hosting requirements.  
+
+This is all well and good, but I must admit that I find the whole world of JavaScript development a little overwhelming at times.  There are _so_ many frameworks.  There are a number of comon packaging and deployment options.  But, ultimately, I would just prefer to use something other than JavaScript.  Better yet, I'd like to use a functional approach.  
+
+In this post, we'll consider a very simple front-end application created using Vue.js.  We'll then rewrite the application using [PureScript](https://www.purescript.org/).  Then, due to my own personal biases, we'll then talk about how much simpler and cleaner the PureScript implementation is! &#128512;
+
+
+# Why Functional Programming?
+
+
+# Why PureScript?
+
+## Type Classes!
+
+
+# Prerequisites
+
+To install the PureScript compiler, run:
+
+```bash
+npm install -g purescript
+```
+
+To install the PureScript build tool, run:
+
+```bash
+npm install -g spago
+```
+
+Now, while we're using Vue.js to build out a client side application using JavaScript, there are plenty of people who would balk at the use of a framework, and who would advocate for the use of vanilla JavaScript instead.  I don't have a strong opinion either way when it comes to JavaScript; but in the case of PureScript, I would strongly recommend the use of a high-level framework.  For the purpose this post, we'll use [halogen](https://purescript-halogen.github.io/purescript-halogen/).
+
+
+# A Simple Example
+
+## Vue.js
+
+## PureScript
+
+# A Slightly Less Simple Application
+
+
+

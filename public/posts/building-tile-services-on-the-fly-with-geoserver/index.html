@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.0.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chris Hansen">
+<meta name="dcterms.date" content="2019-09-17">
+<meta name="description" content="Sending large vector features over-the-wire for use in slippy maps is bad, m’kay. One possible solution is to appeal to a tile service or similar, and here we look at how we might leverage the GeoServer API to enable end-users to quickly deploy their own tile sets on-the-fly.">
+
+<title>cmhh - Building Tile Services on-the-fly with GeoServer</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-block .quarto-title-banner {
+      background-image: url(../../img/banner-2.jpg);
+background-size: cover;
+    }
+    </style>
+
+
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">cmhh</span>
+  </a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+</i> 
+ </a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Building Tile Services on-the-fly with GeoServer</h1>
+                  <div>
+        <div class="description">
+          Sending large vector features over-the-wire for use in slippy maps is bad, m’kay. One possible solution is to appeal to a tile service or similar, and here we look at how we might leverage the GeoServer API to enable end-users to quickly deploy their own tile sets on-the-fly.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">geospatial</div>
+                <div class="quarto-category">R</div>
+                <div class="quarto-category">GeoServer</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Chris Hansen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">September 17, 2019</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#a-comment-on-spatial-formats" id="toc-a-comment-on-spatial-formats" class="nav-link" data-scroll-target="#a-comment-on-spatial-formats">A comment on spatial formats</a>
+  <ul class="collapse">
+  <li><a href="#source-data" id="toc-source-data" class="nav-link" data-scroll-target="#source-data">Source data</a></li>
+  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
+  <li><a href="#testing-geoserver" id="toc-testing-geoserver" class="nav-link" data-scroll-target="#testing-geoserver">Testing GeoServer</a></li>
+  <li><a href="#an-r-client-library" id="toc-an-r-client-library" class="nav-link" data-scroll-target="#an-r-client-library">An R client library</a></li>
+  <li><a href="#making-a-new-layer" id="toc-making-a-new-layer" class="nav-link" data-scroll-target="#making-a-new-layer">Making a new layer</a></li>
+  <li><a href="#example---meshblock-with-labels" id="toc-example---meshblock-with-labels" class="nav-link" data-scroll-target="#example---meshblock-with-labels">Example - meshblock with labels</a></li>
+  <li><a href="#example---population-by-statistical-area-2" id="toc-example---population-by-statistical-area-2" class="nav-link" data-scroll-target="#example---population-by-statistical-area-2">Example - population by statistical area 2</a></li>
+  <li><a href="#appendix---api-calls" id="toc-appendix---api-calls" class="nav-link" data-scroll-target="#appendix---api-calls">Appendix - API calls</a>
+  <ul class="collapse">
+  <li><a href="#creating-a-workspace" id="toc-creating-a-workspace" class="nav-link" data-scroll-target="#creating-a-workspace">Creating a workspace</a></li>
+  <li><a href="#creating-a-datastore" id="toc-creating-a-datastore" class="nav-link" data-scroll-target="#creating-a-datastore">Creating a datastore</a></li>
+  <li><a href="#creating-a-layer" id="toc-creating-a-layer" class="nav-link" data-scroll-target="#creating-a-layer">Creating a layer</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>Interactive web applications can be a great way to present information to a diverse audience. If your interface is well designed and intuitive, then almost anybody will be able to use it. And where data has a spatial dimension, slippy maps can be an effective way of presenting information. But sometimes the objects we want to render are a bit on the large side. This means that our web browser can struggle to render all the required features, and it also means that mobile users of an app might end up using excessive amounts of data.</p>
+<p>A good solution to the problem, that the spatial features we need to display are large, is to use some sort of tile service. Slippy maps can, for the most part, fetch information from a tile service only for the active extent. So, here we look at using <a href="https://geoserver.org">GeoServer</a> as a means of publishing such services. We put special emphasis on ease of use and deployment, so cover the following:</p>
+<ul>
+<li>the use of Docker to simplify the installation and deployment of GeoServer itself</li>
+<li>the use of GeoServer’s REST API</li>
+<li>wrapping calls to GeoServer’s REST API to simplify a number of common use cases</li>
+</ul>
+<p>Specifically, we’ll demonstrate how we can create new tile services on-the-fly entirely within R (though we could use any language capable of making HTTP calls and manipulating geospatial data–Python with geopandas, for example).</p>
+<p><video src="assets/geoserver.mp4" class="img-fluid" controls=""><a href="assets/geoserver.mp4">Video</a></video></p>
+<p><strong>Note that there is already an R package, <a href="https://github.com/eblondel/geosapi"><code>geosapi</code></a>, that provides what looks like a largely complete wrapper for the GeoServer REST API.</strong> I wasn’t aware of it when I put this together. The use case here is a bit different, but we nevertheless could possibly have made use of the geosapi package.</p>
+</section>
+<section id="a-comment-on-spatial-formats" class="level1">
+<h1>A comment on spatial formats</h1>
+<p>In this overview we work exclusively with GeoPackages. Of course shapefile is somewhat ubiquitous–it’s readily available, and most GIS tools can work with it easily. But shapefile is a proprietary format with a lot of very real drawbacks. GeoPackage, on the other hand, is an open format built on SQLite which has few, if any, of the same drawbacks, and is widely supported in mainstream GIS tools.</p>
+<p>Converting shapefile to GeoPackage is relatively easy if you have access to <a href="https://gdal.org/">GDAL</a>:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> ogr2ogr <span class="at">-f</span> GPKG output.gpkg input.shp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="source-data" class="level2">
+<h2 class="anchored" data-anchor-id="source-data">Source data</h2>
+<p>Throughout this document, we use spatial features sourced from <a href="https://datafinder.stats.govt.nz">Stats NZ geographic data service</a>. Specifically:</p>
+<ul>
+<li><a href="https://datafinder.stats.govt.nz/layer/92198-meshblock-2018-clipped-generalised/">Meshblock 2018 Clipped (generalised)</a></li>
+<li><a href="https://datafinder.stats.govt.nz/layer/92211-statistical-area-1-2018-clipped-generalised/">Statistical Area 1 2018 (genaralised)</a></li>
+<li><a href="https://datafinder.stats.govt.nz/layer/92213-statistical-area-2-2018-clipped-generalised/">Statistical Area 2 2018 (generalised)</a></li>
+<li><a href="https://datafinder.stats.govt.nz/layer/92215-territorial-authority-2018-clipped-generalised/">Territorial Authority 2018 Clipped (generalised)</a></li>
+<li><a href="https://datafinder.stats.govt.nz/layer/92205-regional-council-2018-clipped-generalised/">Regional Council 2018 Clipped (generalised)</a></li>
+</ul>
+<p>In addition, we also combine this with contextual information found on <a href="http://nzdotstat.stats.govt.nz/wbos/Index.aspx?_ga=2.229484444.1460045830.1566778650-200579101.1566001142">NZ.Stat</a>:</p>
+<ul>
+<li><a href="http://nzdotstat.stats.govt.nz/wbos/Index.aspx?DataSetCode=TABLECODE7979">Subnational population estimates (RC, SA2), by age and sex, at 30 June 1996, 2001, 2006-18 (2018 boundaries)</a></li>
+<li><a href="http://nzdotstat.stats.govt.nz/wbos/Index.aspx?DataSetCode=TABLECODE7980">Subnational population estimates (TA, SA2), by age and sex, at 30 June 1996, 2001, 2006-18 (2018 boundaries)</a></li>
+</ul>
+</section>
+<section id="installation" class="level2">
+<h2 class="anchored" data-anchor-id="installation">Installation</h2>
+<p>To install the R package used throughout this document, simply run:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">"cmhh/geoserveR"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The R package requires a running instance of GeoServer to be useful. We can get GeoServer up and running easily using Docker. There is <a href="https://wiki.osgeo.org/wiki/DockerImages">no shortage of existing images online</a>, but we’ll build our own. We do this because it’s pretty straight forward, and because it’s instructive. The R package contains a Dockerfile in <code>docker/Dockerfile</code> as follows:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode dockerfile code-with-copy"><code class="sourceCode dockerfile"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> ubuntu:18.04</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> DEBIAN_FRONTEND noninteractive</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> GEOSERVER_VERSION 2.15.2</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">RUN</span> <span class="ex">apt-get</span> update <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> install <span class="at">-y</span> <span class="dt">\</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    ca-certificates openssl wget openjdk-8-jre <span class="dt">\</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    openssh-server openssh-client unzip <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="ex">apt-get</span> clean <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="ex">update-ca-certificates</span> <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="bu">cd</span> /usr/local <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">wget</span> http://sourceforge.net/projects/geoserver/files/GeoServer/<span class="va">${GEOSERVER_VERSION}</span>/geoserver-<span class="va">${GEOSERVER_VERSION}</span>-bin.zip <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unzip</span> geoserver-<span class="va">${GEOSERVER_VERSION}</span>-bin.zip <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mv</span> geoserver-<span class="va">${GEOSERVER_VERSION}</span> geoserver <span class="kw">&amp;&amp;</span> <span class="dt">\</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rm</span> geoserver-<span class="va">${GEOSERVER_VERSION}</span>-bin.zip</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> GEOSERVER_HOME /usr/local/geoserver</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">ENV</span> GEOSERVER_DATA_DIR ${GEOSERVER_HOME}/data_dir</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="kw">EXPOSE</span> 8080</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a><span class="kw">CMD</span> [<span class="st">"sh"</span>, <span class="st">"/usr/local/geoserver/bin/startup.sh"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The R package can be used to generate the command required to build the image since the location of <code>Dockerfile</code> will vary depending on the user’s setup. For example:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="sc">&gt;</span> geoserveR<span class="sc">::</span><span class="fu">docker_build</span>(<span class="at">tag =</span> <span class="st">'geoserver'</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>docker build <span class="sc">-</span>t geoserver <span class="st">"/home/cmhh/R/x86_64-pc-linux-gnu-library/3.5/geoserveR/docker"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Running the resulting command at the terminal will result in the creation of an image called, in this case, <code>geoserver</code>. We can start this via:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> docker run <span class="at">-d</span> <span class="at">--name</span> geoserver <span class="at">--rm</span> <span class="at">-p</span> 8080:8080 geoserver</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The container will take a short while to get up and running completely, but when done, simply open a browser at <code>http://localhost:8080/geoserver</code>. To login, the username is <code>admin</code>, and the password is <code>geoserver</code> (obviously, we’d configure this differently in a production setting… more on that later). And that’s it.</p>
+<p><img src="assets/geoserver001.png" class="img-fluid"></p>
+</section>
+<section id="testing-geoserver" class="level2">
+<h2 class="anchored" data-anchor-id="testing-geoserver">Testing GeoServer</h2>
+<p>GeoServer includes several data sources by default, and we can use these to test out our install. We’re mostly interested in WMS services which we can display on a leaflet map, though GeoServer can display WCS, WFS, WMS, and WMTS.</p>
+<p>Broadly speaking, GeoServer groups sets of <em>layers</em> together in <em>workspaces</em>, where the layers are the features we’re intrested in displaying on a map. And the layers themselves are built up from <em>data stores</em>. We can inspect workspaces in the main web interface by clicking the Data &gt; Workpaces link:</p>
+<p><img src="assets/workspaces.png" class="img-fluid"></p>
+<p>Any of the listed workspaces can then be accessed as WMS services programmatically via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?</code> (and an XML file describing the service can be accessed via <code>http://localhost/geoserver/&lt;workspace&gt;/wms?request=GetCapabilities</code>). For example, if we wanted to display layers that are part of the <code>topp</code> workspace, we’d use <code>http://localhost:8080/geoserver/topp/wms?</code>. If we click on Data &gt; Layers in the main web interface we see that there is, for example, a layer in the <code>topp</code> workspace called <code>states</code>:</p>
+<p><img src="assets/layers.png" class="img-fluid"></p>
+<p>We can display this in a leaflet map in R by running the following code:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">leaflet</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addTiles</span>(</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">urlTemplate =</span> <span class="st">"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  leaflet<span class="sc">::</span><span class="fu">fitBounds</span>(<span class="sc">-</span><span class="dv">125</span>, <span class="dv">25</span>, <span class="sc">-</span><span class="dv">67</span>, <span class="dv">50</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addWMSTiles</span>(</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="st">"http://localhost:8080/geoserver/topp/wms?"</span>, </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">layers =</span> <span class="st">"states"</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">WMSTileOptions</span>(<span class="at">format =</span> <span class="st">"image/png"</span>, <span class="at">transparent =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>which yields the following:</p>
+<p><img src="assets/states.png" class="img-fluid"></p>
+</section>
+<section id="an-r-client-library" class="level2">
+<h2 class="anchored" data-anchor-id="an-r-client-library">An R client library</h2>
+<p>Our use case is to create styled tiles services, entirely from within R. To simplify the discussion, a simple R package is provided which:</p>
+<ul>
+<li>includes geographies (as <code>sf</code> objects)</li>
+<li>includes population counts (as a tidy <code>data.frame</code>)</li>
+<li>includes an interface for (a subset of) the GeoServer REST API</li>
+<li>includes utilities that simplify working with the GeoServer interface.</li>
+</ul>
+<p>We won’t go into the details here, but rather just describe the relevant usage as it arises. Where possible, though, we will also consider the plain HTTP calls. But by way of example, the following lists the layers available in the <code>topp</code> workspace. First, using the REST API (via <code>curl</code>):</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> curl <span class="at">-s</span> <span class="at">-u</span> admin:geoserver <span class="at">-X</span> GET <span class="dt">\</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    http://localhost:8080/geoserver/rest/workspaces/topp/layers <span class="kw">|</span> <span class="ex">jq</span> <span class="st">'.'</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"layers"</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">"layer"</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"states"</span><span class="fu">,</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"href"</span><span class="fu">:</span> <span class="st">"http://localhost:8080/geoserver/rest/workspaces/topp/layers/states.json"</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"tasmania_cities"</span><span class="fu">,</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"href"</span><span class="fu">:</span> <span class="st">"http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_cities.json"</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"tasmania_roads"</span><span class="fu">,</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"href"</span><span class="fu">:</span> <span class="st">"http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_roads.json"</span></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"tasmania_state_boundaries"</span><span class="fu">,</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"href"</span><span class="fu">:</span> <span class="st">"http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_state_boundaries.json"</span></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>      <span class="fu">{</span></span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"name"</span><span class="fu">:</span> <span class="st">"tasmania_water_bodies"</span><span class="fu">,</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>        <span class="dt">"href"</span><span class="fu">:</span> <span class="st">"http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_water_bodies.json"</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>    <span class="ot">]</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and then using the provided R package:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geoserveR)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>gs <span class="ot">&lt;-</span> GeoServer<span class="sc">$</span><span class="fu">new</span>()</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>topp_layers <span class="ot">&lt;-</span> gs<span class="sc">$</span><span class="fu">getLayers</span>(<span class="st">"topp"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(topp_layers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>List of 5</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a> $ states                   :List of 2</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  ..$ name: chr "states"</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  ..$ href: chr "http://localhost:8080/geoserver/rest/workspaces/topp/layers/states.json"</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a> $ tasmania_cities          :List of 2</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  ..$ name: chr "tasmania_cities"</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  ..$ href: chr "http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_cities.json"</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a> $ tasmania_roads           :List of 2</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  ..$ name: chr "tasmania_roads"</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  ..$ href: chr "http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_roads.json"</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a> $ tasmania_state_boundaries:List of 2</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  ..$ name: chr "tasmania_state_boundaries"</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  ..$ href: chr "http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_state_boundaries.json"</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a> $ tasmania_water_bodies    :List of 2</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  ..$ name: chr "tasmania_water_bodies"</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  ..$ href: chr "http://localhost:8080/geoserver/rest/workspaces/topp/layers/tasmania_water_bodies.json"</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="making-a-new-layer" class="level2">
+<h2 class="anchored" data-anchor-id="making-a-new-layer">Making a new layer</h2>
+<p>Pretty much any layer that exists in GeoServer can be made available as a service–WMS in our case. We’ll run through a couple of examples, but, broadly speaking, the steps are:</p>
+<ul>
+<li>create a <em>workspace</em></li>
+<li>add a <em>datastore</em> to the workspace</li>
+<li>add a <em>style</em> via a styled layer descriptor (sld) file</li>
+<li>add a <em>layer</em> to the workspace which references the data store and style</li>
+</ul>
+<p>We’ll put all our examples in a single workspace named <code>statsnz</code>. We can create this in R as follows:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geserveR)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>gs <span class="ot">&lt;-</span> GeoServer<span class="sc">$</span><span class="fu">new</span>()</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>gs<span class="sc">$</span><span class="fu">createWorkspace</span>(<span class="st">"statsnz"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="example---meshblock-with-labels" class="level2">
+<h2 class="anchored" data-anchor-id="example---meshblock-with-labels">Example - meshblock with labels</h2>
+<p>Meshblocks are the building blocks of most other official geographies held by Stats NZ. There are approximately 50,000 of them and collectively they are quite large–the GeoPackage used here was 91MB, though we simplified this considerably using <a href="https://mapshaper.org/">mapshaper</a> to make things practical. To display them in R on a leaflet map:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geoserveR)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">leaflet</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addTiles</span>(<span class="at">urlTemplate =</span> <span class="st">"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addPolygons</span>(</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> mb2018, </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"#000000"</span>, <span class="at">weight =</span> <span class="dv">1</span>, <span class="at">opacity =</span> <span class="dv">1</span>, <span class="at">fillOpacity =</span> <span class="dv">0</span>,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">label =</span> <span class="sc">~</span>code</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This yields something like the following:</p>
+<p><img src="assets/leaflet001.png" class="img-fluid"></p>
+<p>Saved as a stand-alone HTML file, this weighs in at over 15MB, and can be sluggish when rendering. In actuality, the features are oversimplified here, so that when zoomed in the shapes have lost far too much detail. But if we’d displayed them at full resolution, our HTML file would be over 100MB!</p>
+<p>To make meshblocks available as a service, we first add a datastore. We can add this in R as follows:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>gs<span class="sc">$</span><span class="fu">createDatastore</span>(mb2018, <span class="st">"statsnz"</span>, <span class="st">"mb2018"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Internally, this creates a copy of the <code>mb2018</code> feature class as a GeoPackage, and then uploads it to the server via the <code>datastores</code> endpoint. We then make a layer in R as follows:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>style <span class="ot">&lt;-</span> <span class="fu">import_template</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"outline_with_label"</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"mb2018_with_labels"</span>, <span class="at">strokeColor =</span> <span class="st">"#000000"</span>, <span class="at">strokeWidth =</span> <span class="dv">1</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">maxScale =</span> <span class="dv">600000</span>, <span class="at">geometryName =</span> <span class="st">"geom"</span>, <span class="at">labelName =</span> <span class="st">"code"</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fontFamily =</span> <span class="st">"Arial"</span>, <span class="at">fontSize =</span> <span class="dv">9</span>, <span class="at">fontStyle =</span> <span class="st">"normal"</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">fontWeight =</span> <span class="st">"bold"</span>, <span class="at">fontColor =</span> <span class="st">"#000000"</span>,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">haloSize =</span> <span class="fl">1.5</span>, <span class="at">haloColor =</span> <span class="st">"#FFFFFF"</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>gs<span class="sc">$</span><span class="fu">createLayer</span>(<span class="st">"statsnz"</span>, <span class="st">"mb2018"</span>, <span class="st">"mb2018_with_labels"</span>, style)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Internally, we create a <em>feature type</em>, which is initially unconfigured. We then create a new style, and then we apply the style to the created layer. The variable <code>style</code> contains styling information in styled layer descriptor (SLD) format. The approach here isn’t terribly refined, but it is practical. The <code>import_template</code> function is used to import bundled templates, and replace placeholders with parameter values.</p>
+<p>Either way, having done all this, we can now access meshblocks as a WMS via <code>http://localhost:8080/statsnz/wms?</code> as follows:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">leaflet</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fitBounds</span>(<span class="at">lng1 =</span> <span class="fl">164.45</span>, <span class="at">lng2 =</span> <span class="fl">179.35</span>, <span class="at">lat1 =</span> <span class="sc">-</span><span class="fl">48.52</span>, <span class="at">lat2 =</span> <span class="sc">-</span><span class="fl">33.22</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addTiles</span>(</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">urlTemplate =</span> <span class="st">"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addWMSTiles</span>(</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>    <span class="st">"http://localhost:8080/geoserver/statsnz/wms?"</span>, </span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">layers =</span> <span class="st">"mb2018_with_labels"</span>,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">WMSTileOptions</span>(<span class="at">format =</span> <span class="st">"image/png"</span>, <span class="at">transparent =</span> <span class="cn">TRUE</span>), </span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">group =</span> <span class="st">"mb2018"</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLayersControl</span>(</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">overlayGroups =</span> <span class="st">"mb2018"</span>,</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">layersControlOptions</span>(<span class="at">collapsed =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Visually:</p>
+<p><img src="assets/leaflet003.png" class="img-fluid"></p>
+<p><img src="assets/leaflet004.png" class="img-fluid"></p>
+<p>Better yet, saved as a stand-alone HTML file, this map is less than 500KB (though the various tiles still need to be transferred, so one can still burn through a bit of data just navigating around).</p>
+</section>
+<section id="example---population-by-statistical-area-2" class="level2">
+<h2 class="anchored" data-anchor-id="example---population-by-statistical-area-2">Example - population by statistical area 2</h2>
+<p>Consider the following R code:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geoserveR)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(leaflet)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(sa22018)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(popdata)</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>mapdata <span class="ot">&lt;-</span> sa22018 <span class="sc">%&gt;%</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(<span class="fu">filter</span>(popdata, geography <span class="sc">==</span> <span class="st">"sa22018"</span>), <span class="at">by =</span> <span class="st">"code"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(year <span class="sc">==</span> <span class="dv">2018</span>)</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>pal <span class="ot">&lt;-</span> <span class="fu">colorNumeric</span>(<span class="at">palette =</span> <span class="st">"Blues"</span>, <span class="at">domain =</span> mapdata<span class="sc">$</span>value)</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a><span class="fu">leaflet</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addTiles</span>(<span class="at">urlTemplate =</span> <span class="st">"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addPolygons</span>(<span class="at">data =</span> mapdata, </span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>              <span class="at">fillColor =</span> <span class="sc">~</span><span class="fu">pal</span>(value), <span class="at">opacity =</span> <span class="dv">0</span>, <span class="at">fillOpacity =</span> <span class="dv">1</span>,</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>              <span class="at">label =</span> <span class="sc">~</span><span class="fu">sprintf</span>(<span class="st">"%s - %s"</span>, label, value)) <span class="sc">%&gt;%</span></span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLegend</span>(<span class="at">position =</span> <span class="st">"bottomright"</span>, <span class="at">pal =</span> pal, <span class="at">values =</span> mapdata<span class="sc">$</span>value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This yields an interactive map as follows:</p>
+<p><img src="assets/leaflet002.png" class="img-fluid"></p>
+<p>The resulting HTML file weighs in at 3.2MB–not enormous by any stretch, but still probably not something you want users to be fetching repeatedly over a mobile connection, for example. But this map just shows data for 2018, yet we have data for the years 1996, 2001, and 2006-2018–that’s 15 years all up. What if we want to make all this available on one map? In that case, the resulting stand-alone HTML file weighs in at over 40MB. (Of course, a hosted app could serve up a year based on user selection, but 3MB or so would still be transferred each time the year was switched).</p>
+<p>Let us instead see if we can create a workspace in GeoServer which contains a layer for each year. As a WMS, the layers will cease to be interactive (so no hovering tooltips), but we could at least render a label whenever the user zooms in close enough, so let’s do that too.</p>
+<p>First, we create a version of the SA2 feature class that has population counts:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(reshape2)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>counts <span class="ot">&lt;-</span> popdata <span class="sc">%&gt;%</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">filter</span>(geography <span class="sc">==</span> <span class="st">"sa22018"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  dplyr<span class="sc">::</span><span class="fu">select</span>(<span class="sc">-</span>geography)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>counts_wide <span class="ot">&lt;-</span> counts <span class="sc">%&gt;%</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  reshape2<span class="sc">::</span><span class="fu">dcast</span>(code <span class="sc">~</span> year, <span class="at">value.var =</span> <span class="st">"value"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  data.frame <span class="co"># this is deliberate so years are like X1996 rather than `1996`</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>sa22018_with_counts <span class="ot">&lt;-</span> sa22018 <span class="sc">%&gt;%</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">inner_join</span>(counts_wide, <span class="at">by =</span> <span class="st">"code"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Then, we create a data store using the feature class created, and add a new layer for each of the columns:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>gs <span class="ot">&lt;-</span> GeoServer<span class="sc">$</span><span class="fu">new</span>()</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>gs<span class="sc">$</span><span class="fu">createDatastore</span>(sa22018_with_counts, <span class="st">"statsnz"</span>, <span class="st">"sa22018_with_counts"</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>years <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1996</span>, <span class="dv">2001</span>, <span class="dv">2006</span><span class="sc">:</span><span class="dv">2018</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> years) {</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  col <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"X%s"</span>, year)</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  name <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"sa22018_%s"</span>, year)</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  style <span class="ot">&lt;-</span> <span class="fu">create_polygon_fills</span>(sa22018_with_counts, col, <span class="st">"geom"</span>, <span class="st">"label"</span>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  gs<span class="sc">$</span><span class="fu">createLayer</span>(<span class="st">"statsnz"</span>, <span class="st">"sa22018_with_counts"</span>, name, style) </span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And that’s it—we now have a bunch of new layers called <code>sa22018_1996</code>, and so on. There’s a little bit going on under the hood, of course, but either way we can now use the resulting WMS layers as follows:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">leaflet</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fitBounds</span>(<span class="at">lng1 =</span> <span class="fl">164.45</span>, <span class="at">lng2 =</span> <span class="fl">179.35</span>, <span class="at">lat1 =</span> <span class="sc">-</span><span class="fl">48.52</span>, <span class="at">lat2 =</span> <span class="sc">-</span><span class="fl">33.22</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addTiles</span>(</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">urlTemplate =</span> <span class="st">"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (year <span class="cf">in</span> years) {</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> m <span class="sc">%&gt;%</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">addWMSTiles</span>(</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>      <span class="st">"http://localhost:8080/geoserver/statsnz/wms?"</span>,</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>      <span class="at">layers =</span> <span class="fu">sprintf</span>(<span class="st">"sa22018_%s"</span>, year),</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>      <span class="at">options =</span> <span class="fu">WMSTileOptions</span>(<span class="at">format =</span> <span class="st">"image/png"</span>, <span class="at">transparent =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">group =</span> <span class="fu">as.character</span>(year)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">hideGroup</span>(<span class="fu">as.character</span>(year))</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>m <span class="sc">%&gt;%</span></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">addLayersControl</span>(</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">overlayGroups =</span> <span class="fu">as.character</span>(years),</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">options =</span> <span class="fu">layersControlOptions</span>(<span class="at">collapsed =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">showGroup</span>(<span class="fu">as.character</span>(<span class="fu">tail</span>(years, <span class="dv">1</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>which yields:</p>
+<p><img src="assets/leaflet005.png" class="img-fluid"></p>
+<p><img src="assets/leaflet006.png" class="img-fluid"></p>
+</section>
+<section id="appendix---api-calls" class="level2">
+<h2 class="anchored" data-anchor-id="appendix---api-calls">Appendix - API calls</h2>
+<p>For the sake of brevity, the examples above mostly focused on R calls using the provided R client library. For the sake of completeness, and for those who might want to do something similar without R, we include the equivalent functionality using direct API calls.</p>
+<section id="creating-a-workspace" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-workspace">Creating a workspace</h3>
+<p>To make the <code>statsnz</code> workspace, we ran:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geserveR)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>gs <span class="ot">&lt;-</span> GeoServer<span class="sc">$</span><span class="fu">new</span>()</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>gs<span class="sc">$</span><span class="fu">createWorkspace</span>(<span class="st">"statsnz"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>To do this direclty, we use the <code>workspaces</code> endpoint:</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="dt">\</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-u</span> admin:geoserver <span class="dt">\</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Content-Type: application/json"</span> <span class="dt">\</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">'{"workspace":{"name":"statsnz"}}'</span> <span class="dt">\</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  http://localhost:8080/geoserver/rest/workspaces</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="creating-a-datastore" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-datastore">Creating a datastore</h3>
+<p>To add the meshblock feature set as a datastore, we ran the following in R:</p>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>gs<span class="sc">$</span><span class="fu">createDatastore</span>(mb2018, <span class="st">"statsnz"</span>, <span class="st">"mb2018"</span>, <span class="st">"mb2018.gpkg"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Internally, this results in <code>mb2018</code> first being saved as a temporary GeoPackage, before being uploaded via the <code>datastores</code> endpoint. If we wanted to do this manually, we’d first create the GeoPackage in R:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fname <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".gpkg"</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(regc2018, fname, <span class="st">"mb2018"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and then we’d <code>PUT</code> via the <code>datastores</code> endpoint as follows (assuming <code>fname</code> has the value <code>file4b82655cefdd.gpkg</code>):</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="dt">\</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-u</span> admin:geoserver <span class="dt">\</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Accept: application/json, text/xml, application/xml, */*"</span> <span class="dt">\</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Content-Type: application/octet-stream"</span> <span class="dt">\</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-T</span> <span class="st">"/tmp/RtmpbY5Tby/file4b82655cefdd.gpkg"</span> <span class="dt">\</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-X</span> PUT <span class="dt">\</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"http://localhost:8080/geoserver/rest/workspaces/statsnz/datastores/regc2018/file.gpkg?configure=none&amp;update=overwrite&amp;charset=UTF-8&amp;filename=mb2018.gpkg"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="creating-a-layer" class="level3">
+<h3 class="anchored" data-anchor-id="creating-a-layer">Creating a layer</h3>
+<p>To create a meshblock layer with a simple outline and text label, we ran the following in R:</p>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>style <span class="ot">&lt;-</span> <span class="fu">import_template</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"outline_with_label"</span>,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="st">"mb2018_with_labels"</span>, <span class="at">strokeColor =</span> <span class="st">"#000000"</span>, <span class="at">strokeWidth =</span> <span class="dv">1</span>,</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">maxScale =</span> <span class="dv">600000</span>, <span class="at">geometryName =</span> <span class="st">"geom"</span>, <span class="at">labelName =</span> <span class="st">"code"</span>,</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fontFamily =</span> <span class="st">"Arial"</span>, <span class="at">fontSize =</span> <span class="dv">9</span>, <span class="at">fontStyle =</span> <span class="st">"normal"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">fontWeight =</span> <span class="st">"bold"</span>, <span class="at">fontColor =</span> <span class="st">"#000000"</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">haloSize =</span> <span class="fl">1.5</span>, <span class="at">haloColor =</span> <span class="st">"#FFFFFF"</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>gs<span class="sc">$</span><span class="fu">createLayer</span>(<span class="st">"statsnz"</span>, <span class="st">"mb2018"</span>, <span class="st">"mb2018_with_labels"</span>, style)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Assuming we have saved the content of the variable <code>style</code> in a file called <code>style.sld</code>, we could create the style on the server as follows:</p>
+<div class="sourceCode" id="cb26"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="dt">\</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-u</span> admin:geoserver <span class="dt">\</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Accept: application/json, text/xml, application/xml, */*"</span> <span class="dt">\</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Content-Type: application/vnd.ogc.sld+xml"</span> <span class="dt">\</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--data</span> <span class="st">"@style.sld"</span> <span class="dt">\</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"http://localhost:8080/geoserver/rest/workspaces/statsnz/styles?name=mb2018_with_label"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>We’d create the feature type as:</p>
+<div class="sourceCode" id="cb27"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="dt">\</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-u</span> admin:geoserver <span class="dt">\</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Content-Type: application/json"</span> <span class="dt">\</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">'{"featureType":{"name":"mb2018_with_labels", "nativeName":"mb2018"}}'</span> <span class="dt">\</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-X</span> POST <span class="dt">\</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"http://localhost:8080/geoserver/rest/workspaces/statsnz/datastores/mb2018/featuretypes"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>and we’d add the style to the layer as:</p>
+<div class="sourceCode" id="cb28"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="ex">curl</span> <span class="dt">\</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-u</span> admin:geoserver <span class="dt">\</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-H</span> <span class="st">"Content-Type: application/json"</span> <span class="dt">\</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-d</span> <span class="st">'{"layer":{"defaultStyle":{"name":"statsnz:labelledpolygon"}}}'</span> <span class="dt">\</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">-X</span> PUT <span class="dt">\</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"http://localhost:8080/geoserver/rest/workspaces/statsnz/layers/mb2018"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      let href = ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

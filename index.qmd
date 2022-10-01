@@ -1,0 +1,17 @@
+---
+title: "cmhh"
+listing:
+  # page-size: 20
+  contents: posts
+  sort: "date desc"
+  type: default # grid 
+  categories: cloud # true
+  fields: [image, date, title, reading-time, description, image]
+  sort-ui: false
+  filter-ui: false
+page-layout: full
+title-block-banner: true
+title-block-banner: img/banner-2.jpg
+---
+
+

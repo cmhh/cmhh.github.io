@@ -1,0 +1,15 @@
+project:
+  type: website
+  output-dir: public
+
+website:
+  title: "cmhh"
+  navbar:
+    right:
+      - icon: github
+        href: https://github.com/cmhh
+
+format:
+  html:
+    theme: sandstone
+    css: css/styles.css
