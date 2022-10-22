@@ -1,0 +1,6 @@
+# robots.txt for https://cmhh.github.io
+
+Sitemap: https://cmhh.github.io/sitemap.xml
+
+User-agent: *
+Allow: /
