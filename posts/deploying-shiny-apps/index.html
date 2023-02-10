@@ -527,7 +527,7 @@ background-size: cover;
 </section>
 <section id="aws" class="level1">
 <h1>AWS</h1>
-<p>Their are a few options for deploying Shiny apps on AWS. Again, we could deploy manually on an EC2 instance, using containers or not. But otherwise we <em>ought</em> to be able to do this via Elastic Beanstalk, or else by first pushing our image to Elastic Container Registry, and then deploying via Elastic Container Service. I had a quick go at the latter, but the setup became reasonably involved, involving internet gateways and so on, so I decided it to leave it for this post. AWS App Runner <em>looks</em> like a much simpler option and I was able to deploy the app using this, only to find out App Runner does not support WebSockets and the deployed app didn’t work correctly. Hopefully Amazon add WebSocket support to App Runner soon.</p>
+<p>There are a few options for deploying Shiny apps on AWS. Again, we could deploy manually on an EC2 instance, using containers or not. But otherwise we <em>ought</em> to be able to do this via Elastic Beanstalk, or else by first pushing our image to Elastic Container Registry, and then deploying via Elastic Container Service. I had a quick go at the latter, but the setup became reasonably involved, involving internet gateways and so on, so I decided it to leave it for this post. AWS App Runner <em>looks</em> like a much simpler option and I was able to deploy the app using this, only to find out App Runner does not support WebSockets and the deployed app didn’t work correctly. Hopefully Amazon add WebSocket support to App Runner soon.</p>
 
 
 </section>
