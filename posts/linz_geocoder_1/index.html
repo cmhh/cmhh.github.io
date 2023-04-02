@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.335">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Chris Hansen">
+<meta name="dcterms.date" content="2023-04-02">
+<meta name="description" content="This post outlines a method for parsing address strings using a bidirectional long short-term memory network.">
+
+<title>cmhh - Building a New Zealand Address Geocoder, Part 1</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<style>
+    .quarto-title-block .quarto-title-banner {
+      background-image: url(../../img/banner-2.jpg);
+background-size: cover;
+    }
+    </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="../../css/styles.css">
+</head>
+
+<body class="floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">cmhh</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default toc-left page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Building a New Zealand Address Geocoder, Part 1</h1>
+            <p class="subtitle lead">Building an Address Parser</p>
+                  <div>
+        <div class="description">
+          This post outlines a method for parsing address strings using a bidirectional long short-term memory network.
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">geocoding</div>
+                <div class="quarto-category">postcode</div>
+                <div class="quarto-category">LINZ</div>
+                <div class="quarto-category">deeplearning4j</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Chris Hansen </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">April 2, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#overview" id="toc-overview" class="nav-link active" data-scroll-target="#overview">Overview</a></li>
+  <li><a href="#geocoder-outline" id="toc-geocoder-outline" class="nav-link" data-scroll-target="#geocoder-outline">Geocoder Outline</a></li>
+  <li><a href="#linz-addresses" id="toc-linz-addresses" class="nav-link" data-scroll-target="#linz-addresses">LINZ Addresses</a></li>
+  <li><a href="#a-note-about-postcodes" id="toc-a-note-about-postcodes" class="nav-link" data-scroll-target="#a-note-about-postcodes">A Note About Postcodes</a></li>
+  <li><a href="#address-parser-take-1" id="toc-address-parser-take-1" class="nav-link" data-scroll-target="#address-parser-take-1">Address Parser Take 1</a></li>
+  <li><a href="#address-parser-take-2" id="toc-address-parser-take-2" class="nav-link" data-scroll-target="#address-parser-take-2">Address Parser Take 2</a></li>
+  <li><a href="#address-parser-take-3" id="toc-address-parser-take-3" class="nav-link" data-scroll-target="#address-parser-take-3">Address Parser Take 3</a>
+  <ul class="collapse">
+  <li><a href="#data" id="toc-data" class="nav-link" data-scroll-target="#data">Data</a></li>
+  <li><a href="#a-simple-model" id="toc-a-simple-model" class="nav-link" data-scroll-target="#a-simple-model">A simple model…</a></li>
+  <li><a href="#training" id="toc-training" class="nav-link" data-scroll-target="#training">Training</a></li>
+  <li><a href="#model-evaluation" id="toc-model-evaluation" class="nav-link" data-scroll-target="#model-evaluation">Model evaluation</a></li>
+  </ul></li>
+  <li><a href="#up-next" id="toc-up-next" class="nav-link" data-scroll-target="#up-next">Up Next…</a></li>
+  </ul>
+</nav>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="overview" class="level1">
+<h1>Overview</h1>
+<p>Geocoding, the act of assigning a location to a description of a place, is a <em>very</em> common use case. And being a common use case, there are an astonishing number of options for us to avail ourselves of, both commerical and open source.</p>
+<p>Commericial options tend to be very easy to consume, mostly perform adequately, and the total cost of ownership <em>can</em> be low. However, the terms of use associated with commerical options can be rather unpalatable. Most, for example, expressly forbid the caching of results, and do not permit users to display results on third-party maps. Depending on the nature of your business, there may even be privacy concerns.</p>
+<p>On the other hand, there are a number of open source solutions which function well, <a href="https://pelias.io/">pelias</a> being a particularly good example, and those who contribute should be commended. Depending on your level of use, the total cost of ownership <em>can</em> be higher than commercial offerings, but self-hosting means you’re not bound by any restrictive terms of use. However, open source solutions tend to rely on crowd sourced data such as <a href="https://www.openstreetmap.org">OpenStreetMap</a>, which <em>can</em> have coverage issues; or they rely on pre-trained models for address parsing, which can perform a little worse than desired for specific locales.</p>
+<p>Either way, I recently decided to try building my own geocoding solution. This was in part related to concerns already outlined, but while I was investigating various options, I also received an email from <a href="https://www.linz.govt.nz/">Land Information New Zealand (LINZ)</a> declaring their publicly available <a href="https://data.linz.govt.nz/layer/105689-nz-addresses/">NZ Addresses</a> feature set to be authoritative. I figured, if a definitive data set of all addresses was available, why not build a geocoding service on top of it?</p>
+</section>
+<section id="geocoder-outline" class="level1">
+<h1>Geocoder Outline</h1>
+<p>Our geocoding process will be relatively simple:</p>
+<ul>
+<li>parse an address string into its constituent pieces</li>
+<li>search an address database for a record with similar components</li>
+</ul>
+<p>Any single address can be written down a few different ways, with all variations being completely understandable. This makes parsing addresses a relatively difficult task, and is the focus of this post. We’ll sketch a solution, providing small code snippets along the way. Complete source code can be found on GitHub:</p>
+<p><a href="https://github.com/cmhh/linzaddressparse">cmhh/linzaddressparse</a></p>
+<p>Once we have accurately parsed an address, it is reasonably straightforward to search an address database for similar records. Combining all this, we can make a web service which receives an address string as input, and returns one or more potential matches as a result. This will be the focus of our <a href="../linz_geocoder_2">next post</a>.</p>
+</section>
+<section id="linz-addresses" class="level1">
+<h1>LINZ Addresses</h1>
+<p>A <a href="https://data.linz.govt.nz/layer/105689-nz-addresses/">LINZ address</a> record contains separate fields for the constituent parts of an address, as well as a single string which combines the individual fields in a standard way. The most useful fields are:</p>
+<table class="table">
+<colgroup>
+<col style="width: 30%">
+<col style="width: 69%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>field</th>
+<th>description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>address_id</code></td>
+<td>Persistent ID.</td>
+</tr>
+<tr class="even">
+<td><code>unit_type</code></td>
+<td>Unit type, e.g.&nbsp;apartment, flat, unit, shop, suite.</td>
+</tr>
+<tr class="odd">
+<td><code>unit_value</code></td>
+<td>Unit value, e.g.&nbsp;1, 2, A01, 1C, etc.</td>
+</tr>
+<tr class="even">
+<td><code>level_type</code></td>
+<td>Level type, e.g.&nbsp;ground, lower ground, level.</td>
+</tr>
+<tr class="odd">
+<td><code>level_value</code></td>
+<td>Level value, typically numeric, but ‘P’ for penthouse.</td>
+</tr>
+<tr class="even">
+<td><code>address_number</code></td>
+<td>Address number.</td>
+</tr>
+<tr class="odd">
+<td><code>address_number_suffix</code></td>
+<td>Address number suffix, e.g.&nbsp;A, B, C, AB, BAA.</td>
+</tr>
+<tr class="even">
+<td><code>address_number_high</code></td>
+<td>Highest number in a range, e.g., 1-<em>5</em>.</td>
+</tr>
+<tr class="odd">
+<td><code>road_name</code></td>
+<td>Road name.</td>
+</tr>
+<tr class="even">
+<td><code>road_type_name</code></td>
+<td>Road type, e.g.&nbsp;Street, Road, Avenue, Grove.</td>
+</tr>
+<tr class="odd">
+<td><code>road_suffix</code></td>
+<td>Road suffix, e.g.&nbsp;East, West, Lower, Upper.</td>
+</tr>
+<tr class="even">
+<td><code>suburb_locality</code></td>
+<td>Suburb or locality, e.g.&nbsp;Aro Valley.</td>
+</tr>
+<tr class="odd">
+<td><code>town_city</code></td>
+<td>Town or city, e.g.&nbsp;Inglewood, Porirua, Auckland.</td>
+</tr>
+</tbody>
+</table>
+<p>These fields are, of course, constrained in practice–<code>address_number</code> must be a number, for example. However, let us model an address simply as follows (and note we include postcode, which is <em>not</em> provided with the LINZ data):</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="cf">case</span> <span class="kw">class</span> <span class="fu">AddressComponents</span><span class="op">(</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  unitType<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  unitValue<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  levelType<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  levelValue<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  addressNumber<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  addressNumberSuffix<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  addressNumberHigh<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  roadName<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  roadTypeName<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  roadSuffix<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  suburbLocality<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>  townCity<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">],</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>  postcode<span class="op">:</span> <span class="ex">Option</span><span class="op">[</span><span class="ex">String</span><span class="op">]</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">{</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="kw">lazy</span> <span class="kw">val</span> toJson<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> <span class="op">???</span></span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="a-note-about-postcodes" class="level1">
+<h1>A Note About Postcodes</h1>
+<p>While LINZ provide the authoritative address dataset, the addresses are provided without postcode. It won’t be useful to get into the details here (though visiting <a href="https://www.data.govt.nz/datasetrequest/show/433">this link</a> is educational), suffice to say that a geocoder that is ignorant of postcode is considerably less useful in practice than one that is not. For various reasons, an address string encountered in the wild <em>will</em> typically include a postcode and so our parser should be able to correctly identify one if provided. Moreover, we’d also ideally be able to use postcode as a filter when searching for addresses.</p>
+</section>
+<section id="address-parser-take-1" class="level1">
+<h1>Address Parser Take 1</h1>
+<p>There are a handful of open source address parsers available which are in very heavy use, notably <a href="https://github.com/openvenues/libpostal">libpostal</a> and <a href="https://github.com/GRAAL-Research/deepparse">deepparse</a>. Consider the following address:</p>
+<pre><code>1/45A Memorial Avenue, Ilam, Christchurch 8053</code></pre>
+<p>If we parse this using the pre-trained model provided with libpostal we get:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"house_number"</span><span class="fu">:</span> <span class="st">"1/45a"</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"road"</span><span class="fu">:</span> <span class="st">"memorial avenue"</span><span class="fu">,</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"suburb"</span><span class="fu">:</span> <span class="st">"ilam"</span><span class="fu">,</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"city"</span><span class="fu">:</span> <span class="st">"christchurch"</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"postcode"</span><span class="fu">:</span> <span class="st">"8053"</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And if we parse this with deepparse we get:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"StreetNumber"</span><span class="fu">:</span> <span class="st">"1/45a"</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"StreetName"</span><span class="fu">:</span> <span class="st">"memorial avenue"</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Unit"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Municipality"</span><span class="fu">:</span> <span class="st">"ilam"</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Province"</span><span class="fu">:</span> <span class="st">"christchurch"</span><span class="fu">,</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"PostalCode"</span><span class="fu">:</span> <span class="st">"8053"</span><span class="fu">,</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"Orientation"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"GeneralDelivery"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"EOS"</span><span class="fu">:</span> <span class="kw">null</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In both cases the results are reasonable. However, we want to search for addresses within the authoritative LINZ address file, and this task would be considerably easier if the components we parsed were in one-to-one correspondence with fields in that dataset. So, for example, we’d rather the street address, <code>1/45A</code>, was parsed as separate components <code>unitValue</code>, <code>addressNumber</code>, and <code>addressNumberSuffix</code> with values <code>1</code>, <code>45</code>, and <code>A</code>, respectively. Similarly, we’d rather the street was parsed sparately into <code>roadName</code> and <code>roadTypeName</code> with values <code>memorial</code> and <code>avenue</code>, respectively.</p>
+<p>To be fair to these parsers, these are the results using the provided pretrained models, and it is possible to fine-tune them. According to the deepparse repository, for example, it did not use New Zealand data in its training, but still achieved 91.25% accuracy when tested on New Zealand data. Moreover, deepparse can be retrained, including with different tags. But let’s attempt to build a parser from scratch all the same.</p>
+</section>
+<section id="address-parser-take-2" class="level1">
+<h1>Address Parser Take 2</h1>
+<p>While addresses can be formatted in a number of ways, a large proportion of the strings we’d see in practice would likely fit one of only a small number of patterns. In these cases, we could probably parse an address easily enough using regular expressions. For example, consider again the address:</p>
+<pre><code>1/45A Memorial Avenue, Ilam, Christchurch 8053</code></pre>
+<p>We can describe this easily enough using the following pattern:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> regex <span class="op">=</span> <span class="st">"^(</span><span class="ch">\\</span><span class="st">d+)/(</span><span class="ch">\\</span><span class="st">d+)([a-zA-Z]{1}) ([a-zA-Z</span><span class="ch">\\</span><span class="st">s]+) ([a-zA-Z]+), ([a-zA-Z</span><span class="ch">\\</span><span class="st">s]+), ([a-zA-Z</span><span class="ch">\\</span><span class="st">s]+) (</span><span class="ch">\\</span><span class="st">d{4})$"</span><span class="op">.</span>r</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And once we have an expression that fits, we can extract the individual components as directly:</p>
+<div class="inputoutput">
+<div class="sourceCode" id="cb7"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> address <span class="op">=</span> <span class="st">"1/45A Memorial Avenue, Ilam, Christchurch 8053"</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> <span class="fu">regex</span><span class="op">(</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  unitValue<span class="op">,</span> </span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  addressNumber<span class="op">,</span> addressNumberSuffix<span class="op">,</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  roadName<span class="op">,</span> roadTypeName<span class="op">,</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  suburbLocality<span class="op">,</span> townCity<span class="op">,</span> postcode</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a><span class="op">)</span> <span class="op">=</span> address</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> unitValue<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> addressNumber<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> <span class="dv">45</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> addressNumberSuffix<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> A</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> roadName<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> Memorial</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> roadTypeName<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> Avenue</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> suburbLocality<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> Ilam</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> townCity<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> Christchurch</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> postcode<span class="op">:</span> <span class="ex">String</span> <span class="op">=</span> <span class="dv">8053</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>A (pretty terrible) parser would then be as follows:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">parse</span><span class="op">(</span>address<span class="op">:</span> <span class="ex">String</span><span class="op">):</span> AddressComponents <span class="op">=</span> <span class="op">{</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> regex <span class="op">=</span> <span class="st">"^(</span><span class="ch">\\</span><span class="st">d+)/(</span><span class="ch">\\</span><span class="st">d+)([a-zA-Z]{1}) ([a-zA-Z</span><span class="ch">\\</span><span class="st">s]+) ([a-zA-Z]+), ([a-zA-Z</span><span class="ch">\\</span><span class="st">s]+), ([a-zA-Z</span><span class="ch">\\</span><span class="st">s]+) (</span><span class="ch">\\</span><span class="st">d{4})$"</span><span class="op">.</span>r</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">val</span> <span class="fu">regex</span><span class="op">(</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    unitValue<span class="op">,</span> </span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    addressNumber<span class="op">,</span> addressNumberSuffix<span class="op">,</span> </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    roadName<span class="op">,</span> roadTypeName<span class="op">,</span> </span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    suburbLocality<span class="op">,</span> townCity<span class="op">,</span> postcode</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span> <span class="op">=</span> address</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">AddressComponents</span><span class="op">(</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="bu">None</span><span class="op">,</span> <span class="bu">Some</span><span class="op">(</span>unitValue<span class="op">),</span> </span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="bu">None</span><span class="op">,</span> <span class="bu">None</span><span class="op">,</span> </span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Some</span><span class="op">(</span>addressNumber<span class="op">),</span> <span class="bu">Some</span><span class="op">(</span>addressNumberSuffix<span class="op">),</span> <span class="bu">None</span><span class="op">,</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Some</span><span class="op">(</span>roadName<span class="op">),</span> <span class="bu">Some</span><span class="op">(</span>roadTypeName<span class="op">),</span> <span class="bu">None</span><span class="op">,</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="bu">Some</span><span class="op">(</span>suburbLocality<span class="op">),</span> <span class="bu">Some</span><span class="op">(</span>townCity<span class="op">),</span> <span class="bu">Some</span><span class="op">(</span>postcode<span class="op">)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>It works for this particular address, but it would crash for any address that didn’t match–we need to extend it to handle <em>every</em> notable pattern for it to be generally useful.</p>
+<div class="inputoutput">
+<div class="sourceCode" id="cb10"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">parse</span><span class="op">(</span>address<span class="op">).</span>toJson</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"unitType"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"unitValue"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"levelType"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"levelValue"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"addressNumber"</span><span class="fu">:</span> <span class="dv">45</span><span class="fu">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"addressNumberSuffix"</span><span class="fu">:</span> <span class="st">"A"</span><span class="fu">,</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"addressNumberHigh"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"roadName"</span><span class="fu">:</span> <span class="st">"Memorial"</span><span class="fu">,</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"roadTypeName"</span><span class="fu">:</span> <span class="st">"Avenue"</span><span class="fu">,</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"roadSuffix"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"suburbLocality"</span><span class="fu">:</span> <span class="st">"Ilam"</span><span class="fu">,</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"townCity"</span><span class="fu">:</span> <span class="st">"Christchurch"</span><span class="fu">,</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"postcode"</span><span class="fu">:</span> <span class="st">"8053"</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="address-parser-take-3" class="level1">
+<h1>Address Parser Take 3</h1>
+<p>A different possible approach is to build something <em>like</em> <a href="https://github.com/openvenues/libpostal">libpostal</a> or <a href="https://github.com/GRAAL-Research/deepparse">deepparse</a> from scratch, customised for use with the LINZ address file. Some sort of <a href="https://maxwell.ict.griffith.edu.au/spl/publications/papers/ieeesp97_schuster.pdf">bidirectional recurrent neural network</a> (BRNN) would seem to be a reasonable candidate, and for this exercise we settle on a relatively simple model composed of birectional long short-term merory (LSTM) layers. A good practical example of this is <a href="https://github.com/jasonrig/address-net">AddressNet</a>, which uses the <a href="https://geoscape.com.au/data/g-naf/">Australian address database</a> to do more or less exactly that.</p>
+<section id="data" class="level2">
+<h2 class="anchored" data-anchor-id="data">Data</h2>
+<p>In the <a href="../linz_geocoder_2">next post</a> we show how one can load the LINZ address data to a PostGIS database. While we could appeal to this data in real-time when training our address parser, things are much simpler in practice if we appeal to simple text files. For convenience, files are provided with the <a href="https://github.com/cmhh/linzaddressparse">address parser source code</a>. If one has an address database up and running, such files are easily created–in R, for example:</p>
+<details>
+<summary>
+create raw data
+</summary>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> DBI<span class="sc">::</span><span class="fu">dbConnect</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  RPostgreSQL<span class="sc">::</span><span class="fu">PostgreSQL</span>(), </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">user =</span> <span class="st">"&lt;username&gt;"</span>, </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">password =</span> <span class="st">"&lt;password&gt;"</span>, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">dbname =</span> <span class="st">"&lt;dbname&gt;"</span>, </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">port =</span> <span class="sc">&lt;</span>port<span class="sc">&gt;</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">host =</span> <span class="st">"&lt;server&gt;"</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>addr <span class="ot">&lt;-</span> DBI<span class="sc">::</span><span class="fu">dbGetQuery</span>(</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  con,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="st">  select </span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="st">    unit_type, unit_value, level_type, level_value, </span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="st">    address_number, address_number_suffix, address_number_high,</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="st">    road_name, road_type_name, road_suffix,</span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="st">    suburb_locality, postcode, town_city,</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="st">    random() as r</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="st">  from</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="st">    linz.addresses_v</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="st">  order by</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="st">    r</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="st">  "</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>) </span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">fwrite</span>(</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>  addr[addr<span class="sc">$</span>r <span class="sc">&lt;=</span> <span class="fl">0.8</span>, <span class="sc">-</span><span class="fu">which</span>(<span class="fu">colnames</span>(addr) <span class="sc">==</span> <span class="st">"r"</span>)], </span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>  <span class="st">"linzaddress_train.csv.gz"</span>, </span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span></span>
+<span id="cb12-31"><a href="#cb12-31" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-32"><a href="#cb12-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-33"><a href="#cb12-33" aria-hidden="true" tabindex="-1"></a>data.table<span class="sc">::</span><span class="fu">fwrite</span>(</span>
+<span id="cb12-34"><a href="#cb12-34" aria-hidden="true" tabindex="-1"></a>  addr[addr<span class="sc">$</span>r <span class="sc">&gt;</span> <span class="fl">0.8</span>, <span class="sc">-</span><span class="fu">which</span>(<span class="fu">colnames</span>(addr) <span class="sc">==</span> <span class="st">"r"</span>)], </span>
+<span id="cb12-35"><a href="#cb12-35" aria-hidden="true" tabindex="-1"></a>  <span class="st">"linzaddress_test.csv.gz"</span>, </span>
+<span id="cb12-36"><a href="#cb12-36" aria-hidden="true" tabindex="-1"></a>  <span class="at">col.names =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb12-37"><a href="#cb12-37" aria-hidden="true" tabindex="-1"></a>  <span class="at">sep =</span> <span class="st">"|"</span></span>
+<span id="cb12-38"><a href="#cb12-38" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb12-39"><a href="#cb12-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-40"><a href="#cb12-40" aria-hidden="true" tabindex="-1"></a>DBI<span class="sc">::</span><span class="fu">dbDisconnect</span>(con)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</section>
+<section id="a-simple-model" class="level2">
+<h2 class="anchored" data-anchor-id="a-simple-model">A simple model…</h2>
+<p>Here’s an example of a model we could train using <a href="https://deeplearning4j.konduit.ai/">Deeplearning4j</a>:</p>
+<details>
+<summary>
+LSTM model
+</summary>
+<div class="sourceCode" id="cb13"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>conf<span class="op">.</span>NeuralNetConfiguration</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>conf<span class="op">.</span>graph<span class="op">.</span>MergeVertex</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>conf<span class="op">.</span>layers<span class="op">.{</span>LSTM<span class="op">,</span> RnnOutputLayer<span class="op">}</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>conf<span class="op">.</span>layers<span class="op">.</span>recurrent<span class="op">.</span>Bidirectional</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>graph<span class="op">.</span>ComputationGraph</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>api<span class="op">.</span>OptimizationAlgorithm</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>nd4j<span class="op">.</span>linalg<span class="op">.</span>activations<span class="op">.</span>Activation</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>weights<span class="op">.</span>WeightInit</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>nd4j<span class="op">.</span>linalg<span class="op">.</span>learning<span class="op">.</span>config<span class="op">.</span>Adam</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>nd4j<span class="op">.</span>linalg<span class="op">.</span>lossfunctions<span class="op">.</span>LossFunctions </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="kw">import</span> org<span class="op">.</span>deeplearning4j<span class="op">.</span>nn<span class="op">.</span>conf<span class="op">.</span>inputs<span class="op">.</span>InputType</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> architecture <span class="op">=</span> <span class="kw">new</span> NeuralNetConfiguration<span class="op">.</span><span class="fu">Builder</span><span class="op">()</span></span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">weightInit</span><span class="op">(</span>WeightInit<span class="op">.</span>XAVIER<span class="op">)</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">optimizationAlgo</span><span class="op">(</span>OptimizationAlgorithm<span class="op">.</span>STOCHASTIC_GRADIENT_DESCENT<span class="op">)</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">updater</span><span class="op">(</span><span class="kw">new</span> <span class="fu">Adam</span><span class="op">(</span>learningRate<span class="op">))</span></span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">seed</span><span class="op">(</span>seed<span class="op">)</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">graphBuilder</span><span class="op">()</span></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">addInputs</span><span class="op">(</span><span class="st">"features"</span><span class="op">)</span></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">setOutputs</span><span class="op">(</span><span class="st">"prediction"</span><span class="op">)</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">setInputTypes</span><span class="op">(</span>InputType<span class="op">.</span><span class="fu">recurrent</span><span class="op">(</span>vocabSize<span class="op">))</span></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">addLayer</span><span class="op">(</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bdlstm1"</span><span class="op">,</span> </span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> <span class="fu">Bidirectional</span><span class="op">(</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>      <span class="kw">new</span> LSTM<span class="op">.</span><span class="fu">Builder</span><span class="op">()</span></span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">nIn</span><span class="op">(</span>vocabSize<span class="op">)</span></span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">nOut</span><span class="op">(</span>numHiddenNodes1<span class="op">)</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">activation</span><span class="op">(</span>Activation<span class="op">.</span>TANH<span class="op">)</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">build</span><span class="op">()</span></span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>    <span class="op">),</span> </span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>    <span class="st">"features"</span></span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">addLayer</span><span class="op">(</span></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bdlstm2"</span><span class="op">,</span> </span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> <span class="fu">Bidirectional</span><span class="op">(</span></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a>      <span class="kw">new</span> LSTM<span class="op">.</span><span class="fu">Builder</span><span class="op">()</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">nIn</span><span class="op">(</span>numHiddenNodes1<span class="op">)</span></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">nOut</span><span class="op">(</span>numHiddenNodes2<span class="op">)</span></span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">activation</span><span class="op">(</span>Activation<span class="op">.</span>TANH<span class="op">)</span></span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a>        <span class="op">.</span><span class="fu">build</span><span class="op">()</span></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a>    <span class="op">),</span> </span>
+<span id="cb13-42"><a href="#cb13-42" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bdlstm1"</span></span>
+<span id="cb13-43"><a href="#cb13-43" aria-hidden="true" tabindex="-1"></a>  <span class="op">)</span></span>
+<span id="cb13-44"><a href="#cb13-44" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">addLayer</span><span class="op">(</span></span>
+<span id="cb13-45"><a href="#cb13-45" aria-hidden="true" tabindex="-1"></a>    <span class="st">"prediction"</span><span class="op">,</span> </span>
+<span id="cb13-46"><a href="#cb13-46" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> RnnOutputLayer<span class="op">.</span><span class="fu">Builder</span><span class="op">()</span></span>
+<span id="cb13-47"><a href="#cb13-47" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">nIn</span><span class="op">(</span>numHiddenNodes2<span class="op">)</span></span>
+<span id="cb13-48"><a href="#cb13-48" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">nOut</span><span class="op">(</span>numClasses<span class="op">)</span></span>
+<span id="cb13-49"><a href="#cb13-49" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">activation</span><span class="op">(</span>Activation<span class="op">.</span>SOFTMAX<span class="op">)</span></span>
+<span id="cb13-50"><a href="#cb13-50" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">lossFunction</span><span class="op">(</span>LossFunctions<span class="op">.</span>LossFunction<span class="op">.</span>MCXENT<span class="op">)</span></span>
+<span id="cb13-51"><a href="#cb13-51" aria-hidden="true" tabindex="-1"></a>      <span class="op">.</span><span class="fu">build</span><span class="op">(),</span> </span>
+<span id="cb13-52"><a href="#cb13-52" aria-hidden="true" tabindex="-1"></a>    <span class="st">"bdlstm2"</span><span class="op">)</span></span>
+<span id="cb13-53"><a href="#cb13-53" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span><span class="fu">build</span><span class="op">()</span></span>
+<span id="cb13-54"><a href="#cb13-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-55"><a href="#cb13-55" aria-hidden="true" tabindex="-1"></a><span class="kw">val</span> model <span class="op">=</span> <span class="kw">new</span> <span class="fu">ComputationGraph</span><span class="op">(</span>architecture<span class="op">)</span></span>
+<span id="cb13-56"><a href="#cb13-56" aria-hidden="true" tabindex="-1"></a>model<span class="op">.</span><span class="fu">init</span><span class="op">()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</section>
+<section id="training" class="level2">
+<h2 class="anchored" data-anchor-id="training">Training</h2>
+<p>We pass address strings through our network as a sequence of labelled characters. For example, our example address</p>
+<pre><code>1/45A Memorial Avenue, Ilam, Christchurch 8053</code></pre>
+<p>would be labelled as follows:</p>
+<div class="no-head">
+<table class="table">
+<thead>
+<tr class="header">
+<th>&nbsp;</th>
+<th>&nbsp;</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>1</code></td>
+<td><code>unit_type</code></td>
+</tr>
+<tr class="even">
+<td><code>/</code></td>
+<td><code>separator</code></td>
+</tr>
+<tr class="odd">
+<td><code>4</code></td>
+<td><code>address_number</code></td>
+</tr>
+<tr class="even">
+<td><code>5</code></td>
+<td><code>address_number</code></td>
+</tr>
+<tr class="odd">
+<td><code>A</code></td>
+<td><code>address_number_suffix</code></td>
+</tr>
+<tr class="even">
+<td><code>˽</code></td>
+<td><code>space</code></td>
+</tr>
+<tr class="odd">
+<td><code>M</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="even">
+<td><code>e</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="odd">
+<td><code>m</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="even">
+<td><code>o</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="odd">
+<td><code>r</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="even">
+<td><code>i</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="odd">
+<td><code>a</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="even">
+<td><code>l</code></td>
+<td><code>road_name</code></td>
+</tr>
+<tr class="odd">
+<td><code>˽</code></td>
+<td><code>space</code></td>
+</tr>
+<tr class="even">
+<td><code>A</code></td>
+<td><code>road_type_name</code></td>
+</tr>
+<tr class="odd">
+<td><code>v</code></td>
+<td><code>road_type_name</code></td>
+</tr>
+<tr class="even">
+<td><code>e</code></td>
+<td><code>road_type_name</code></td>
+</tr>
+<tr class="odd">
+<td><code>n</code></td>
+<td><code>road_type_name</code></td>
+</tr>
+<tr class="even">
+<td><code>u</code></td>
+<td><code>road_type_name</code></td>
+</tr>
+<tr class="odd">
+<td><code>e</code></td>
+<td><code>road_type_name</code></td>
+</tr>
+<tr class="even">
+<td><code>,</code></td>
+<td><code>separator</code></td>
+</tr>
+<tr class="odd">
+<td><code>˽</code></td>
+<td><code>space</code></td>
+</tr>
+<tr class="even">
+<td><code>I</code></td>
+<td><code>suburb_locality</code></td>
+</tr>
+<tr class="odd">
+<td><code>l</code></td>
+<td><code>suburb_locality</code></td>
+</tr>
+<tr class="even">
+<td><code>a</code></td>
+<td><code>suburb_locality</code></td>
+</tr>
+<tr class="odd">
+<td><code>m</code></td>
+<td><code>suburb_locality</code></td>
+</tr>
+<tr class="even">
+<td><code>,</code></td>
+<td><code>separator</code></td>
+</tr>
+<tr class="odd">
+<td><code>˽</code></td>
+<td><code>space</code></td>
+</tr>
+<tr class="even">
+<td><code>C</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="odd">
+<td><code>h</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="even">
+<td><code>r</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="odd">
+<td><code>i</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="even">
+<td><code>s</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="odd">
+<td><code>t</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="even">
+<td><code>c</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="odd">
+<td><code>h</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="even">
+<td><code>u</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="odd">
+<td><code>r</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="even">
+<td><code>c</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="odd">
+<td><code>h</code></td>
+<td><code>town_city</code></td>
+</tr>
+<tr class="even">
+<td><code>˽</code></td>
+<td><code>space</code></td>
+</tr>
+<tr class="odd">
+<td><code>8</code></td>
+<td><code>postcode</code></td>
+</tr>
+<tr class="even">
+<td><code>0</code></td>
+<td><code>postcode</code></td>
+</tr>
+<tr class="odd">
+<td><code>5</code></td>
+<td><code>postcode</code></td>
+</tr>
+<tr class="even">
+<td><code>3</code></td>
+<td><code>postcode</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Actually, we pass our characters and labels as one-hot encoded vectors. For example, our vocabulary here consists of the following 46 characters:</p>
+<p><code></code>, <code>'</code>, <code>,</code>, <code>-</code>, <code>/</code>, <code>0</code>, <code>1</code>, <code>2</code>, <code>3</code>, <code>4</code>, <code>5</code>, <code>6</code>, <code>7</code>, <code>8</code>, <code>9</code>, <code>a</code>, <code>b</code>, <code>c</code>, <code>d</code>, <code>e</code>, <code>f</code>, <code>g</code>, <code>h</code>, <code>i</code>, <code>j</code>, <code>k</code>, <code>l</code>, <code>m</code>, <code>n</code>, <code>o</code>, <code>p</code>, <code>q</code>, <code>r</code>, <code>s</code>, <code>t</code>, <code>u</code>, <code>v</code>, <code>w</code>, <code>x</code>, <code>y</code>, <code>z</code>, <code>ā</code>, <code>ē</code>, <code>ī</code>, <code>ō</code>, <code>ū</code></p>
+<p><code>0</code> happens to be the 6<sup>th</sup> element of our vocabulary, so we’d represent this as follows:</p>
+<p><span class="math display">\[
+\underbrace{%
+\begin{bmatrix} 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; \ldots &amp; 0 &amp; 0 &amp; 0 \end{bmatrix}%
+}_{46}
+\]</span></p>
+<p>Similarly, the full set of labels are:</p>
+<p><code>space</code>, <code>separator</code>, <code>unit_type</code>, <code>unit_value</code>, <code>level_type</code>, <code>level_value</code>, <code>address_number</code>, <code>address_number_suffix</code>, <code>address_number_high</code>, <code>road_name</code>, <code>road_type_name</code>, <code>road_suffix</code>, <code>suburb_locality</code>, <code>postcode</code>, <code>town_city</code></p>
+<p><code>address_number</code> is the 7<sup>th</sup> of our labels, so we’d represent this as follows:</p>
+<p><span class="math display">\[
+\begin{bmatrix}
+0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 1 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0 &amp; 0
+\end{bmatrix}
+\]</span></p>
+<p>When training, we allow the string representation to vary a little, as well as introducing typos. For example, the following are several random variations of our example address:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode default code-with-copy"><code class="sourceCode default"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>1/45A Memorial Avenue, Ilam, Christchurch 8053</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>1/45A Memorial Ave, Ilam</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>1/45A Memorial Avnue, Ilam, Christcyurch 8053</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>1/45A Memorial Av, Ilam, Christchutch 8053</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Our model outputs a set of 15 numbers for each character, roughly representing a probability, and the one with the largest numeric value is the assigned category. After training, this looks as follows for our test address:</p>
+<p><img src="assets/img/parsed.png" class="img-fluid"></p>
+<p>We can then use this array to extract our labels easily enough. We omit implementation details, but we create a function with the following signature:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="fu">parse</span><span class="op">(</span>address<span class="op">:</span> <span class="ex">String</span><span class="op">)(</span><span class="kw">implicit</span> m<span class="op">:</span> ComputationGraph<span class="op">):</span> AddressComponents <span class="op">=</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="op">???</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>And we can then do this:</p>
+<div class="inputoutput">
+<div class="sourceCode" id="cb17"><pre class="sourceCode scala code-with-copy"><code class="sourceCode scala"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">parse</span><span class="op">(</span><span class="st">"1/45A Memorial Avenue, Ilam, Christchurch 8053"</span><span class="op">).</span>toJson</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode json code-with-copy"><code class="sourceCode json"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"unitType"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"unitValue"</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"levelType"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"levelValue"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"addressNumber"</span><span class="fu">:</span> <span class="dv">45</span><span class="fu">,</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"addressNumberSuffix"</span><span class="fu">:</span> <span class="st">"A"</span><span class="fu">,</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"addressNumberHigh"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"roadName"</span><span class="fu">:</span> <span class="st">"Memorial"</span><span class="fu">,</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"roadTypeName"</span><span class="fu">:</span> <span class="st">"Avenue"</span><span class="fu">,</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"roadSuffix"</span><span class="fu">:</span> <span class="kw">null</span><span class="fu">,</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"suburbLocality"</span><span class="fu">:</span> <span class="st">"Ilam"</span><span class="fu">,</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"townCity"</span><span class="fu">:</span> <span class="st">"Christchurch"</span><span class="fu">,</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">"postcode"</span><span class="fu">:</span> <span class="st">"8053"</span></span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And we’re done! Cool-i-o.</p>
+</section>
+<section id="model-evaluation" class="level2">
+<h2 class="anchored" data-anchor-id="model-evaluation">Model evaluation</h2>
+<p>At the time of writing, the LINZ address file contained 2,314,785 addresses. This is more than enough to train our model, so we can hold out a portion for evaluation. If we define success as correctly classifying every character in our address string, we achieve over 99.9% accuracy for a test set of 20% (some 460000) addresses. Of course, in practice we’ll only achieve this sort of accuracy on address strings that are similar enough to the ones used for training, but this is a good outcome all the same. If our results prove inadequate, because we failed to allow for a particular arrangement of our address components when raining, we could always refine the way we create our training data and retrain our model.</p>
+</section>
+</section>
+<section id="up-next" class="level1">
+<h1>Up Next…</h1>
+<p>In the <a href="../linz_geocoder_2">next post</a> we’ll take the address parser we made here and use it to create a geocoder.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

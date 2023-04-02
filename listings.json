@@ -2,9 +2,11 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/linz_geocoder_2/index.html",
+      "/posts/linz_geocoder_1/index.html",
       "/posts/guitar-chord-transitions/index.html",
-      "/posts/azure-functions-scala-2/index.html",
       "/posts/azure-functions-scala-1/index.html",
+      "/posts/azure-functions-scala-2/index.html",
       "/posts/r-spatial-snowflake/index.html",
       "/posts/deploying-shiny-apps/index.html",
       "/posts/serving-postgis-features/index.html",

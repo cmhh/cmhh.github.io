@@ -27,22 +27,6 @@ img.inline {
   margin: 0!important; 
 }
 
-.repl div:nth-child(1) {
-  margin-bottom: 5px;
-}
-
-.repl div:nth-child(2) {
-  margin-top: 0;
-}
-
-.repl div:nth-child(1) > pre {
-  border-left: 3px solid green;
-}
-
-.repl div:nth-child(2) > pre {
-  border-left: 3px solid red;
-}
-
 kbd {
   background-color: rgb(227, 230, 232);
   border: 1px solid rgb(159, 166, 173);
@@ -59,4 +43,41 @@ kbd {
 
 .no-head thead {
   display: none;
+}
+
+.repl div:nth-child(1) {
+  margin-bottom: 5px;
+}
+
+.repl div:nth-child(2) {
+  margin-top: 0;
+}
+
+.repl div:nth-child(1) > pre {
+  border-left: 3px solid green;
+}
+
+.repl div:nth-child(2) > pre {
+  border-left: 3px solid red;
+}
+
+.inputoutput div.sourceCode {
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+
+.inputoutput div.sourceCode:nth-child(odd) {
+  border-left: 3px solid green;
+}
+
+.inputoutput div.sourceCode:nth-child(even) {
+  border-left: 3px solid red;
+}
+
+.inputoutput div.sourceCode:nth-child(1){
+  margin-top: 18px;
+}
+
+.inputoutput div.sourceCode:last-child {
+  margin-bottom: 18px;
 }

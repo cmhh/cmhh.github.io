@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.26">
+<meta name="generator" content="quarto-1.2.335">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -72,7 +72,7 @@ ul.task-list li input[type="checkbox"] {
     const options = {
       valueNames: ['listing-image','listing-date','listing-title','listing-reading-time','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-subtitle","listing-image","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -118,7 +118,7 @@ background-size: cover;
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/cmhh" rel=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
 </i> 
  <span class="menu-text"></span></a>
   </li>  
@@ -150,7 +150,7 @@ background-size: cover;
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-cloud"><div class="category" data-category="Akka"><span class="quarto-category-count category-cloud-2">Akka</span></div><div class="category" data-category="Akka HTTP"><span class="quarto-category-count category-cloud-1">Akka HTTP</span></div><div class="category" data-category="Azure"><span class="quarto-category-count category-cloud-1">Azure</span></div><div class="category" data-category="Azure Functions"><span class="quarto-category-count category-cloud-1">Azure Functions</span></div><div class="category" data-category="Deeplearning4j"><span class="quarto-category-count category-cloud-1">Deeplearning4j</span></div><div class="category" data-category="Docker"><span class="quarto-category-count category-cloud-2">Docker</span></div><div class="category" data-category="GeoServer"><span class="quarto-category-count category-cloud-1">GeoServer</span></div><div class="category" data-category="GeoSpark"><span class="quarto-category-count category-cloud-1">GeoSpark</span></div><div class="category" data-category="Kafka"><span class="quarto-category-count category-cloud-1">Kafka</span></div><div class="category" data-category="Mapnik"><span class="quarto-category-count category-cloud-1">Mapnik</span></div><div class="category" data-category="OSRM"><span class="quarto-category-count category-cloud-1">OSRM</span></div><div class="category" data-category="Plumber"><span class="quarto-category-count category-cloud-1">Plumber</span></div><div class="category" data-category="PostGIS"><span class="quarto-category-count category-cloud-2">PostGIS</span></div><div class="category" data-category="PostGraphile"><span class="quarto-category-count category-cloud-1">PostGraphile</span></div><div class="category" data-category="PostgREST"><span class="quarto-category-count category-cloud-1">PostgREST</span></div><div class="category" data-category="PostgreSQL"><span class="quarto-category-count category-cloud-1">PostgreSQL</span></div><div class="category" data-category="QGIS"><span class="quarto-category-count category-cloud-1">QGIS</span></div><div class="category" data-category="R"><span class="quarto-category-count category-cloud-3">R</span></div><div class="category" data-category="Scala"><span class="quarto-category-count category-cloud-3">Scala</span></div><div class="category" data-category="Sedona"><span class="quarto-category-count category-cloud-1">Sedona</span></div><div class="category" data-category="Shiny"><span class="quarto-category-count category-cloud-1">Shiny</span></div><div class="category" data-category="Snowflake"><span class="quarto-category-count category-cloud-1">Snowflake</span></div><div class="category" data-category="Spark"><span class="quarto-category-count category-cloud-1">Spark</span></div><div class="category" data-category="TileStache"><span class="quarto-category-count category-cloud-1">TileStache</span></div><div class="category" data-category="Vue.js"><span class="quarto-category-count category-cloud-2">Vue.js</span></div><div class="category" data-category="WSL"><span class="quarto-category-count category-cloud-1">WSL</span></div><div class="category" data-category="X13-ARIMA-SEATS"><span class="quarto-category-count category-cloud-1">X13-ARIMA-SEATS</span></div><div class="category" data-category="geospatial"><span class="quarto-category-count category-cloud-4">geospatial</span></div><div class="category" data-category="microsimulation"><span class="quarto-category-count category-cloud-1">microsimulation</span></div><div class="category" data-category="online learning"><span class="quarto-category-count category-cloud-1">online learning</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-cloud"><div class="category" data-category="Akka"><span class="quarto-category-count category-cloud-2">Akka</span></div><div class="category" data-category="Akka HTTP"><span class="quarto-category-count category-cloud-1">Akka HTTP</span></div><div class="category" data-category="Azure"><span class="quarto-category-count category-cloud-1">Azure</span></div><div class="category" data-category="Azure Functions"><span class="quarto-category-count category-cloud-1">Azure Functions</span></div><div class="category" data-category="Deeplearning4j"><span class="quarto-category-count category-cloud-1">Deeplearning4j</span></div><div class="category" data-category="Docker"><span class="quarto-category-count category-cloud-2">Docker</span></div><div class="category" data-category="GeoServer"><span class="quarto-category-count category-cloud-1">GeoServer</span></div><div class="category" data-category="GeoSpark"><span class="quarto-category-count category-cloud-1">GeoSpark</span></div><div class="category" data-category="Kafka"><span class="quarto-category-count category-cloud-1">Kafka</span></div><div class="category" data-category="LINZ"><span class="quarto-category-count category-cloud-1">LINZ</span></div><div class="category" data-category="Mapnik"><span class="quarto-category-count category-cloud-1">Mapnik</span></div><div class="category" data-category="OSRM"><span class="quarto-category-count category-cloud-1">OSRM</span></div><div class="category" data-category="Plumber"><span class="quarto-category-count category-cloud-1">Plumber</span></div><div class="category" data-category="PostGIS"><span class="quarto-category-count category-cloud-2">PostGIS</span></div><div class="category" data-category="PostGraphile"><span class="quarto-category-count category-cloud-1">PostGraphile</span></div><div class="category" data-category="PostgREST"><span class="quarto-category-count category-cloud-1">PostgREST</span></div><div class="category" data-category="PostgreSQL"><span class="quarto-category-count category-cloud-1">PostgreSQL</span></div><div class="category" data-category="QGIS"><span class="quarto-category-count category-cloud-1">QGIS</span></div><div class="category" data-category="R"><span class="quarto-category-count category-cloud-3">R</span></div><div class="category" data-category="Scala"><span class="quarto-category-count category-cloud-3">Scala</span></div><div class="category" data-category="Sedona"><span class="quarto-category-count category-cloud-1">Sedona</span></div><div class="category" data-category="Shiny"><span class="quarto-category-count category-cloud-1">Shiny</span></div><div class="category" data-category="Snowflake"><span class="quarto-category-count category-cloud-1">Snowflake</span></div><div class="category" data-category="Spark"><span class="quarto-category-count category-cloud-1">Spark</span></div><div class="category" data-category="TileStache"><span class="quarto-category-count category-cloud-1">TileStache</span></div><div class="category" data-category="Vue.js"><span class="quarto-category-count category-cloud-2">Vue.js</span></div><div class="category" data-category="WSL"><span class="quarto-category-count category-cloud-1">WSL</span></div><div class="category" data-category="X13-ARIMA-SEATS"><span class="quarto-category-count category-cloud-1">X13-ARIMA-SEATS</span></div><div class="category" data-category="akka-http"><span class="quarto-category-count category-cloud-1">akka-http</span></div><div class="category" data-category="deeplearning4j"><span class="quarto-category-count category-cloud-1">deeplearning4j</span></div><div class="category" data-category="geocoding"><span class="quarto-category-count category-cloud-1">geocoding</span></div><div class="category" data-category="geospatial"><span class="quarto-category-count category-cloud-4">geospatial</span></div><div class="category" data-category="microsimulation"><span class="quarto-category-count category-cloud-1">microsimulation</span></div><div class="category" data-category="online learning"><span class="quarto-category-count category-cloud-1">online learning</span></div><div class="category" data-category="postcode"><span class="quarto-category-count category-cloud-1">postcode</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -163,7 +163,63 @@ background-size: cover;
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="Vue.js" data-listing-date-sort="1661688000000" data-listing-file-modified-sort="1664617103604" data-listing-reading-time-sort="7.215">
+<div class="quarto-post image-right" data-index="0" data-categories="geocoding,postcode,LINZ,akka-http" data-listing-date-sort="1680346800000" data-listing-file-modified-sort="1680404769992" data-listing-reading-time-sort="13.635">
+<div class="thumbnail">
+<p><a href="./posts/linz_geocoder_2/index.html"> <img src="./posts/linz_geocoder_2/assets/img/geocode.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/linz_geocoder_2/index.html">
+<h3 class="no-anchor listing-title">
+Building a New Zealand Address Geocoder, Part 2
+</h3>
+<div class="listing-subtitle">
+Building a Geocoding Service
+</div>
+<div class="listing-description">
+<p>In this post we create an address geocoder using an address parser and a database of addresses.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/linz_geocoder_2/index.html">
+<div class="listing-date">
+Apr 2, 2023
+</div>
+<div class="listing-reading-time">
+13 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="geocoding,postcode,LINZ,deeplearning4j" data-listing-date-sort="1680346800000" data-listing-file-modified-sort="1680404541160" data-listing-reading-time-sort="13.5">
+<div class="thumbnail">
+<p><a href="./posts/linz_geocoder_1/index.html"> <img src="./posts/linz_geocoder_1/assets/img/parsed.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/linz_geocoder_1/index.html">
+<h3 class="no-anchor listing-title">
+Building a New Zealand Address Geocoder, Part 1
+</h3>
+<div class="listing-subtitle">
+Building an Address Parser
+</div>
+<div class="listing-description">
+<p>This post outlines a method for parsing address strings using a bidirectional long short-term memory network.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/linz_geocoder_1/index.html">
+<div class="listing-date">
+Apr 2, 2023
+</div>
+<div class="listing-reading-time">
+13 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="Vue.js" data-listing-date-sort="1661688000000" data-listing-file-modified-sort="1678260523504" data-listing-reading-time-sort="7.215">
 <div class="thumbnail">
 <p><a href="./posts/guitar-chord-transitions/index.html"> <img src="./posts/guitar-chord-transitions/assets/img/chordvuer.webp" class="thumnail-image"> </a></p>
 </div>
@@ -191,35 +247,7 @@ Aug 29, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="Azure Functions,Scala,Akka" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1659045283566" data-listing-reading-time-sort="7.84">
-<div class="thumbnail">
-<p><a href="./posts/azure-functions-scala-2/index.html"> <img src="./posts/azure-functions-scala-2/assets/azure-functions-custom-handlers-overview.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/azure-functions-scala-2/index.html">
-<h3 class="no-anchor listing-title">
-Azure Functions with Scala using a Custom Handler
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>In this post we look at how we can write an Azure Function in <em>any</em> language. We do this by creating a simple web service in our language of choice (Scala), and then using it as a custom handler from a host Azure Function.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/azure-functions-scala-2/index.html">
-<div class="listing-date">
-Jun 19, 2022
-</div>
-<div class="listing-reading-time">
-7 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-categories="Azure Functions,Scala" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1658003199543" data-listing-reading-time-sort="20.435">
+<div class="quarto-post image-right" data-index="3" data-categories="Azure Functions,Scala" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1678260522816" data-listing-reading-time-sort="20.435">
 <div class="thumbnail">
 <p><a href="./posts/azure-functions-scala-1/index.html"> <img src="./posts/azure-functions-scala-1/assets/function01.png" class="thumnail-image"> </a></p>
 </div>
@@ -247,7 +275,35 @@ Jun 19, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="geospatial,R,Snowflake" data-listing-date-sort="1650110400000" data-listing-file-modified-sort="1655201199762" data-listing-reading-time-sort="5.54">
+<div class="quarto-post image-right" data-index="4" data-categories="Azure Functions,Scala,Akka" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1678260522828" data-listing-reading-time-sort="7.84">
+<div class="thumbnail">
+<p><a href="./posts/azure-functions-scala-2/index.html"> <img src="./posts/azure-functions-scala-2/assets/azure-functions-custom-handlers-overview.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/azure-functions-scala-2/index.html">
+<h3 class="no-anchor listing-title">
+Azure Functions with Scala using a Custom Handler
+</h3>
+<div class="listing-subtitle">
+
+</div>
+<div class="listing-description">
+<p>In this post we look at how we can write an Azure Function in <em>any</em> language. We do this by creating a simple web service in our language of choice (Scala), and then using it as a custom handler from a host Azure Function.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/azure-functions-scala-2/index.html">
+<div class="listing-date">
+Jun 19, 2022
+</div>
+<div class="listing-reading-time">
+7 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="5" data-categories="geospatial,R,Snowflake" data-listing-date-sort="1650110400000" data-listing-file-modified-sort="1678260522860" data-listing-reading-time-sort="5.54">
 <div class="thumbnail">
 <p><a href="./posts/r-spatial-snowflake/index.html"> <img src="./posts/r-spatial-snowflake/assets/buildings.png" class="thumnail-image"> </a></p>
 </div>
@@ -275,7 +331,7 @@ Apr 17, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="4" data-categories="Docker,Shiny,R,Azure" data-listing-date-sort="1646218800000" data-listing-file-modified-sort="1655202082692" data-listing-reading-time-sort="11.83">
+<div class="quarto-post image-right" data-index="6" data-categories="Docker,Shiny,R,Azure" data-listing-date-sort="1646218800000" data-listing-file-modified-sort="1678260522884" data-listing-reading-time-sort="11.83">
 <div class="thumbnail">
 <p><a href="./posts/deploying-shiny-apps/index.html"> <img src="./posts/deploying-shiny-apps/assets/hello_runif_shiny.webp" class="thumnail-image"> </a></p>
 </div>
@@ -303,7 +359,7 @@ Mar 3, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="5" data-categories="geospatial,PostGIS,Akka HTTP" data-listing-date-sort="1645700400000" data-listing-file-modified-sort="1655201973445" data-listing-reading-time-sort="10.585">
+<div class="quarto-post image-right" data-index="7" data-categories="geospatial,PostGIS,Akka HTTP" data-listing-date-sort="1645700400000" data-listing-file-modified-sort="1678260522868" data-listing-reading-time-sort="10.585">
 <div class="thumbnail">
 <p><a href="./posts/serving-postgis-features/index.html"> <img src="./posts/serving-postgis-features/assets/getFeatureClass.webp" class="thumnail-image"> </a></p>
 </div>
@@ -331,7 +387,7 @@ Feb 25, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="6" data-categories="R,Shiny,Plumber,Vue.js" data-listing-date-sort="1642590000000" data-listing-file-modified-sort="1655201933489" data-listing-reading-time-sort="34.05">
+<div class="quarto-post image-right" data-index="8" data-categories="R,Shiny,Plumber,Vue.js" data-listing-date-sort="1642590000000" data-listing-file-modified-sort="1678260523448" data-listing-reading-time-sort="34.05">
 <div class="thumbnail">
 <p><a href="./posts/too-much-shiny/index.html"> <img src="./posts/too-much-shiny/assets/img/01hello.webp" class="thumnail-image"> </a></p>
 </div>
@@ -359,7 +415,7 @@ Jan 20, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="7" data-categories="microsimulation,Akka,Scala" data-listing-date-sort="1641639600000" data-listing-file-modified-sort="1655201726601" data-listing-reading-time-sort="20.245">
+<div class="quarto-post image-right" data-index="9" data-categories="microsimulation,Akka,Scala" data-listing-date-sort="1641639600000" data-listing-file-modified-sort="1678260523348" data-listing-reading-time-sort="20.245">
 <div class="thumbnail">
 <p><a href="./posts/agent-based-simulations-with-akka/index.html"> <img src="./posts/agent-based-simulations-with-akka/assets/collectionsim.dot.png" class="thumnail-image"> </a></p>
 </div>
@@ -387,7 +443,7 @@ Jan 9, 2022
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="8" data-categories="PostgreSQL,PostGraphile,PostgREST" data-listing-date-sort="1628856000000" data-listing-file-modified-sort="1655201021610" data-listing-reading-time-sort="15.63">
+<div class="quarto-post image-right" data-index="10" data-categories="PostgreSQL,PostGraphile,PostgREST" data-listing-date-sort="1628856000000" data-listing-file-modified-sort="1678260523332" data-listing-reading-time-sort="15.63">
 <div class="thumbnail">
 <p><a href="./posts/data-services-from-postgres/index.html"> <img src="./posts/data-services-from-postgres/assets/schema01.png" class="thumnail-image"> </a></p>
 </div>
@@ -415,7 +471,7 @@ Aug 14, 2021
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="9" data-categories="online learning,Scala,Akka,Deeplearning4j" data-listing-date-sort="1628337600000" data-listing-file-modified-sort="1655201145066" data-listing-reading-time-sort="9.53">
+<div class="quarto-post image-right" data-index="11" data-categories="online learning,Scala,Akka,Deeplearning4j" data-listing-date-sort="1628337600000" data-listing-file-modified-sort="1678260523320" data-listing-reading-time-sort="9.53">
 <div class="thumbnail">
 <p><a href="./posts/online-learning-with-akka/index.html"> <img src="./posts/online-learning-with-akka/assets/random1.png" class="thumnail-image"> </a></p>
 </div>
@@ -443,7 +499,7 @@ Aug 8, 2021
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="10" data-categories="online learning,Scala,Kafka,Deeplearning4j" data-listing-date-sort="1627560000000" data-listing-file-modified-sort="1655201178586" data-listing-reading-time-sort="13.28">
+<div class="quarto-post image-right" data-index="12" data-categories="online learning,Scala,Kafka,Deeplearning4j" data-listing-date-sort="1627560000000" data-listing-file-modified-sort="1678260523304" data-listing-reading-time-sort="13.28">
 <div class="thumbnail">
 <p><a href="./posts/online-learning-with-kafka/index.html"> <img src="./posts/online-learning-with-kafka/assets/random1.png" class="thumnail-image"> </a></p>
 </div>
@@ -471,7 +527,7 @@ Jul 30, 2021
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="11" data-categories="geospatial,Spark,Sedona,GeoSpark,PostGIS" data-listing-date-sort="1618747200000" data-listing-file-modified-sort="1655200879239" data-listing-reading-time-sort="17.07">
+<div class="quarto-post image-right" data-index="13" data-categories="geospatial,Spark,Sedona,GeoSpark,PostGIS" data-listing-date-sort="1618747200000" data-listing-file-modified-sort="1678260523284" data-listing-reading-time-sort="17.07">
 <div class="thumbnail">
 <p><a href="./posts/a-brief-look-at-apache-sedona/index.html"> <img src="./posts/a-brief-look-at-apache-sedona/assets/dissolve01.png" class="thumnail-image"> </a></p>
 </div>
@@ -499,7 +555,7 @@ Apr 19, 2021
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="12" data-categories="Docker,WSL" data-listing-date-sort="1607079600000" data-listing-file-modified-sort="1671837382392" data-listing-reading-time-sort="13.65">
+<div class="quarto-post image-right" data-index="14" data-categories="Docker,WSL" data-listing-date-sort="1607079600000" data-listing-file-modified-sort="1678260523252" data-listing-reading-time-sort="13.65">
 <div class="thumbnail">
 <p><a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html"> <img src="./posts/working-productively-on-windows-using-wsl2-and-docker/assets/dev.png" class="thumnail-image"> </a></p>
 </div>
@@ -527,7 +583,7 @@ Dec 5, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="13" data-categories="geospatial,R,PostGIS" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1655202126408" data-listing-reading-time-sort="13.52">
+<div class="quarto-post image-right" data-index="15" data-categories="geospatial,R,PostGIS" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1678260523172" data-listing-reading-time-sort="13.52">
 <div class="thumbnail">
 <p><a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html"> <img src="./posts/using-postgis-as-a-spatial-backend-for-r/assets/upperhuttlanduse.png" class="thumnail-image"> </a></p>
 </div>
@@ -555,7 +611,7 @@ Oct 31, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="14" data-categories="Docker,WSL" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1655036734557" data-listing-reading-time-sort="11.61">
+<div class="quarto-post image-right" data-index="16" data-categories="Docker,WSL" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1678260523132" data-listing-reading-time-sort="11.61">
 <div class="thumbnail">
 <p><a href="./posts/docker-on-windows-with-wsl2/index.html"> <img src="./posts/docker-on-windows-with-wsl2/assets/vscode03.png" class="thumnail-image"> </a></p>
 </div>
@@ -583,7 +639,7 @@ Oct 31, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="15" data-categories="X13-ARIMA-SEATS,Akka,Akka HTTP,Vue.js" data-listing-date-sort="1590926400000" data-listing-file-modified-sort="1671837140389" data-listing-reading-time-sort="17.66">
+<div class="quarto-post image-right" data-index="17" data-categories="X13-ARIMA-SEATS,Akka,Akka HTTP,Vue.js" data-listing-date-sort="1590926400000" data-listing-file-modified-sort="1678260523120" data-listing-reading-time-sort="17.66">
 <div class="thumbnail">
 <p><a href="./posts/seasonal-adjustment-as-a-service/index.html"> <img src="./posts/seasonal-adjustment-as-a-service/assets/postman01.png" class="thumnail-image"> </a></p>
 </div>
@@ -611,7 +667,7 @@ Jun 1, 2020
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="16" data-categories="geospatial,R,GeoServer" data-listing-date-sort="1568635200000" data-listing-file-modified-sort="1655200984399" data-listing-reading-time-sort="14.065">
+<div class="quarto-post image-right" data-index="18" data-categories="geospatial,R,GeoServer" data-listing-date-sort="1568635200000" data-listing-file-modified-sort="1678260523056" data-listing-reading-time-sort="14.065">
 <div class="thumbnail">
 <p><a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html"> <img src="./posts/building-tile-services-on-the-fly-with-geoserver/assets/geoserver.webp" class="thumnail-image"> </a></p>
 </div>
@@ -639,7 +695,7 @@ Sep 17, 2019
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="17" data-categories="geospatial,QGIS" data-listing-date-sort="1485342000000" data-listing-file-modified-sort="1655206996369" data-listing-reading-time-sort="6.755">
+<div class="quarto-post image-right" data-index="19" data-categories="geospatial,QGIS" data-listing-date-sort="1485342000000" data-listing-file-modified-sort="1678260523020" data-listing-reading-time-sort="6.755">
 <div class="thumbnail">
 <p><a href="./posts/web-maps-and-tiles-with-qgis/index.html"> <img src="./posts/web-maps-and-tiles-with-qgis/assets/qgis.2013.01.png" class="thumnail-image"> </a></p>
 </div>
@@ -667,7 +723,7 @@ Jan 26, 2017
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="18" data-categories="geospatial,Mapnik,TileStache" data-listing-date-sort="1480244400000" data-listing-file-modified-sort="1655207101031" data-listing-reading-time-sort="17.7">
+<div class="quarto-post image-right" data-index="20" data-categories="geospatial,Mapnik,TileStache" data-listing-date-sort="1480244400000" data-listing-file-modified-sort="1678260522976" data-listing-reading-time-sort="17.7">
 <div class="thumbnail">
 <p><a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html"> <img src="./posts/serving-geospatial-features-with-mapnik-and-tilestache/assets/000nginxlocal.png" class="thumnail-image"> </a></p>
 </div>
@@ -695,7 +751,7 @@ Nov 28, 2016
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="19" data-categories="R,geospatial,OSRM" data-listing-date-sort="1480158000000" data-listing-file-modified-sort="1660094054340" data-listing-reading-time-sort="4.415">
+<div class="quarto-post image-right" data-index="21" data-categories="R,geospatial,OSRM" data-listing-date-sort="1480158000000" data-listing-file-modified-sort="1678260522964" data-listing-reading-time-sort="4.415">
 <div class="thumbnail">
 <p><a href="./posts/routing-in-r-using-osrm/index.html"> <img src="./posts/routing-in-r-using-osrm/assets/route.png" class="thumnail-image"> </a></p>
 </div>
