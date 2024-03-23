@@ -1,0 +1,72 @@
+.tt {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dashed black;
+}
+
+.tt .tttext {
+  visibility: hidden;
+  width: 856px;
+  height: 592px;
+  padding: 0;
+  position: absolute;
+  z-index: 1000;
+  top: 50%;
+  left: 50%;
+  margin-left: -428px; 
+  margin-top: -296px;
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.tt:hover .tttext {
+  visibility: visible;
+  background-image: url('../img/callback.png');
+  background-size: contain;
+  opacity: 1;
+}
+
+iframe {
+  border: 1px solid rgb(52, 58, 64);
+  border-radius: 2px;
+  min-height: 400px;
+  max-height: 400px;
+  width: calc(100% - 2px);
+}
+
+code::-webkit-scrollbar {
+  width: 16px;
+}
+
+code::-webkit-scrollbar-track {
+  border-radius: 8px;
+  background-color: #e7e7e7;
+  border: 1px solid #cacaca;
+}
+
+code::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+  background-color: rgb(17, 122, 101);
+}
+
+.tab-pane div.sourceCode {
+  margin-bottom: 0;
+}
+
+.tab-pane code {
+  max-height: 400px;
+  padding-bottom: 0;
+  margin-bottom: 0;
+  overflow-y: auto;
+}
+
+code.markdown, code.html {
+  text-wrap: wrap!important;
+}
+
+.caption p {
+  margin-top: -17px;
+}

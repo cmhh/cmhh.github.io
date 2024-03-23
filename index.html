@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
-<link rel="canonical" href="https://cmhh.github.io/" />
-
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.335">
+<meta name="generator" content="quarto-1.4.549">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -19,7 +17,7 @@ div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
   width: 0.8em;
-  margin: 0 0.8em 0.2em -1.6em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
 </style>
@@ -49,7 +47,13 @@ ul.task-list li input[type="checkbox"] {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -58,8 +62,10 @@ ul.task-list li input[type="checkbox"] {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 <script>
@@ -92,13 +98,42 @@ ul.task-list li input[type="checkbox"] {
   })
   </script>
 <style>
-    .quarto-title-block .quarto-title-banner {
-      background-image: url(img/banner-2.jpg);
-background-size: cover;
-    }
-    </style>
 
+      .quarto-title-block .quarto-title-banner {
+        background-image: url(img/banner-2.jpg);
+background-size: cover;
+      }
+</style>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -106,27 +141,29 @@ background-size: cover;
 <body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
-  <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg navbar-dark ">
+  <header id="quarto-header" class="headroom fixed-top quarto-banner">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">cmhh</span>
     </a>
   </div>
+            <div id="quarto-search" class="" title="Search"></div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/cmhh"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/cmhh"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
-              <div id="quarto-search" class="" title="Search"></div>
           </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -139,7 +176,7 @@ background-size: cover;
   </div>
     
   
-  <div class="quarto-title-meta">
+  <div class="quarto-title-meta column-page-left">
 
       
     
@@ -152,7 +189,7 @@ background-size: cover;
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-cloud"><div class="category" data-category="Akka"><span class="quarto-category-count category-cloud-2">Akka</span></div><div class="category" data-category="Akka HTTP"><span class="quarto-category-count category-cloud-1">Akka HTTP</span></div><div class="category" data-category="Azure"><span class="quarto-category-count category-cloud-1">Azure</span></div><div class="category" data-category="Azure Functions"><span class="quarto-category-count category-cloud-1">Azure Functions</span></div><div class="category" data-category="Deeplearning4j"><span class="quarto-category-count category-cloud-1">Deeplearning4j</span></div><div class="category" data-category="Docker"><span class="quarto-category-count category-cloud-2">Docker</span></div><div class="category" data-category="GeoServer"><span class="quarto-category-count category-cloud-1">GeoServer</span></div><div class="category" data-category="GeoSpark"><span class="quarto-category-count category-cloud-1">GeoSpark</span></div><div class="category" data-category="Kafka"><span class="quarto-category-count category-cloud-1">Kafka</span></div><div class="category" data-category="LINZ"><span class="quarto-category-count category-cloud-1">LINZ</span></div><div class="category" data-category="Mapnik"><span class="quarto-category-count category-cloud-1">Mapnik</span></div><div class="category" data-category="OSRM"><span class="quarto-category-count category-cloud-1">OSRM</span></div><div class="category" data-category="Plumber"><span class="quarto-category-count category-cloud-1">Plumber</span></div><div class="category" data-category="PostGIS"><span class="quarto-category-count category-cloud-2">PostGIS</span></div><div class="category" data-category="PostGraphile"><span class="quarto-category-count category-cloud-1">PostGraphile</span></div><div class="category" data-category="PostgREST"><span class="quarto-category-count category-cloud-1">PostgREST</span></div><div class="category" data-category="PostgreSQL"><span class="quarto-category-count category-cloud-1">PostgreSQL</span></div><div class="category" data-category="QGIS"><span class="quarto-category-count category-cloud-1">QGIS</span></div><div class="category" data-category="R"><span class="quarto-category-count category-cloud-3">R</span></div><div class="category" data-category="Scala"><span class="quarto-category-count category-cloud-3">Scala</span></div><div class="category" data-category="Sedona"><span class="quarto-category-count category-cloud-1">Sedona</span></div><div class="category" data-category="Shiny"><span class="quarto-category-count category-cloud-1">Shiny</span></div><div class="category" data-category="Snowflake"><span class="quarto-category-count category-cloud-1">Snowflake</span></div><div class="category" data-category="Spark"><span class="quarto-category-count category-cloud-1">Spark</span></div><div class="category" data-category="TileStache"><span class="quarto-category-count category-cloud-1">TileStache</span></div><div class="category" data-category="Vue.js"><span class="quarto-category-count category-cloud-2">Vue.js</span></div><div class="category" data-category="WSL"><span class="quarto-category-count category-cloud-1">WSL</span></div><div class="category" data-category="X13-ARIMA-SEATS"><span class="quarto-category-count category-cloud-1">X13-ARIMA-SEATS</span></div><div class="category" data-category="akka-http"><span class="quarto-category-count category-cloud-1">akka-http</span></div><div class="category" data-category="deeplearning4j"><span class="quarto-category-count category-cloud-1">deeplearning4j</span></div><div class="category" data-category="geocoding"><span class="quarto-category-count category-cloud-1">geocoding</span></div><div class="category" data-category="geospatial"><span class="quarto-category-count category-cloud-4">geospatial</span></div><div class="category" data-category="microsimulation"><span class="quarto-category-count category-cloud-1">microsimulation</span></div><div class="category" data-category="online learning"><span class="quarto-category-count category-cloud-1">online learning</span></div><div class="category" data-category="postcode"><span class="quarto-category-count category-cloud-1">postcode</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-cloud"><div class="category" data-category="Akka"><span class="quarto-category-count category-cloud-2">Akka</span></div><div class="category" data-category="Akka HTTP"><span class="quarto-category-count category-cloud-1">Akka HTTP</span></div><div class="category" data-category="Azure"><span class="quarto-category-count category-cloud-1">Azure</span></div><div class="category" data-category="Azure Functions"><span class="quarto-category-count category-cloud-1">Azure Functions</span></div><div class="category" data-category="Deeplearning4j"><span class="quarto-category-count category-cloud-1">Deeplearning4j</span></div><div class="category" data-category="Docker"><span class="quarto-category-count category-cloud-2">Docker</span></div><div class="category" data-category="GeoServer"><span class="quarto-category-count category-cloud-1">GeoServer</span></div><div class="category" data-category="GeoSpark"><span class="quarto-category-count category-cloud-1">GeoSpark</span></div><div class="category" data-category="Kafka"><span class="quarto-category-count category-cloud-1">Kafka</span></div><div class="category" data-category="LINZ"><span class="quarto-category-count category-cloud-1">LINZ</span></div><div class="category" data-category="Mapnik"><span class="quarto-category-count category-cloud-1">Mapnik</span></div><div class="category" data-category="OSRM"><span class="quarto-category-count category-cloud-1">OSRM</span></div><div class="category" data-category="Plumber"><span class="quarto-category-count category-cloud-1">Plumber</span></div><div class="category" data-category="PostGIS"><span class="quarto-category-count category-cloud-2">PostGIS</span></div><div class="category" data-category="PostGraphile"><span class="quarto-category-count category-cloud-1">PostGraphile</span></div><div class="category" data-category="PostgREST"><span class="quarto-category-count category-cloud-1">PostgREST</span></div><div class="category" data-category="PostgreSQL"><span class="quarto-category-count category-cloud-1">PostgreSQL</span></div><div class="category" data-category="QGIS"><span class="quarto-category-count category-cloud-1">QGIS</span></div><div class="category" data-category="R"><span class="quarto-category-count category-cloud-3">R</span></div><div class="category" data-category="Scala"><span class="quarto-category-count category-cloud-3">Scala</span></div><div class="category" data-category="Sedona"><span class="quarto-category-count category-cloud-1">Sedona</span></div><div class="category" data-category="Shiny"><span class="quarto-category-count category-cloud-1">Shiny</span></div><div class="category" data-category="Snowflake"><span class="quarto-category-count category-cloud-1">Snowflake</span></div><div class="category" data-category="Spark"><span class="quarto-category-count category-cloud-1">Spark</span></div><div class="category" data-category="TileStache"><span class="quarto-category-count category-cloud-1">TileStache</span></div><div class="category" data-category="Vue.js"><span class="quarto-category-count category-cloud-2">Vue.js</span></div><div class="category" data-category="WSL"><span class="quarto-category-count category-cloud-1">WSL</span></div><div class="category" data-category="X13-ARIMA-SEATS"><span class="quarto-category-count category-cloud-1">X13-ARIMA-SEATS</span></div><div class="category" data-category="akka-http"><span class="quarto-category-count category-cloud-1">akka-http</span></div><div class="category" data-category="deeplearning4j"><span class="quarto-category-count category-cloud-1">deeplearning4j</span></div><div class="category" data-category="geocoding"><span class="quarto-category-count category-cloud-1">geocoding</span></div><div class="category" data-category="geospatial"><span class="quarto-category-count category-cloud-4">geospatial</span></div><div class="category" data-category="markdown"><span class="quarto-category-count category-cloud-1">markdown</span></div><div class="category" data-category="marked"><span class="quarto-category-count category-cloud-1">marked</span></div><div class="category" data-category="microsimulation"><span class="quarto-category-count category-cloud-1">microsimulation</span></div><div class="category" data-category="online learning"><span class="quarto-category-count category-cloud-1">online learning</span></div><div class="category" data-category="postcode"><span class="quarto-category-count category-cloud-1">postcode</span></div><div class="category" data-category="zero-md"><span class="quarto-category-count category-cloud-1">zero-md</span></div></div></div>
 <!-- main -->
 <main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
 
@@ -163,533 +200,58 @@ background-size: cover;
 
 
 
+
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="geocoding,postcode,LINZ,akka-http" data-listing-date-sort="1680346800000" data-listing-file-modified-sort="1680404769992" data-listing-reading-time-sort="13.635">
+<div class="quarto-post image-right" data-index="0" data-categories="markdown,zero-md,marked" data-listing-date-sort="1711105200000" data-listing-file-modified-sort="1711187351545" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="13" data-listing-word-count-sort="2441">
 <div class="thumbnail">
-<p><a href="./posts/linz_geocoder_2/index.html"> <img src="./posts/linz_geocoder_2/assets/img/geocode.png" class="thumnail-image"> </a></p>
+<p><a href="./posts/rendering_markdown_on_the_web/index.html" class="no-external"></a></p><a href="./posts/rendering_markdown_on_the_web/index.html" class="no-external">
+<p><img src="./posts/rendering_markdown_on_the_web/assets/img/zeromd.webp" class="thumbnail-image"></p>
+</a><p><a href="./posts/rendering_markdown_on_the_web/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/linz_geocoder_2/index.html">
 <h3 class="no-anchor listing-title">
-Building a New Zealand Address Geocoder, Part 2
+<a href="./posts/rendering_markdown_on_the_web/index.html" class="no-external">Rendering Markdown on the Web using zero-md</a>
 </h3>
 <div class="listing-subtitle">
-Building a Geocoding Service
+<a href="./posts/rendering_markdown_on_the_web/index.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-<p>In this post we create an address geocoder using an address parser and a database of addresses.</p>
+<a href="./posts/rendering_markdown_on_the_web/index.html" class="no-external">This post demonstrates the use of zero-md to render an external markdown file in a web page, and populate a navigation element.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/rendering_markdown_on_the_web/index.html" class="no-external">
+<div class="listing-date">
+Mar 23, 2024
+</div>
+<div class="listing-reading-time">
+13 min
 </div>
 </a>
 </div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="geocoding,postcode,LINZ,deeplearning4j" data-listing-date-sort="1680346800000" data-listing-file-modified-sort="1711187609523" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2702">
+<div class="thumbnail">
+<p><a href="./posts/linz_geocoder_1/index.html" class="no-external"></a></p><a href="./posts/linz_geocoder_1/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/linz_geocoder_1/assets/img/parsed.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/linz_geocoder_1/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/linz_geocoder_1/index.html" class="no-external">Building a New Zealand Address Geocoder (1)</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/linz_geocoder_1/index.html" class="no-external">Building an Address Parser</a>
+</div>
+<div class="listing-description">
+<a href="./posts/linz_geocoder_1/index.html" class="no-external">This post outlines a method for parsing address strings using a bidirectional long short-term memory network.</a>
+</div>
+</div>
 <div class="metadata">
-<a href="./posts/linz_geocoder_2/index.html">
+<a href="./posts/linz_geocoder_1/index.html" class="no-external">
 <div class="listing-date">
 Apr 2, 2023
-</div>
-<div class="listing-reading-time">
-13 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="geocoding,postcode,LINZ,deeplearning4j" data-listing-date-sort="1680346800000" data-listing-file-modified-sort="1680404541160" data-listing-reading-time-sort="13.5">
-<div class="thumbnail">
-<p><a href="./posts/linz_geocoder_1/index.html"> <img src="./posts/linz_geocoder_1/assets/img/parsed.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/linz_geocoder_1/index.html">
-<h3 class="no-anchor listing-title">
-Building a New Zealand Address Geocoder, Part 1
-</h3>
-<div class="listing-subtitle">
-Building an Address Parser
-</div>
-<div class="listing-description">
-<p>This post outlines a method for parsing address strings using a bidirectional long short-term memory network.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/linz_geocoder_1/index.html">
-<div class="listing-date">
-Apr 2, 2023
-</div>
-<div class="listing-reading-time">
-13 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="2" data-categories="Vue.js" data-listing-date-sort="1661688000000" data-listing-file-modified-sort="1678260523504" data-listing-reading-time-sort="7.215">
-<div class="thumbnail">
-<p><a href="./posts/guitar-chord-transitions/index.html"> <img src="./posts/guitar-chord-transitions/assets/img/chordvuer.webp" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/guitar-chord-transitions/index.html">
-<h3 class="no-anchor listing-title">
-Guitar Chord Transitions with Vue.js
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>A basic Vue.js component for rendering guitar chord diagrams, and for animating chord transitions.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/guitar-chord-transitions/index.html">
-<div class="listing-date">
-Aug 29, 2022
-</div>
-<div class="listing-reading-time">
-7 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="3" data-categories="Azure Functions,Scala" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1678260522816" data-listing-reading-time-sort="20.435">
-<div class="thumbnail">
-<p><a href="./posts/azure-functions-scala-1/index.html"> <img src="./posts/azure-functions-scala-1/assets/function01.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/azure-functions-scala-1/index.html">
-<h3 class="no-anchor listing-title">
-Azure Functions with Scala using the Java Handler
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>In this post we look at how we create an Azure Function in Scala by making small changes to a basic Java function.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/azure-functions-scala-1/index.html">
-<div class="listing-date">
-Jun 19, 2022
-</div>
-<div class="listing-reading-time">
-20 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="4" data-categories="Azure Functions,Scala,Akka" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1678260522828" data-listing-reading-time-sort="7.84">
-<div class="thumbnail">
-<p><a href="./posts/azure-functions-scala-2/index.html"> <img src="./posts/azure-functions-scala-2/assets/azure-functions-custom-handlers-overview.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/azure-functions-scala-2/index.html">
-<h3 class="no-anchor listing-title">
-Azure Functions with Scala using a Custom Handler
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>In this post we look at how we can write an Azure Function in <em>any</em> language. We do this by creating a simple web service in our language of choice (Scala), and then using it as a custom handler from a host Azure Function.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/azure-functions-scala-2/index.html">
-<div class="listing-date">
-Jun 19, 2022
-</div>
-<div class="listing-reading-time">
-7 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="5" data-categories="geospatial,R,Snowflake" data-listing-date-sort="1650110400000" data-listing-file-modified-sort="1678260522860" data-listing-reading-time-sort="5.54">
-<div class="thumbnail">
-<p><a href="./posts/r-spatial-snowflake/index.html"> <img src="./posts/r-spatial-snowflake/assets/buildings.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/r-spatial-snowflake/index.html">
-<h3 class="no-anchor listing-title">
-Loading Spatial Data to Snowflake from R
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Loading spatial data to Snowflake can be a little awkward. Here we describe a simple and performant approach using the ODBC or JDBC drivers from R.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/r-spatial-snowflake/index.html">
-<div class="listing-date">
-Apr 17, 2022
-</div>
-<div class="listing-reading-time">
-5 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="6" data-categories="Docker,Shiny,R,Azure" data-listing-date-sort="1646218800000" data-listing-file-modified-sort="1678260522884" data-listing-reading-time-sort="11.83">
-<div class="thumbnail">
-<p><a href="./posts/deploying-shiny-apps/index.html"> <img src="./posts/deploying-shiny-apps/assets/hello_runif_shiny.webp" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/deploying-shiny-apps/index.html">
-<h3 class="no-anchor listing-title">
-Deploying Shiny Applications
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>There are many ways we can deploy Shiny applications for external consumption. This post describes several possible methods.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/deploying-shiny-apps/index.html">
-<div class="listing-date">
-Mar 3, 2022
-</div>
-<div class="listing-reading-time">
-11 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="7" data-categories="geospatial,PostGIS,Akka HTTP" data-listing-date-sort="1645700400000" data-listing-file-modified-sort="1678260522868" data-listing-reading-time-sort="10.585">
-<div class="thumbnail">
-<p><a href="./posts/serving-postgis-features/index.html"> <img src="./posts/serving-postgis-features/assets/getFeatureClass.webp" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/serving-postgis-features/index.html">
-<h3 class="no-anchor listing-title">
-Serving PostGIS Features Over HTTP
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Does it bother you when you’re forced to fetch features via an API, instead of just downloading a file from a file server? Same! As a solution of sorts, I wondered how easily we could make a service which could used to download features directly in a requested format.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/serving-postgis-features/index.html">
-<div class="listing-date">
-Feb 25, 2022
-</div>
-<div class="listing-reading-time">
-10 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="8" data-categories="R,Shiny,Plumber,Vue.js" data-listing-date-sort="1642590000000" data-listing-file-modified-sort="1678260523448" data-listing-reading-time-sort="34.05">
-<div class="thumbnail">
-<p><a href="./posts/too-much-shiny/index.html"> <img src="./posts/too-much-shiny/assets/img/01hello.webp" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/too-much-shiny/index.html">
-<h3 class="no-anchor listing-title">
-Too Much Shiny?!
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Shiny provides a low-entry option for R programmers to develop single-page web applications. But, <em>in my opinion</em>, it is over-used. In this post we consider where Shiny might be a good option, and where it might not.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/too-much-shiny/index.html">
-<div class="listing-date">
-Jan 20, 2022
-</div>
-<div class="listing-reading-time">
-34 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="9" data-categories="microsimulation,Akka,Scala" data-listing-date-sort="1641639600000" data-listing-file-modified-sort="1678260523348" data-listing-reading-time-sort="20.245">
-<div class="thumbnail">
-<p><a href="./posts/agent-based-simulations-with-akka/index.html"> <img src="./posts/agent-based-simulations-with-akka/assets/collectionsim.dot.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/agent-based-simulations-with-akka/index.html">
-<h3 class="no-anchor listing-title">
-Agent Based Simulations with Akka
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>In this post we attempt to approximate a household survey collection as an agent-based simulation. The simulation designed using the actor model, and implemented in Scala using Akka.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/agent-based-simulations-with-akka/index.html">
-<div class="listing-date">
-Jan 9, 2022
-</div>
-<div class="listing-reading-time">
-20 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="10" data-categories="PostgreSQL,PostGraphile,PostgREST" data-listing-date-sort="1628856000000" data-listing-file-modified-sort="1678260523332" data-listing-reading-time-sort="15.63">
-<div class="thumbnail">
-<p><a href="./posts/data-services-from-postgres/index.html"> <img src="./posts/data-services-from-postgres/assets/schema01.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/data-services-from-postgres/index.html">
-<h3 class="no-anchor listing-title">
-Data Services from Existing PostgreSQL Databases
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Sometimes creating a bespoke data service is easy enough. But maybe sometimes it’s just easier to expose data that already exists in a database. Here we consider a couple of options, PostGraphile and PostGREST, for doing just that.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/data-services-from-postgres/index.html">
-<div class="listing-date">
-Aug 14, 2021
-</div>
-<div class="listing-reading-time">
-15 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="11" data-categories="online learning,Scala,Akka,Deeplearning4j" data-listing-date-sort="1628337600000" data-listing-file-modified-sort="1678260523320" data-listing-reading-time-sort="9.53">
-<div class="thumbnail">
-<p><a href="./posts/online-learning-with-akka/index.html"> <img src="./posts/online-learning-with-akka/assets/random1.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/online-learning-with-akka/index.html">
-<h3 class="no-anchor listing-title">
-Online Learning with Akka
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Imagine an online learning scenario where we wish to update an existing model using streaming event data, say. Here we consider how we might approach such a problem using the actor model as implemented by Akka.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/online-learning-with-akka/index.html">
-<div class="listing-date">
-Aug 8, 2021
-</div>
-<div class="listing-reading-time">
-9 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="12" data-categories="online learning,Scala,Kafka,Deeplearning4j" data-listing-date-sort="1627560000000" data-listing-file-modified-sort="1678260523304" data-listing-reading-time-sort="13.28">
-<div class="thumbnail">
-<p><a href="./posts/online-learning-with-kafka/index.html"> <img src="./posts/online-learning-with-kafka/assets/random1.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/online-learning-with-kafka/index.html">
-<h3 class="no-anchor listing-title">
-Online Learning with Apache Kafka
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Imagine an online learning scenario where we wish to update an existing model using streaming event data, say. Here we consider how we might approach such a problem using Apache Kafka.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/online-learning-with-kafka/index.html">
-<div class="listing-date">
-Jul 30, 2021
-</div>
-<div class="listing-reading-time">
-13 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="13" data-categories="geospatial,Spark,Sedona,GeoSpark,PostGIS" data-listing-date-sort="1618747200000" data-listing-file-modified-sort="1678260523284" data-listing-reading-time-sort="17.07">
-<div class="thumbnail">
-<p><a href="./posts/a-brief-look-at-apache-sedona/index.html"> <img src="./posts/a-brief-look-at-apache-sedona/assets/dissolve01.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/a-brief-look-at-apache-sedona/index.html">
-<h3 class="no-anchor listing-title">
-A Brief Look at Apache Sedona
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-Apache Sedona, formerly GeoSpark, is a library that let’s us make spatial RDDs and DataFrames in Apache Spark, as well as to run spatial queries. Feature classes can get very…
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/a-brief-look-at-apache-sedona/index.html">
-<div class="listing-date">
-Apr 19, 2021
-</div>
-<div class="listing-reading-time">
-17 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="14" data-categories="Docker,WSL" data-listing-date-sort="1607079600000" data-listing-file-modified-sort="1678260523252" data-listing-reading-time-sort="13.65">
-<div class="thumbnail">
-<p><a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html"> <img src="./posts/working-productively-on-windows-using-wsl2-and-docker/assets/dev.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html">
-<h3 class="no-anchor listing-title">
-Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-A relatively common scenario in enterprise is to provide users a Windows desktop with a relatively small set of tools, and…<em></em>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html">
-<div class="listing-date">
-Dec 5, 2020
-</div>
-<div class="listing-reading-time">
-13 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="15" data-categories="geospatial,R,PostGIS" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1678260523172" data-listing-reading-time-sort="13.52">
-<div class="thumbnail">
-<p><a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html"> <img src="./posts/using-postgis-as-a-spatial-backend-for-r/assets/upperhuttlanduse.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html">
-<h3 class="no-anchor listing-title">
-Using PostGIS as a Spatial Backend for R
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Here we look at how we can leverage PostgreSQL and the PostGIS extension to usefully complement R, mostly by offloading large geoprocessing tasks, and as a library for storing large feature classes for shared use across a potentially large userbase.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html">
-<div class="listing-date">
-Oct 31, 2020
-</div>
-<div class="listing-reading-time">
-13 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="16" data-categories="Docker,WSL" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1678260523132" data-listing-reading-time-sort="11.61">
-<div class="thumbnail">
-<p><a href="./posts/docker-on-windows-with-wsl2/index.html"> <img src="./posts/docker-on-windows-with-wsl2/assets/vscode03.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/docker-on-windows-with-wsl2/index.html">
-<h3 class="no-anchor listing-title">
-Docker on Windows with Windows Subsystem for Linux 2
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-Windows Subsystem for Linux version 2 (WSL2) brings…
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/docker-on-windows-with-wsl2/index.html">
-<div class="listing-date">
-Oct 31, 2020
-</div>
-<div class="listing-reading-time">
-11 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="17" data-categories="X13-ARIMA-SEATS,Akka,Akka HTTP,Vue.js" data-listing-date-sort="1590926400000" data-listing-file-modified-sort="1678260523120" data-listing-reading-time-sort="17.66">
-<div class="thumbnail">
-<p><a href="./posts/seasonal-adjustment-as-a-service/index.html"> <img src="./posts/seasonal-adjustment-as-a-service/assets/postman01.png" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/seasonal-adjustment-as-a-service/index.html">
-<h3 class="no-anchor listing-title">
-Seasonal Adjustment as a Service
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>X13-ARIMA-SEATS is a widely used seasonal adjustment program developed by the U.S. Census Bureau. Here we look at how one might go wrapping this program as a web service for remote execution.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/seasonal-adjustment-as-a-service/index.html">
-<div class="listing-date">
-Jun 1, 2020
-</div>
-<div class="listing-reading-time">
-17 min
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="18" data-categories="geospatial,R,GeoServer" data-listing-date-sort="1568635200000" data-listing-file-modified-sort="1678260523056" data-listing-reading-time-sort="14.065">
-<div class="thumbnail">
-<p><a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html"> <img src="./posts/building-tile-services-on-the-fly-with-geoserver/assets/geoserver.webp" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html">
-<h3 class="no-anchor listing-title">
-Building Tile Services on-the-fly with GeoServer
-</h3>
-<div class="listing-subtitle">
-
-</div>
-<div class="listing-description">
-<p>Sending large vector features over-the-wire for use in slippy maps is bad, m’kay. One possible solution is to appeal to a tile service or similar, and here we look at how we might leverage the GeoServer API to enable end-users to quickly deploy their own tile sets on-the-fly.</p>
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html">
-<div class="listing-date">
-Sep 17, 2019
 </div>
 <div class="listing-reading-time">
 14 min
@@ -697,27 +259,139 @@ Sep 17, 2019
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="19" data-categories="geospatial,QGIS" data-listing-date-sort="1485342000000" data-listing-file-modified-sort="1678260523020" data-listing-reading-time-sort="6.755">
+<div class="quarto-post image-right" data-index="2" data-categories="geocoding,postcode,LINZ,akka-http" data-listing-date-sort="1680346800000" data-listing-file-modified-sort="1711187653792" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2727">
 <div class="thumbnail">
-<p><a href="./posts/web-maps-and-tiles-with-qgis/index.html"> <img src="./posts/web-maps-and-tiles-with-qgis/assets/qgis.2013.01.png" class="thumnail-image"> </a></p>
+<p><a href="./posts/linz_geocoder_2/index.html" class="no-external"></a></p><a href="./posts/linz_geocoder_2/index.html" class="no-external">
+<p><img src="./posts/linz_geocoder_2/assets/img/geocode.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/linz_geocoder_2/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/web-maps-and-tiles-with-qgis/index.html">
 <h3 class="no-anchor listing-title">
-Web Maps and Tiles with QGIS
+<a href="./posts/linz_geocoder_2/index.html" class="no-external">Building a New Zealand Address Geocoder (2)</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/linz_geocoder_2/index.html" class="no-external">Building a Geocoding Service</a>
 </div>
 <div class="listing-description">
-<p>In this post we look at how we can use QGIS Server to publish a range of services using WMS, WFS and WCS.</p>
+<a href="./posts/linz_geocoder_2/index.html" class="no-external">In this post we create an address geocoder using an address parser and a database of addresses.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/linz_geocoder_2/index.html" class="no-external">
+<div class="listing-date">
+Apr 2, 2023
+</div>
+<div class="listing-reading-time">
+14 min
 </div>
 </a>
 </div>
+</div>
+<div class="quarto-post image-right" data-index="3" data-categories="Vue.js" data-listing-date-sort="1661688000000" data-listing-file-modified-sort="1678260523504" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1443">
+<div class="thumbnail">
+<p><a href="./posts/guitar-chord-transitions/index.html" class="no-external"></a></p><a href="./posts/guitar-chord-transitions/index.html" class="no-external">
+<p><img src="./posts/guitar-chord-transitions/assets/img/chordvuer.webp" class="thumbnail-image"></p>
+</a><p><a href="./posts/guitar-chord-transitions/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/guitar-chord-transitions/index.html" class="no-external">Guitar Chord Transitions with Vue.js</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/guitar-chord-transitions/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/guitar-chord-transitions/index.html" class="no-external">A basic Vue.js component for rendering guitar chord diagrams, and for animating chord transitions.</a>
+</div>
+</div>
 <div class="metadata">
-<a href="./posts/web-maps-and-tiles-with-qgis/index.html">
+<a href="./posts/guitar-chord-transitions/index.html" class="no-external">
 <div class="listing-date">
-Jan 26, 2017
+Aug 29, 2022
+</div>
+<div class="listing-reading-time">
+8 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="4" data-categories="Azure Functions,Scala" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1678260522816" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4087">
+<div class="thumbnail">
+<p><a href="./posts/azure-functions-scala-1/index.html" class="no-external"></a></p><a href="./posts/azure-functions-scala-1/index.html" class="no-external">
+<p><img src="./posts/azure-functions-scala-1/assets/function01.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/azure-functions-scala-1/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/azure-functions-scala-1/index.html" class="no-external">Azure Functions with Scala using the Java Handler</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/azure-functions-scala-1/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/azure-functions-scala-1/index.html" class="no-external">In this post we look at how we create an Azure Function in Scala by making small changes to a basic Java function.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/azure-functions-scala-1/index.html" class="no-external">
+<div class="listing-date">
+Jun 19, 2022
+</div>
+<div class="listing-reading-time">
+21 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="5" data-categories="Azure Functions,Scala,Akka" data-listing-date-sort="1655553600000" data-listing-file-modified-sort="1678260522828" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="8" data-listing-word-count-sort="1568">
+<div class="thumbnail">
+<p><a href="./posts/azure-functions-scala-2/index.html" class="no-external"></a></p><a href="./posts/azure-functions-scala-2/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/azure-functions-scala-2/assets/azure-functions-custom-handlers-overview.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/azure-functions-scala-2/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/azure-functions-scala-2/index.html" class="no-external">Azure Functions with Scala using a Custom Handler</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/azure-functions-scala-2/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/azure-functions-scala-2/index.html" class="no-external">In this post we look at how we can write an Azure Function in <em>any</em> language. We do this by creating a simple web service in our language of choice (Scala), and then using it as a custom handler from a host Azure Function.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/azure-functions-scala-2/index.html" class="no-external">
+<div class="listing-date">
+Jun 19, 2022
+</div>
+<div class="listing-reading-time">
+8 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="6" data-categories="geospatial,R,Snowflake" data-listing-date-sort="1650110400000" data-listing-file-modified-sort="1678260522860" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="6" data-listing-word-count-sort="1108">
+<div class="thumbnail">
+<p><a href="./posts/r-spatial-snowflake/index.html" class="no-external"></a></p><a href="./posts/r-spatial-snowflake/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/r-spatial-snowflake/assets/buildings.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/r-spatial-snowflake/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/r-spatial-snowflake/index.html" class="no-external">Loading Spatial Data to Snowflake from R</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/r-spatial-snowflake/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/r-spatial-snowflake/index.html" class="no-external">Loading spatial data to Snowflake can be a little awkward. Here we describe a simple and performant approach using the ODBC or JDBC drivers from R.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/r-spatial-snowflake/index.html" class="no-external">
+<div class="listing-date">
+Apr 17, 2022
 </div>
 <div class="listing-reading-time">
 6 min
@@ -725,58 +399,450 @@ Jan 26, 2017
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="20" data-categories="geospatial,Mapnik,TileStache" data-listing-date-sort="1480244400000" data-listing-file-modified-sort="1678260522976" data-listing-reading-time-sort="17.7">
+<div class="quarto-post image-right" data-index="7" data-categories="Docker,Shiny,R,Azure" data-listing-date-sort="1646218800000" data-listing-file-modified-sort="1678260522884" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2366">
 <div class="thumbnail">
-<p><a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html"> <img src="./posts/serving-geospatial-features-with-mapnik-and-tilestache/assets/000nginxlocal.png" class="thumnail-image"> </a></p>
+<p><a href="./posts/deploying-shiny-apps/index.html" class="no-external"></a></p><a href="./posts/deploying-shiny-apps/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/deploying-shiny-apps/assets/hello_runif_shiny.webp"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/deploying-shiny-apps/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html">
 <h3 class="no-anchor listing-title">
-Serving Geospatial Features with Mapnik and TileStache
+<a href="./posts/deploying-shiny-apps/index.html" class="no-external">Deploying Shiny Applications</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/deploying-shiny-apps/index.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-<p>When making maps for display on the web, the size of the various objects being rendered can quickly become overwhelming. One solution is to appeal to a tile service, and here we consider one approach using Mapnik and TileStache.</p>
+<a href="./posts/deploying-shiny-apps/index.html" class="no-external">There are many ways we can deploy Shiny applications for external consumption. This post describes several possible methods.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/deploying-shiny-apps/index.html" class="no-external">
+<div class="listing-date">
+Mar 3, 2022
+</div>
+<div class="listing-reading-time">
+12 min
 </div>
 </a>
 </div>
+</div>
+<div class="quarto-post image-right" data-index="8" data-categories="geospatial,PostGIS,Akka HTTP" data-listing-date-sort="1645700400000" data-listing-file-modified-sort="1697602769231" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="11" data-listing-word-count-sort="2117">
+<div class="thumbnail">
+<p><a href="./posts/serving-postgis-features/index.html" class="no-external"></a></p><a href="./posts/serving-postgis-features/index.html" class="no-external">
+<p><img src="./posts/serving-postgis-features/assets/getFeatureClass.webp" class="thumbnail-image"></p>
+</a><p><a href="./posts/serving-postgis-features/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/serving-postgis-features/index.html" class="no-external">Serving PostGIS Features Over HTTP</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/serving-postgis-features/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/serving-postgis-features/index.html" class="no-external">Does it bother you when you’re forced to fetch features via an API, instead of just downloading a file from a file server? Same! As a solution of sorts, I wondered how easily we could make a service which could be used to download features directly in a requested format.</a>
+</div>
+</div>
 <div class="metadata">
-<a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html">
+<a href="./posts/serving-postgis-features/index.html" class="no-external">
+<div class="listing-date">
+Feb 25, 2022
+</div>
+<div class="listing-reading-time">
+11 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="9" data-categories="R,Shiny,Plumber,Vue.js" data-listing-date-sort="1642590000000" data-listing-file-modified-sort="1678260523448" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="35" data-listing-word-count-sort="6810">
+<div class="thumbnail">
+<p><a href="./posts/too-much-shiny/index.html" class="no-external"></a></p><a href="./posts/too-much-shiny/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/too-much-shiny/assets/img/01hello.webp"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/too-much-shiny/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/too-much-shiny/index.html" class="no-external">Too Much Shiny?!</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/too-much-shiny/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/too-much-shiny/index.html" class="no-external">Shiny provides a low-entry option for R programmers to develop single-page web applications. But, <em>in my opinion</em>, it is over-used. In this post we consider where Shiny might be a good option, and where it might not.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/too-much-shiny/index.html" class="no-external">
+<div class="listing-date">
+Jan 20, 2022
+</div>
+<div class="listing-reading-time">
+35 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="10" data-categories="microsimulation,Akka,Scala" data-listing-date-sort="1641639600000" data-listing-file-modified-sort="1678260523348" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="21" data-listing-word-count-sort="4049">
+<div class="thumbnail">
+<p><a href="./posts/agent-based-simulations-with-akka/index.html" class="no-external"></a></p><a href="./posts/agent-based-simulations-with-akka/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/agent-based-simulations-with-akka/assets/collectionsim.dot.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/agent-based-simulations-with-akka/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/agent-based-simulations-with-akka/index.html" class="no-external">Agent Based Simulations with Akka</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/agent-based-simulations-with-akka/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/agent-based-simulations-with-akka/index.html" class="no-external">In this post we attempt to approximate a household survey collection as an agent-based simulation. The simulation designed using the actor model, and implemented in Scala using Akka.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/agent-based-simulations-with-akka/index.html" class="no-external">
+<div class="listing-date">
+Jan 9, 2022
+</div>
+<div class="listing-reading-time">
+21 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="11" data-categories="PostgreSQL,PostGraphile,PostgREST" data-listing-date-sort="1628856000000" data-listing-file-modified-sort="1678260523332" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="16" data-listing-word-count-sort="3126">
+<div class="thumbnail">
+<p><a href="./posts/data-services-from-postgres/index.html" class="no-external"></a></p><a href="./posts/data-services-from-postgres/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/data-services-from-postgres/assets/schema01.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/data-services-from-postgres/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/data-services-from-postgres/index.html" class="no-external">Data Services from Existing PostgreSQL Databases</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/data-services-from-postgres/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/data-services-from-postgres/index.html" class="no-external">Sometimes creating a bespoke data service is easy enough. But maybe sometimes it’s just easier to expose data that already exists in a database. Here we consider a couple of options, PostGraphile and PostGREST, for doing just that.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/data-services-from-postgres/index.html" class="no-external">
+<div class="listing-date">
+Aug 14, 2021
+</div>
+<div class="listing-reading-time">
+16 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="12" data-categories="online learning,Scala,Akka,Deeplearning4j" data-listing-date-sort="1628337600000" data-listing-file-modified-sort="1678260523320" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="10" data-listing-word-count-sort="1906">
+<div class="thumbnail">
+<p><a href="./posts/online-learning-with-akka/index.html" class="no-external"></a></p><a href="./posts/online-learning-with-akka/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/online-learning-with-akka/assets/random1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/online-learning-with-akka/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/online-learning-with-akka/index.html" class="no-external">Online Learning with Akka</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/online-learning-with-akka/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/online-learning-with-akka/index.html" class="no-external">Imagine an online learning scenario where we wish to update an existing model using streaming event data, say. Here we consider how we might approach such a problem using the actor model as implemented by Akka.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/online-learning-with-akka/index.html" class="no-external">
+<div class="listing-date">
+Aug 8, 2021
+</div>
+<div class="listing-reading-time">
+10 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="13" data-categories="online learning,Scala,Kafka,Deeplearning4j" data-listing-date-sort="1627560000000" data-listing-file-modified-sort="1678260523304" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2656">
+<div class="thumbnail">
+<p><a href="./posts/online-learning-with-kafka/index.html" class="no-external"></a></p><a href="./posts/online-learning-with-kafka/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/online-learning-with-kafka/assets/random1.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/online-learning-with-kafka/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/online-learning-with-kafka/index.html" class="no-external">Online Learning with Apache Kafka</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/online-learning-with-kafka/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/online-learning-with-kafka/index.html" class="no-external">Imagine an online learning scenario where we wish to update an existing model using streaming event data, say. Here we consider how we might approach such a problem using Apache Kafka.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/online-learning-with-kafka/index.html" class="no-external">
+<div class="listing-date">
+Jul 30, 2021
+</div>
+<div class="listing-reading-time">
+14 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="14" data-categories="geospatial,Spark,Sedona,GeoSpark,PostGIS" data-listing-date-sort="1618747200000" data-listing-file-modified-sort="1678260523284" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3414">
+<div class="thumbnail">
+<p><a href="./posts/a-brief-look-at-apache-sedona/index.html" class="no-external"></a></p><a href="./posts/a-brief-look-at-apache-sedona/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/a-brief-look-at-apache-sedona/assets/dissolve01.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/a-brief-look-at-apache-sedona/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/a-brief-look-at-apache-sedona/index.html" class="no-external">A Brief Look at Apache Sedona</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/a-brief-look-at-apache-sedona/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/a-brief-look-at-apache-sedona/index.html" class="no-external">Apache Sedona, formerly GeoSpark, is a library that let’s us make spatial RDDs and DataFrames in Apache Spark, as well as to run spatial queries. Feature classes can get…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/a-brief-look-at-apache-sedona/index.html" class="no-external">
+<div class="listing-date">
+Apr 19, 2021
+</div>
+<div class="listing-reading-time">
+18 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="15" data-categories="Docker,WSL" data-listing-date-sort="1607079600000" data-listing-file-modified-sort="1678260523252" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2730">
+<div class="thumbnail">
+<p><a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html" class="no-external"></a></p><a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/working-productively-on-windows-using-wsl2-and-docker/assets/dev.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html" class="no-external">Working Productively on Windows Using Windows Subsystem for Linux 2 and Docker</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html" class="no-external">A relatively common scenario in enterprise is to provide users a Windows desktop with a relatively small set of tools, and without administrative access. Depending on the…<em></em></a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/working-productively-on-windows-using-wsl2-and-docker/index.html" class="no-external">
+<div class="listing-date">
+Dec 5, 2020
+</div>
+<div class="listing-reading-time">
+14 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="16" data-categories="Docker,WSL" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1678260523132" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="12" data-listing-word-count-sort="2322">
+<div class="thumbnail">
+<p><a href="./posts/docker-on-windows-with-wsl2/index.html" class="no-external"></a></p><a href="./posts/docker-on-windows-with-wsl2/index.html" class="no-external">
+<p><img src="./posts/docker-on-windows-with-wsl2/assets/vscode03.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/docker-on-windows-with-wsl2/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/docker-on-windows-with-wsl2/index.html" class="no-external">Docker on Windows with Windows Subsystem for Linux 2</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/docker-on-windows-with-wsl2/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/docker-on-windows-with-wsl2/index.html" class="no-external">Windows Subsystem for Linux version 2 (WSL2) brings something like a native Linux environment to Windows. And because it’s native, we can even run Docker on WSL2 and access…</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/docker-on-windows-with-wsl2/index.html" class="no-external">
+<div class="listing-date">
+Oct 31, 2020
+</div>
+<div class="listing-reading-time">
+12 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="17" data-categories="geospatial,R,PostGIS" data-listing-date-sort="1604055600000" data-listing-file-modified-sort="1678260523172" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="14" data-listing-word-count-sort="2704">
+<div class="thumbnail">
+<p><a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html" class="no-external"></a></p><a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/using-postgis-as-a-spatial-backend-for-r/assets/upperhuttlanduse.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html" class="no-external">Using PostGIS as a Spatial Backend for R</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html" class="no-external">Here we look at how we can leverage PostgreSQL and the PostGIS extension to usefully complement R, mostly by offloading large geoprocessing tasks, and as a library for storing large feature classes for shared use across a potentially large userbase.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/using-postgis-as-a-spatial-backend-for-r/index.html" class="no-external">
+<div class="listing-date">
+Oct 31, 2020
+</div>
+<div class="listing-reading-time">
+14 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="18" data-categories="X13-ARIMA-SEATS,Akka,Akka HTTP,Vue.js" data-listing-date-sort="1590926400000" data-listing-file-modified-sort="1678260523120" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3532">
+<div class="thumbnail">
+<p><a href="./posts/seasonal-adjustment-as-a-service/index.html" class="no-external"></a></p><a href="./posts/seasonal-adjustment-as-a-service/index.html" class="no-external">
+<p class="card-img-top"><img src="posts/seasonal-adjustment-as-a-service/assets/postman01.png"  class="thumbnail-image card-img"/></p>
+</a><p><a href="./posts/seasonal-adjustment-as-a-service/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/seasonal-adjustment-as-a-service/index.html" class="no-external">Seasonal Adjustment as a Service</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/seasonal-adjustment-as-a-service/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/seasonal-adjustment-as-a-service/index.html" class="no-external">X13-ARIMA-SEATS is a widely used seasonal adjustment program developed by the U.S. Census Bureau. Here we look at how one might go wrapping this program as a web service for remote execution.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/seasonal-adjustment-as-a-service/index.html" class="no-external">
+<div class="listing-date">
+Jun 1, 2020
+</div>
+<div class="listing-reading-time">
+18 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="19" data-categories="geospatial,R,GeoServer" data-listing-date-sort="1568635200000" data-listing-file-modified-sort="1678260523056" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="15" data-listing-word-count-sort="2813">
+<div class="thumbnail">
+<p><a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html" class="no-external"></a></p><a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html" class="no-external">
+<p><img src="./posts/building-tile-services-on-the-fly-with-geoserver/assets/geoserver.webp" class="thumbnail-image"></p>
+</a><p><a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html" class="no-external">Building Tile Services on-the-fly with GeoServer</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html" class="no-external">Sending large vector features over-the-wire for use in slippy maps is bad, m’kay. One possible solution is to appeal to a tile service or similar, and here we look at how we might leverage the GeoServer API to enable end-users to quickly deploy their own tile sets on-the-fly.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/building-tile-services-on-the-fly-with-geoserver/index.html" class="no-external">
+<div class="listing-date">
+Sep 17, 2019
+</div>
+<div class="listing-reading-time">
+15 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="20" data-categories="geospatial,QGIS" data-listing-date-sort="1485342000000" data-listing-file-modified-sort="1678260523020" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="7" data-listing-word-count-sort="1351">
+<div class="thumbnail">
+<p><a href="./posts/web-maps-and-tiles-with-qgis/index.html" class="no-external"></a></p><a href="./posts/web-maps-and-tiles-with-qgis/index.html" class="no-external">
+<p><img src="./posts/web-maps-and-tiles-with-qgis/assets/qgis.2013.01.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/web-maps-and-tiles-with-qgis/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/web-maps-and-tiles-with-qgis/index.html" class="no-external">Web Maps and Tiles with QGIS</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/web-maps-and-tiles-with-qgis/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/web-maps-and-tiles-with-qgis/index.html" class="no-external">In this post we look at how we can use QGIS Server to publish a range of services using WMS, WFS and WCS.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/web-maps-and-tiles-with-qgis/index.html" class="no-external">
+<div class="listing-date">
+Jan 26, 2017
+</div>
+<div class="listing-reading-time">
+7 min
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="21" data-categories="geospatial,Mapnik,TileStache" data-listing-date-sort="1480244400000" data-listing-file-modified-sort="1678260522976" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="18" data-listing-word-count-sort="3540">
+<div class="thumbnail">
+<p><a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html" class="no-external"></a></p><a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html" class="no-external">
+<p><img src="./posts/serving-geospatial-features-with-mapnik-and-tilestache/assets/000nginxlocal.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html" class="no-external"></a></p>
+</div>
+<div class="body">
+<h3 class="no-anchor listing-title">
+<a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html" class="no-external">Serving Geospatial Features with Mapnik and TileStache</a>
+</h3>
+<div class="listing-subtitle">
+<a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html" class="no-external"></a>
+</div>
+<div class="listing-description">
+<a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html" class="no-external">When making maps for display on the web, the size of the various objects being rendered can quickly become overwhelming. One solution is to appeal to a tile service, and here we consider one approach using Mapnik and TileStache.</a>
+</div>
+</div>
+<div class="metadata">
+<a href="./posts/serving-geospatial-features-with-mapnik-and-tilestache/index.html" class="no-external">
 <div class="listing-date">
 Nov 28, 2016
 </div>
 <div class="listing-reading-time">
-17 min
+18 min
 </div>
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="21" data-categories="R,geospatial,OSRM" data-listing-date-sort="1480158000000" data-listing-file-modified-sort="1678260522964" data-listing-reading-time-sort="4.415">
+<div class="quarto-post image-right" data-index="22" data-categories="R,geospatial,OSRM" data-listing-date-sort="1480158000000" data-listing-file-modified-sort="1678260522964" data-listing-date-modified-sort="NaN" data-listing-reading-time-sort="5" data-listing-word-count-sort="884">
 <div class="thumbnail">
-<p><a href="./posts/routing-in-r-using-osrm/index.html"> <img src="./posts/routing-in-r-using-osrm/assets/route.png" class="thumnail-image"> </a></p>
+<p><a href="./posts/routing-in-r-using-osrm/index.html" class="no-external"></a></p><a href="./posts/routing-in-r-using-osrm/index.html" class="no-external">
+<p><img src="./posts/routing-in-r-using-osrm/assets/route.png" class="thumbnail-image"></p>
+</a><p><a href="./posts/routing-in-r-using-osrm/index.html" class="no-external"></a></p>
 </div>
 <div class="body">
-<a href="./posts/routing-in-r-using-osrm/index.html">
 <h3 class="no-anchor listing-title">
-Routing in R Using the Open Source Routing Machine (OSRM)
+<a href="./posts/routing-in-r-using-osrm/index.html" class="no-external">Routing in R Using the Open Source Routing Machine (OSRM)</a>
 </h3>
 <div class="listing-subtitle">
-
+<a href="./posts/routing-in-r-using-osrm/index.html" class="no-external"></a>
 </div>
 <div class="listing-description">
-<p>I often find myself needing to establish the travel time or distance between arrays of addresses from R. Here we describe how we can use a local install of Open Source Routing Machine as a solution which is highly performant, and relatively easy to implement.</p>
+<a href="./posts/routing-in-r-using-osrm/index.html" class="no-external">I often find myself needing to establish the travel time or distance between arrays of addresses from R. Here we describe how we can use a local install of Open Source Routing Machine as a solution which is highly performant, and relatively easy to implement.</a>
 </div>
-</a>
 </div>
 <div class="metadata">
-<a href="./posts/routing-in-r-using-osrm/index.html">
+<a href="./posts/routing-in-r-using-osrm/index.html" class="no-external">
 <div class="listing-date">
 Nov 27, 2016
 </div>
 <div class="listing-reading-time">
-4 min
+5 min
 </div>
 </a>
 </div>
@@ -813,9 +879,23 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     icon: icon
   };
   anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
   const clipboard = new window.ClipboardJS('.code-copy-button', {
-    target: function(trigger) {
-      return trigger.previousElementSibling;
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
     }
   });
   clipboard.on('success', function(e) {
@@ -851,10 +931,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -864,8 +943,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -880,6 +968,238 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
   const findCites = (el) => {
     const parentEl = el.parentElement;
     if (parentEl) {
@@ -920,6 +1240,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 

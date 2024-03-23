@@ -1,0 +1,40 @@
+<html>
+  <head>
+    <style>
+      *::-webkit-scrollbar {
+        width: 16px;
+      }
+      
+      *::-webkit-scrollbar-track {
+        border-radius: 8px;
+        background-color: #e7e7e7;
+        border: 1px solid #cacaca;
+      }
+      
+      *::-webkit-scrollbar-thumb {
+        border-radius: 8px;
+        border: 3px solid transparent;
+        background-clip: content-box;
+        background-color: rgb(17, 122, 101);
+      }
+    </style>
+    <script
+      type="module"
+      src="../js/zero-md.min.js"
+    ></script>
+  </head>
+  <body>
+    <zero-md src="ex.md">
+      <template>
+        <link
+          rel="stylesheet"
+          href="/site_libs/bootstrap/bootstrap.min.css"
+        />
+        <link
+          rel="stylesheet"
+          href="../css/mdstyle.css"
+        />
+      </template>
+    </zero-md>
+  </body>
+</html>
